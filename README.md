@@ -3,6 +3,13 @@
 1. Still need to be tested
 1. No idea it will work
 
+```zsh
+sudo softwareupdate -i -a
+xcode-select --install
+git clone git@github.com:Mugilan-Codes/dotfiles.git ~/.dotfiles
+```
+
 ## Inspired from
 
-[Driesvints' dotfiles](https://github.com/driesvints/dotfiles)
+- [Driesvints' Dotfiles](https://github.com/driesvints/dotfiles)
+- [Webpro's Dotfiles](https://github.com/webpro/dotfiles)
