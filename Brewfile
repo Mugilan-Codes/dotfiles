@@ -43,5 +43,6 @@ cask 'rectangle'
 cask 'transmission'
 cask 'spotify'
 cask 'vlc'
+cask 'flux'
 cask 'microsoft-office' # For College Purposes
 cask 'microsoft-teams' # For College Purposes
