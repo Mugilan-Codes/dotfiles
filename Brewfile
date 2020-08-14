@@ -4,7 +4,7 @@ tap 'homebrew/cask'
 tap 'homebrew/cask-fonts'
 tap 'homebrew/cask-versions'
 
-# Binaries
+# Formulae
 brew 'bash' # Latest Bash version
 brew 'bat' # "cat" on steroids
 brew 'coreutils' # Those that come with macOS are outdated
@@ -15,6 +15,8 @@ brew 'mackup'
 brew 'pkg-config'
 # brew 'svn' # Needed for Source code pro font
 brew 'tree' # List directories in a tree structure
+brew 'zsh-autosuggestions'
+brew 'zsh-syntax-highlighting'
 
 # Development
 brew 'node'

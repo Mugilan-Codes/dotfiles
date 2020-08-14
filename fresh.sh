@@ -18,16 +18,18 @@ sh -c "$(curl -fsSL https://raw.github.com/ohmyzsh/ohmyzsh/master/tools/install.
 brew tap homebrew/bundle
 brew bundle
 
+brew upgrade
+
 # Create a Sites directory
 # This is a default directory for macOS user accounts but doesn't comes pre-installed
-mkdir $HOME/Sites
+# mkdir $HOME/Sites
 
 # Clone Github repositories
-./clone.sh
+# ./clone.sh
 
 # Removes .zshrc from $HOME (if it exists) and symlinks the .zshrc file from the .dotfiles
-rm -rf $HOME/.zshrc
-ln -s $HOME/.dotfiles/.zshrc $HOME/.zshrc
+# rm -rf $HOME/.zshrc
+# ln -s $HOME/.dotfiles/.zshrc $HOME/.zshrc
 
 # Install Powelevel10k Theme for Oh-My-Zsh
 # git clone --depth=1 https://github.com/romkatv/powerlevel10k.git ${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}/themes/powerlevel10k
