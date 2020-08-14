@@ -49,6 +49,7 @@ cask 'visual-studio-code'
 cask 'vlc'
 
 # Fonts
+cask 'font-hack-nerd-font'
 cask 'font-meslo-for-powerline'
 # cask 'font-meslo-lg-nerd-font'
 # cask 'font-source-code-pro-for-powerline'
