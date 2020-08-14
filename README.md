@@ -2,6 +2,7 @@
 
 1. Still need to be tested
 1. No idea it will work
+1. Setup Iterm2 first by downloading it directly from website.
 
 ```zsh
 sudo softwareupdate -i -a
