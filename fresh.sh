@@ -19,10 +19,17 @@ brew tap homebrew/bundle
 brew bundle
 
 brew upgrade
+brew cleanup
 
 # Create a Sites directory
 # This is a default directory for macOS user accounts but doesn't comes pre-installed
 # mkdir $HOME/Sites
+
+# Make a Directory for storing screenshots and projects
+# mkdir -p $HOME/Projects/{Forks,College,Playground,Repos,Personal} $HOME/Pictures/screenshots
+mkdir -p $HOME/Pictures/screenshots
+
+mkdir -p $HOME/Projects/{Forks,College,Playground,Repos,Personal}
 
 # Clone Github repositories
 # ./clone.sh
@@ -30,13 +37,6 @@ brew upgrade
 # Removes .zshrc from $HOME (if it exists) and symlinks the .zshrc file from the .dotfiles
 # rm -rf $HOME/.zshrc
 # ln -s $HOME/.dotfiles/.zshrc $HOME/.zshrc
-
-# Install Powelevel10k Theme for Oh-My-Zsh
-# git clone --depth=1 https://github.com/romkatv/powerlevel10k.git ${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}/themes/powerlevel10k
-
-# Plugins for zsh
-# git clone https://github.com/zsh-users/zsh-autosuggestions.git $ZSH_CUSTOM/plugins/zsh-autosuggestions
-# git clone https://github.com/zsh-users/zsh-syntax-highlighting.git $ZSH_CUSTOM/plugins/zsh-syntax-highlighting
 
 # Symlink the Mackup config file to the home directory
 # ln -s $HOME/.dotfiles/.mackup.cfg $HOME/.mackup.cfg
