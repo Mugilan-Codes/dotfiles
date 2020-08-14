@@ -1,6 +1,7 @@
 # Taps
-tap 'homebrew/cask'
 tap 'homebrew/bundle'
+tap 'homebrew/cask'
+tap 'homebrew/cask-fonts'
 tap 'homebrew/cask-versions'
 
 # Binaries
@@ -12,6 +13,7 @@ brew 'grep'
 brew 'httpie'
 brew 'mackup'
 brew 'pkg-config'
+# brew 'svn' # Needed for Source code pro font
 brew 'tree' # List directories in a tree structure
 
 # Development
@@ -45,3 +47,8 @@ cask 'the-unarchiver'
 cask 'transmission'
 cask 'visual-studio-code'
 cask 'vlc'
+
+# Fonts
+cask 'font-meslo-for-powerline'
+# cask 'font-meslo-lg-nerd-font'
+# cask 'font-source-code-pro-for-powerline'
