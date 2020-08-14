@@ -10,6 +10,10 @@ xcode-select --install
 git clone git@github.com:Mugilan-Codes/dotfiles.git ~/.dotfiles
 ```
 
+## TODO
+
+1. Generate and copy SSH keys for github
+
 ## Inspired from
 
 - [Driesvints' Dotfiles](https://github.com/driesvints/dotfiles)
