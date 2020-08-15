@@ -12,6 +12,7 @@ brew 'git' # Installed with xcode
 brew 'grep'
 brew 'httpie'
 brew 'mackup'
+brew 'neofetch' # Installs Lots of Formulae
 brew 'pkg-config'
 brew 'tree' # List directories in a tree structure
 brew 'zsh-autosuggestions'
