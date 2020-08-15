@@ -10,7 +10,7 @@ brew 'bat' # "cat" on steroids
 brew 'coreutils' # Those that come with macOS are outdated
 brew 'git' # Installed with xcode
 brew 'grep'
-brew 'httpie'
+brew 'httpie' # Command Line Alternative for Postman
 brew 'mackup'
 brew 'neofetch' # Installs Lots of Formulae
 brew 'pkg-config'
