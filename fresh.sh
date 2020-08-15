@@ -11,9 +11,13 @@ fi
 # Update Homebrew recipes
 brew update
 
+echo "Installing Oh-My-Zsh..."
+
 # Install Oh-My-Zsh
 sh -c "$(curl -fsSL https://raw.github.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
 
+
+echo "Installing Brew Files..."
 # Install all our dependencies with bundle (See Brewfile)
 brew tap homebrew/bundle
 brew bundle
@@ -25,6 +29,7 @@ brew cleanup
 # This is a default directory for macOS user accounts but doesn't comes pre-installed
 # mkdir $HOME/Sites
 
+echo "Making Working Directories..."
 # Make a Directory for storing screenshots and projects
 # mkdir -p $HOME/Projects/{Forks,College,Playground,Repos,Personal} $HOME/Pictures/screenshots
 mkdir -p $HOME/Pictures/screenshots
@@ -51,6 +56,7 @@ curl -o $ITERM_COLOR_SCHEME_LOCATION/Dracula.itermcolors https://raw.githubuserc
 # Symlink the Mackup config file to the home directory
 # ln -s $HOME/.dotfiles/.mackup.cfg $HOME/.mackup.cfg
 
+echo "Setting Up macOS Defaults..."
 # Set macOS preferences
 # We will run this last because this will reload the shell
 source .macos
