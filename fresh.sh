@@ -12,7 +12,7 @@ fi
 brew update
 
 # Install Oh-My-Zsh
-# sh -c "$(curl -fsSL https://raw.github.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
+sh -c "$(curl -fsSL https://raw.github.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
 
 # Install all our dependencies with bundle (See Brewfile)
 brew tap homebrew/bundle
@@ -30,6 +30,16 @@ brew cleanup
 mkdir -p $HOME/Pictures/screenshots
 
 mkdir -p $HOME/Projects/{Forks,College,Playground,Repos,Personal}
+
+# Download Dracula and Shades-of-Purple Color Scheme for Iterm2
+ITERM_COLOR_SCHEME_LOCATION=$HOME/Documents/Iterm2/Schemes
+
+mkdir -p $ITERM_COLOR_SCHEME_LOCATION
+
+ITERM_COLOR_SCHEME_NAME=shades-of-purple
+curl -o $ITERM_COLOR_SCHEME_LOCATION/$ITERM_COLOR_SCHEME_NAME.itermcolors https://raw.githubusercontent.com/mbadolato/iTerm2-Color-Schemes/master/schemes/$ITERM_COLOR_SCHEME_NAME.itermcolors
+
+curl -o $ITERM_COLOR_SCHEME_LOCATION/Dracula.itermcolors https://raw.githubusercontent.com/mbadolato/iTerm2-Color-Schemes/master/schemes/Dracula.itermcolors
 
 # Clone Github repositories
 # ./clone.sh

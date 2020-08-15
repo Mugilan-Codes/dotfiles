@@ -50,3 +50,4 @@ cask 'vlc'
 
 # Fonts
 cask 'font-meslo-for-powerline' # VSCode
+cask 'font-source-code-pro-for-powerline'
