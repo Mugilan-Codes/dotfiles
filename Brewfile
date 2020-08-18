@@ -15,8 +15,6 @@ brew 'mackup'
 brew 'neofetch' # Installs Lots of Formulae
 brew 'pkg-config'
 brew 'tree' # List directories in a tree structure
-brew 'zsh-autosuggestions'
-brew 'zsh-syntax-highlighting'
 
 # Development
 brew 'node'
@@ -45,7 +43,7 @@ cask 'spotify'
 cask 'sublime-text'
 cask 'telegram'
 cask 'the-unarchiver'
-cask 'transmission'
+cask 'transmission' #Failing
 cask 'visual-studio-code'
 cask 'vlc'
 
