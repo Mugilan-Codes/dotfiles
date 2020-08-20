@@ -23,6 +23,7 @@ brew 'yarn'
 # Java
 tap 'adoptopenjdk/openjdk' # Download Various Java Versions
 cask 'java' # Latest Stable Version
+cask 'adoptopenjdk' # Latest adoptopenjdk Version
 cask 'adoptopenjdk8' # Java 8 LTS Version
 cask 'adoptopenjdk11' # Java 11 LTS Version
 cask 'corretto' # Latest Amazon Corretto Version (i.e) 11 
