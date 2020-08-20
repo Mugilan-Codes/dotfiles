@@ -20,13 +20,22 @@ brew 'tree' # List directories in a tree structure
 brew 'node'
 brew 'yarn'
 
+# Java
+tap 'adoptopenjdk/openjdk' # Download Various Java Versions
+cask 'java' # Latest Stable Version
+cask 'adoptopenjdk8' # Java 8 LTS Version
+cask 'adoptopenjdk11' # Java 11 LTS Version
+cask 'corretto' # Latest Amazon Corretto Version (i.e) 11 
+cask 'corretto8' # Amazon Corretto 8 Version 
+cask 'jenv' # Manage Java Environment 
+
 # Apps
 cask 'alfred'
 cask 'bitwarden'
 cask 'caffeine'
-cask 'cleanmymac'
+# cask 'cleanmymac' # Do more research
 cask 'coconutbattery'
-cask 'dbngin'
+# cask 'dbngin'
 cask 'discord'
 cask 'docker'
 cask 'dropbox'
@@ -35,11 +44,12 @@ cask 'flux'
 cask 'google-backup-and-sync'
 cask 'google-chrome'
 cask 'iterm2'
-cask 'java' # Latest Stable Version
 cask 'jetbrains-toolbox'
 # cask 'libreoffice'
+# cask 'onyx' # a free alternative to cleanmymac
 cask 'postman'
 cask 'rectangle'
+# cask 'sensei' # a cleanmymac Alternative
 cask 'spotify'
 cask 'sublime-text'
 cask 'telegram'
