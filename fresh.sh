@@ -24,11 +24,8 @@ brew cleanup
 # mkdir $HOME/Sites
 
 echo "Making Working Directories..."
-# Make a Directory for storing screenshots and projects
-# mkdir -p $HOME/Projects/{Forks,College,Playground,Repos,Personal} $HOME/Pictures/screenshots
+# Make a Directory for storing screenshots
 mkdir -p $HOME/Pictures/screenshots
-
-mkdir -p $HOME/Projects/{Forks,College,Playground,Repos,Personal}
 
 # Download Dracula and Shades-of-Purple Color Scheme for Iterm2
 ITERM_COLOR_SCHEME_LOCATION=$HOME/Documents/Iterm2/Schemes
@@ -40,8 +37,8 @@ curl -o $ITERM_COLOR_SCHEME_LOCATION/$ITERM_COLOR_SCHEME_NAME.itermcolors https:
 
 curl -o $ITERM_COLOR_SCHEME_LOCATION/Dracula.itermcolors https://raw.githubusercontent.com/mbadolato/iTerm2-Color-Schemes/master/schemes/Dracula.itermcolors
 
-# Clone Github repositories
-# ./clone.sh
+# Set Project Directories & Clone Github repositories
+./clone.sh
 
 # Removes .zshrc from $HOME (if it exists) and symlinks the .zshrc file from the .dotfiles
 # rm -rf $HOME/.zshrc
