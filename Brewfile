@@ -13,8 +13,13 @@ brew 'grep'
 brew 'httpie' # Command Line Alternative for Postman
 brew 'mackup'
 brew 'neofetch' # Installs Lots of Formulae
+# brew 'openssl' # Recommended for Pyenv
 brew 'pkg-config'
+# brew 'readline' # Recommended for Pyenv
+# brew 'sqlite3' # Recommended for Pyenv
 brew 'tree' # List directories in a tree structure
+# brew 'xz' # Recommended for Pyenv
+brew 'zlib' # Recommended for Pyenv
 
 # Development
 brew 'node'
@@ -28,7 +33,11 @@ cask 'adoptopenjdk8' # Java 8 LTS Version
 cask 'adoptopenjdk11' # Java 11 LTS Version
 cask 'corretto' # Latest Amazon Corretto Version (i.e) 11 
 cask 'corretto8' # Amazon Corretto 8 Version 
-cask 'jenv' # Manage Java Environment 
+cask 'jenv' # Manage Java Environment
+
+# Python
+brew 'pyenv'
+brew 'pipenv'
 
 # Apps
 cask 'alfred'
