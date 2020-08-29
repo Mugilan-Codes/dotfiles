@@ -2,7 +2,7 @@
 
 echo "Making Project Directories..."
 
-mkdir -p $HOME/Projects/{Forks,College,Playground,Repos,Personal}
+mkdir -p $HOME/Projects/{Forks,College,Playground,Repos,Personal,Tutorials}
 
 echo "Cloning repositories..."
 
