@@ -53,11 +53,9 @@ cask 'google-backup-and-sync'
 cask 'google-chrome'
 cask 'iterm2'
 cask 'jetbrains-toolbox'
-cask 'onyx' # a free alternative to cleanmymac
 cask 'opera'
 cask 'postman'
 cask 'rectangle'
-cask 'sensei' # a cleanmymac Alternative
 cask 'spotify'
 cask 'sublime-text'
 cask 'telegram'
@@ -67,6 +65,7 @@ cask 'virtualbox' # Requires permission
 cask 'virtualbox-extension-pack'
 cask 'visual-studio-code'
 cask 'vlc'
+cask 'whatsapp'
 cask 'wpsoffice'
 
 # Fonts
