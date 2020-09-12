@@ -8,6 +8,8 @@
 sudo softwareupdate -i -a
 xcode-select --install
 git clone git@github.com:Mugilan-Codes/dotfiles.git ~/.dotfiles
+cd ~/.dotfiles
+chmod +x fresh.sh
 ```
 
 ## TODO

@@ -36,7 +36,7 @@ brew 'sqlite3' # Recommended for Pyenv
 brew 'xz' # Recommended for Pyenv
 brew 'zlib' # Recommended for Pyenv
 brew 'pyenv'
-brew 'pipenv'
+brew 'pyenv-virtualenv'
 
 # Apps
 cask 'alfred'
@@ -53,7 +53,6 @@ cask 'google-backup-and-sync'
 cask 'google-chrome'
 cask 'iterm2'
 cask 'jetbrains-toolbox'
-cask 'opera'
 cask 'postman'
 cask 'rectangle'
 cask 'spotify'
