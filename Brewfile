@@ -30,13 +30,14 @@ cask 'corretto8' # Amazon Corretto 8 Version
 cask 'jenv' # Manage Java Environment
 
 # Python
+brew 'pipx' # run `pipx ensurepath` & `eval "$(register-python-argcomplete pipx)"`
 brew 'openssl' # Recommended for Pyenv
 brew 'readline' # Recommended for Pyenv
 brew 'sqlite3' # Recommended for Pyenv
 brew 'xz' # Recommended for Pyenv
 brew 'zlib' # Recommended for Pyenv
 brew 'pyenv'
-brew 'pyenv-virtualenv'
+# pipx install pipenv
 
 # Apps
 cask 'alfred'
