@@ -18,7 +18,7 @@ chmod +x fresh.sh
 1. Downlod Xcode Command line Tools. (also Xcode if needed).
 1. Git Configuration and SSH
 1. Clone the Dotfiles repo in ~/.dotfiles.
-1. Install Oh-My-Zsh 
+1. Install Oh-My-Zsh.
 
 ## TODO
 
