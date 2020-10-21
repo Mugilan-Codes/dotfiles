@@ -12,6 +12,14 @@ cd ~/.dotfiles
 chmod +x fresh.sh
 ```
 
+## Plan
+
+1. Do Software update (possibly through command line).
+1. Downlod Xcode Command line Tools. (also Xcode if needed).
+1. Git Configuration and SSH
+1. Clone the Dotfiles repo in ~/.dotfiles.
+1. Install Oh-My-Zsh 
+
 ## TODO
 
 1. Generate and copy SSH keys for github

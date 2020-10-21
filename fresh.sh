@@ -1,12 +1,18 @@
-#!/bin/sh
+#! /bin/sh
 
 echo "Setting up your Mac..."
 
 # Check for Homebrew and install if we don't have it
-if test ! $(which brew); then
-  # /usr/bin/ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
+if [ ! $(which brew) ]; then
+  echo "Installing Homebrew..."
   /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install.sh)"
+else
+  echo "Homebrew already exists..."
+  echo "Skipping Homebrew installation."
 fi
+
+echo "Installing Oh-My-Zsh..."
+sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" "" --unattended
 
 # Update Homebrew recipes
 brew update

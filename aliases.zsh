@@ -12,6 +12,7 @@ alias library="cd $HOME/Library"
 
 # JS
 alias nfresh="rm -rf node_modules/ package-lock.json && npm install"
+alias rm_node_modules="find . -name "node_modules" -type d -prune -exec rm -rf '{}' +"
 
 # Git
 alias gst="git status"
@@ -29,7 +30,7 @@ alias push="git push"
 alias resolve="git add . && git commit --no-edit"
 alias stash="git stash -u"
 alias unstage="git restore --staged ."
-
+alias gitrm="rm -rf .git"
 
 # Easier navigation: .., ..., ...., ....., ~ and -
 alias ..="cd .."
