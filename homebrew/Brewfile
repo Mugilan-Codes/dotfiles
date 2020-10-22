@@ -15,19 +15,12 @@ brew 'mackup'
 brew 'neofetch'
 brew 'tree' # List directories in a tree structure
 
-# ======= Development ======= #
-brew 'node'
-brew 'yarn'
-
 # ======= Java ======== #
-tap 'adoptopenjdk/openjdk' # Download Various Java Versions
-cask 'java' # Latest Stable Version
-cask 'adoptopenjdk' # Latest adoptopenjdk Version
-cask 'adoptopenjdk8' # Java 8 LTS Version
-cask 'adoptopenjdk11' # Java 11 LTS Version
-cask 'corretto' # Latest Amazon Corretto Version (i.e) 11 
-cask 'corretto8' # Amazon Corretto 8 Version 
-cask 'jenv' # Manage Java Environment
+tap 'adoptopenjdk/openjdk'
+cask 'adoptopenjdk' # Latest java
+cask 'corretto8'
+cask 'corretto11'
+cask 'jenv'
 
 # ======= Python ======= #
 brew 'openssl' # Recommended for Pyenv
