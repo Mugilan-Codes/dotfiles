@@ -1,29 +1,21 @@
 #! /bin/sh
 
-echo "Setting up your Mac..."
+header() {
+  echo "$(tput sgr 0 1)$(tput setaf 6)$1$(tput sgr0)"
+}
 
-# Check for Homebrew and install if we don't have it
-if [ ! $(which brew) ]; then
-  echo "Installing Homebrew..."
-  /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install.sh)"
+header "Setting up Mugilan's Mac..."
+
+header "Homebrew"
+source ./homebrew/brew.sh
+
+header "Oh-My-Zsh"
+if [ ! -e ~/.oh-my-zsh ]; then
+  echo "Installing..."
+  sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" "" --unattended
 else
-  echo "Homebrew already exists..."
-  echo "Skipping Homebrew installation."
+  echo "Oh-My-Zsh installation is skipped"
 fi
-
-echo "Installing Oh-My-Zsh..."
-sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" "" --unattended
-
-# Update Homebrew recipes
-brew update
-
-echo "Installing Brew Files..."
-# Install all our dependencies with bundle (See Brewfile)
-brew tap homebrew/bundle
-brew bundle
-
-brew upgrade
-brew cleanup
 
 # Create a Sites directory
 # This is a default directory for macOS user accounts but doesn't comes pre-installed

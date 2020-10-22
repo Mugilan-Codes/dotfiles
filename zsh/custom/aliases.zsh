@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#! /bin/sh
 
 # Shortcuts
 alias copyssh="pbcopy < $HOME/.ssh/id_rsa.pub"
