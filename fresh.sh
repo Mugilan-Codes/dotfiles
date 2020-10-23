@@ -9,14 +9,6 @@ header "Setting up Mugilan's Mac..."
 header "Homebrew"
 source ./homebrew/brew.sh
 
-header "Oh-My-Zsh"
-if [ ! -e ~/.oh-my-zsh ]; then
-  echo "Installing..."
-  sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" "" --unattended
-else
-  echo "Oh-My-Zsh installation is skipped"
-fi
-
 # Create a Sites directory
 # This is a default directory for macOS user accounts but doesn't comes pre-installed
 # mkdir $HOME/Sites
@@ -38,9 +30,8 @@ curl -o $ITERM_COLOR_SCHEME_LOCATION/Dracula.itermcolors https://raw.githubuserc
 # Set Project Directories & Clone Github repositories
 ./clone.sh
 
-# Removes .zshrc from $HOME (if it exists) and symlinks the .zshrc file from the .dotfiles
-# rm -rf $HOME/.zshrc
-# ln -s $HOME/.dotfiles/.zshrc $HOME/.zshrc
+header "ZSH Setup"
+source ./zsh/zsh_setup.sh
 
 # Symlink the Mackup config file to the home directory
 # ln -s $HOME/.dotfiles/.mackup.cfg $HOME/.mackup.cfg
