@@ -9,6 +9,7 @@ brew 'bash' # Latest Bash version
 brew 'bat' # "cat" on steroids
 brew 'coreutils' # Those that come with macOS are outdated
 brew 'exa' # Modern 'ls' command
+brew 'git'
 brew 'grep' # same comment as 'coreutils'
 brew 'httpie' # Command Line Alternative for Postman
 brew 'mackup'
@@ -23,11 +24,11 @@ cask 'corretto11'
 cask 'jenv'
 
 # ======= Python ======= #
-brew 'openssl' # Recommended for Pyenv
-brew 'readline' # Recommended for Pyenv
-brew 'sqlite3' # Recommended for Pyenv
-brew 'xz' # Recommended for Pyenv
-brew 'zlib' # Recommended for Pyenv
+brew 'openssl'
+brew 'readline'
+brew 'sqlite3'
+brew 'xz'
+brew 'zlib'
 brew 'pyenv'
 
 # ======= Apps ======= #
@@ -51,7 +52,7 @@ cask 'spotify'
 cask 'sublime-text'
 cask 'telegram'
 cask 'the-unarchiver'
-cask 'transmission' #Failing
+cask 'transmission'
 cask 'virtualbox' # Requires permission
 cask 'virtualbox-extension-pack'
 cask 'visual-studio-code'

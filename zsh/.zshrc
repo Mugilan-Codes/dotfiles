@@ -114,19 +114,20 @@ export NVM_DIR="$HOME/.nvm"
 [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
 [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
 
-# Java Environment Manager
+# Java Environment Manager - (jenv)
 export PATH="$HOME/.jenv/bin:$PATH"
 eval "$(jenv init -)"
 
-# Python Environment Manager
+# Python Environment Manager - (pyenv)
 if command -v pyenv 1>/dev/null 2>&1; then
   eval "$(pyenv init -)"
 fi
 
-# Change grep path to use homebrew installed version
+# Change `coreutils`, `grep` path to use homebrew installed version
+export PATH="$(brew --prefix)/opt/coreutils/libexec/gnubin:$PATH"
 export PATH="$(brew --prefix)/opt/grep/libexec/gnubin:$PATH"
 
-# Use brew installed git
+# Use brew installed `git`
 export PATH="/usr/local/sbin:$PATH"
 
 # To customize prompt, run `p10k configure` or edit ~/.p10k.zsh.
