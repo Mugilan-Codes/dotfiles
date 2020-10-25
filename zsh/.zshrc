@@ -148,3 +148,4 @@ if [[ ! -f ~/.p10k.zsh ]]; then
 else
   source ~/.p10k.zsh
 fi
+

@@ -158,3 +158,6 @@ alias reload="exec ${SHELL} -l"
 
 # Print each PATH entry on a separate line
 alias path='echo -e ${PATH//:/\\n}'
+
+# https://github.com/pyenv/pyenv/issues/106
+alias brew='env PATH="${PATH//$(pyenv root)\/shims:/}" brew'
