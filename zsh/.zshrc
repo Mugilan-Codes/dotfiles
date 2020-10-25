@@ -34,6 +34,7 @@ DISABLE_UPDATE_PROMPT="true"
 
 # Uncomment the following line to change how often to auto-update (in days).
 export UPDATE_ZSH_DAYS=10
+ZSH_CUSTOM_AUTOUPDATE_QUIET=true
 
 # Uncomment the following line if pasting URLs and other text is messed up.
 # DISABLE_MAGIC_FUNCTIONS="true"
@@ -72,7 +73,7 @@ ZSH_CUSTOM=$DOTFILES/zsh/custom
 # Custom plugins may be added to $ZSH_CUSTOM/plugins/
 # Example format: plugins=(rails git textmate ruby lighthouse)
 # Add wisely, as too many plugins slow down shell startup.
-plugins=(git zsh-nvm zsh-autosuggestions zsh-syntax-highlighting)
+plugins=(git zsh-nvm zsh-autosuggestions zsh-syntax-highlighting autoupdate)
 
 export NVM_LAZY_LOAD=true
 export NVM_COMPLETION=true
