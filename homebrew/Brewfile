@@ -62,4 +62,8 @@ cask 'wpsoffice'
 
 # ======= Fonts ======= #
 cask 'font-meslo-for-powerline' # VSCode
+cask 'font-meslo-lg-nerd-font' # Recommended font for powerlevel10k theme
 cask 'font-source-code-pro-for-powerline'
+
+# ======= Theme ======= #
+brew 'romkatv/powerlevel10k/powerlevel10k'

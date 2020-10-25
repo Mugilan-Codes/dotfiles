@@ -8,13 +8,15 @@ fi
 rm -rf $HOME/.zshrc
 ln -s $HOME/.dotfiles/zsh/.zshrc $HOME/.zshrc
 
+DOTFILES=$HOME/.dotfiles
+ZSH_CUSTOM=$DOTFILES/zsh/custom
 # Plugins install
 # zsh-nvm 
-# zsh-autosuggestions 
+git clone https://github.com/lukechilds/zsh-nvm $ZSH_CUSTOM/plugins/zsh-nvm
+# zsh-autosuggestions
+git clone https://github.com/zsh-users/zsh-autosuggestions $ZSH_CUSTOM/plugins/zsh-autosuggestions
 # zsh-syntax-highlighting
-
-# Theme Install
-# powerlevel10k
+git clone https://github.com/zsh-users/zsh-syntax-highlighting.git $ZSH_CUSTOM/plugins/zsh-syntax-highlighting
 
 rm -rf $HOME/.p10k.zsh
 ln -s $HOME/.dotfiles/zsh/.p10k.zsh $HOME/.p10k.zsh
