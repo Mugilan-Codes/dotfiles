@@ -38,3 +38,10 @@ Thumbs.db
 .idea/
 .vscode
 .vagrant/
+
+# Own Gitignore #
+#################
+venv
+.venv
+*.iml
+out

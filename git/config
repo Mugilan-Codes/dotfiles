@@ -1,0 +1,12 @@
+[user]
+	name = Mugilan
+	email = mugilancodes@gmail.com
+
+[core]
+	excludesfile = ~/.gitignore_global
+
+[fetch]
+	prune = true
+
+[pull]
+	rebase = true
