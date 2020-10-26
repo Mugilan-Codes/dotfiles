@@ -36,7 +36,8 @@ header "ZSH Setup"
 source ./zsh/zsh_setup.sh
 
 # Symlink the Mackup config file to the home directory
-# ln -s $HOME/.dotfiles/.mackup.cfg $HOME/.mackup.cfg
+rm -rf $HOME/.mackup.cfg
+ln -s $DOTFILES/.mackup.cfg $HOME/.mackup.cfg
 
 echo "Setting Up macOS Defaults..."
 # Set macOS preferences
