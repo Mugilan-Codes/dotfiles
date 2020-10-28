@@ -23,8 +23,6 @@ chmod +x fresh.sh
 ## TODO
 
 1. Generate and copy SSH keys for github
-1. Track Oh-My-Zsh Custom Directory. (change $ZSH_CUSTOM to point to dotfiles repo).
-1. Track .p10k.zsh config file.
 
 ## Inspired from
 
