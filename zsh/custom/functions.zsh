@@ -18,40 +18,12 @@ manpdf() {
   man -t "${1}" | open -f -a /System/Applications/Preview.app/
 }
 
-brew_update() {
-  echo "Update Homebrew (Cask) & packages"
-  brew update
-  brew upgrade
-  brew upgrade --cask
-  brew cleanup
-  brew doctor
-}
-
-npm_update() {
-  echo "Update npm & packages"
-  npm install npm -g
-  npm update -g
-}
-
-update_all() {
-  echo "Update App Store apps"
-  sudo softwareupdate -i -a
-
-  brew_update
-  
-  npm_update
-}
-
-# Print short status and log of latest commits:
-git_status_short() {
-  if [[ -z $(git status -s) ]]; then
-    echo 'Nothing to commit, working tree clean\n'
+# Change directory to the current Finder directory
+cdf() {
+  target=`osascript -e 'tell application "Finder" to if (count of Finder windows) > 0 then get POSIX path of (target of front Finder window as text)'`
+  if [ "$target" != "" ]; then
+    cd "$target"; pwd
   else
-    git status -s && echo ''
+    echo 'No Finder window found' >&2
   fi
-  git log -${1:-3} --oneline | cat
-}
-
-git_count() {
-  echo "$(git rev-list --count HEAD) commits total up to current HEAD"
 }
