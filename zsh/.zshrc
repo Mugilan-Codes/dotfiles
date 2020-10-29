@@ -33,7 +33,7 @@ ZSH_THEME="robbyrussell"
 DISABLE_UPDATE_PROMPT="true"
 
 # Uncomment the following line to change how often to auto-update (in days).
-export UPDATE_ZSH_DAYS=10
+export UPDATE_ZSH_DAYS=5
 ZSH_CUSTOM_AUTOUPDATE_QUIET=true
 
 # Uncomment the following line if pasting URLs and other text is messed up.
