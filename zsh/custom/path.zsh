@@ -1,7 +1,8 @@
 # Removes Homebrew warning
 # export PATH="/usr/local/sbin:$PATH"
 
-# Change `grep` path to use homebrew installed version
+# Change `coreutils`, `grep` path to use homebrew installed version
+export PATH="$(brew --prefix)/opt/coreutils/libexec/gnubin:$PATH"
 export PATH="$(brew --prefix)/opt/grep/libexec/gnubin:$PATH"
 
 # Use brew installed `git`
