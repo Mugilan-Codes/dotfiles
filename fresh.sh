@@ -11,6 +11,9 @@ header "Setting up Mugilan's Mac..."
 header "Homebrew"
 source ./homebrew/brew.sh
 
+header "Setting up Git"
+source ./git/git-setup.sh
+
 echo "Making Working Directories..."
 # Make a Directory for storing screenshots
 mkdir -p $HOME/Pictures/screenshots
