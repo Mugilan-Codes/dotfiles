@@ -6,3 +6,5 @@ ln -s $DOTFILES/git/ignore $HOME/.gitignore_global
 
 # Set Project Directories & Clone Github repositories
 ./clone.sh
+
+# Create .gitconfig.local for local configurations

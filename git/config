@@ -1,12 +1,19 @@
-[user]
-	name = Mugilan
-	email = mugilancodes@gmail.com
-
 [core]
 	excludesfile = ~/.gitignore_global
+	editor = vim
 
 [fetch]
 	prune = true
 
+[include]
+	# A local gitconfig, outside of version control.
+	# If the file doesn't exist it is silently ignored
+	path = ~/.gitconfig.local
+
 [pull]
 	rebase = true
+
+[user]
+	user = Mugilan-Codes
+	name = Mugilan
+	email = mugilancodes@gmail.com
