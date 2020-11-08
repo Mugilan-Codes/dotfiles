@@ -19,6 +19,7 @@ brew 'httpie' # Command Line Alternative for Postman
 brew 'mackup'
 brew 'neofetch'
 brew 'tree' # List directories in a tree structure
+brew 'watchman'
 
 # ======= Java ======== #
 tap 'adoptopenjdk/openjdk'
