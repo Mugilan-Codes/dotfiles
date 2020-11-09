@@ -2,7 +2,7 @@ brew_update() {
   echo "Update Homebrew (Cask) & packages"
   brew update
   brew upgrade
-  brew upgrade --cask
+  # brew upgrade --cask
   brew cleanup
   brew doctor
 }
