@@ -9,6 +9,7 @@ alias c="clear"
 
 # Directories
 alias dotfiles="cd $DOTFILES"
+alias dotconfig="dotfiles; code ."
 alias library="cd $HOME/Library"
 
 # JS
@@ -61,7 +62,8 @@ alias sudo='sudo '
 alias week='date +%V'
 
 # Get macOS Software Updates, and update installed Ruby gems, Homebrew, npm, and their installed packages
-alias update='update_all; sudo gem update --system; sudo gem update; sudo gem cleanup'
+# alias update='update_all; sudo gem update --system; sudo gem update; sudo gem cleanup'
+alias update='sudo update_all'
 
 # Google Chrome
 alias chrome='/Applications/Google\ Chrome.app/Contents/MacOS/Google\ Chrome'
