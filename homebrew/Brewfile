@@ -18,6 +18,7 @@ brew 'grep' # same comment as 'coreutils'
 brew 'httpie' # Command Line Alternative for Postman
 brew 'mackup'
 brew 'neofetch'
+brew 'tmux' # Teminal Multiplexer. (Need to set up this)
 brew 'tree' # List directories in a tree structure
 brew 'watchman'
 
