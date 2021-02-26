@@ -17,3 +17,5 @@
 	user = Mugilan-Codes
 	name = Mugilan
 	email = mugilancodes@gmail.com
+[init]
+	defaultBranch = main
