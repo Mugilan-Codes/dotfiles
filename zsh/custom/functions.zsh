@@ -27,3 +27,7 @@ cdf() {
     echo 'No Finder window found' >&2
   fi
 }
+
+header() {
+  echo "$(tput sgr 0 1)$(tput setaf 6)$1$(tput sgr0)"
+}
