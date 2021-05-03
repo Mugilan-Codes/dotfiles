@@ -79,6 +79,10 @@ export NVM_LAZY_LOAD=true
 export NVM_COMPLETION=true
 export NVM_AUTO_USE=true
 
+# Added for Heroku AutoComplete
+# REF: https://docs.brew.sh/Shell-Completion#configuring-completions-in-zsh
+FPATH=$(brew --prefix)/share/zsh/site-functions:$FPATH
+
 source $ZSH/oh-my-zsh.sh
 
 # User configuration
