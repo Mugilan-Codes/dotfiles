@@ -17,5 +17,23 @@
 	user = Mugilan-Codes
 	name = Mugilan
 	email = mugilancodes@gmail.com
+
 [init]
 	defaultBranch = main
+
+# REF: https://cscheng.info/2017/01/26/git-tip-autostash-with-git-pull-rebase.html
+[rebase]
+	autoStash = true
+
+# REF: https://www.atlassian.com/blog/git/advanced-git-aliases
+# REF: https://www.durdn.com/blog/2012/11/22/must-have-git-aliases-advanced-examples/
+# REF: (setpr) https://www.edwardthomson.com/blog/advent_day_5_review_pull_requests_locally.html
+[alias]
+	new = !sh -c 'git log $1@{1}..$1@{0} "$@"'
+	sortdiff = !sh -c 'git diff "$@" | grep "^[+-]" | sort --key=1.2 | uniq -u -s1'
+	ls = log --pretty=format:'%C(cyan)%h%Cred%d %Creset%s%Cgreen [%cn]' --decorate
+	ll = log --pretty=format:'%C(cyan)%h%Cred%d %Creset%s%Cgreen [%cn]' --decorate --numstat
+	lds = log --pretty=format:"%C(yellow)%h\\ %ad%Cred%d\\ %Creset%s%Cblue\\ [%cn]" --decorate --date=short
+	ld = log --pretty=format:"%C(yellow)%h\\ %ad%Cred%d\\ %Creset%s%Cblue\\ [%cn]" --decorate --date=relative
+	le = log --oneline --decorate
+	setpr = "!f() { git remote add pr $(git config remote.origin.url); git config remote.pr.fetch '+refs/pull/*/head:refs/remotes/pr/*'; }; f"
