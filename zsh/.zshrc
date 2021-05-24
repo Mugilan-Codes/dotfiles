@@ -138,6 +138,9 @@ source $ZSH/oh-my-zsh.sh
 export PATH="$HOME/.jenv/bin:$PATH"
 eval "$(jenv init -)"
 
+export PYENV_ROOT="$HOME/.pyenv"
+export PATH="$PYENV_ROOT/bin:$PATH"
+eval "$(pyenv init --path)"
 # Python Environment Manager - (pyenv)
 if command -v pyenv 1>/dev/null 2>&1; then
   eval "$(pyenv init -)"
