@@ -1,5 +1,7 @@
 # Mugilan's Dotfiles
 
+## Needs Work
+
 1. Still need to be tested
 1. No idea it will work
 1. Setup Iterm2 first by downloading it directly from website.
@@ -12,7 +14,7 @@ cd ~/.dotfiles
 chmod +x fresh.sh
 ```
 
-## Plan
+### Plan
 
 1. Do Software update (possibly through command line).
 1. Downlod Xcode Command line Tools. (also Xcode if needed).
@@ -20,11 +22,15 @@ chmod +x fresh.sh
 1. Clone the Dotfiles repo in ~/.dotfiles.
 1. Install Oh-My-Zsh.
 
-## TODO
+### TODO
 
 1. Generate and copy SSH keys for github
 
-## Inspired from
+#### Sources
+
+- [What does >&2 mean in a shell script?](https://askubuntu.com/a/1182458)
+
+##### Inspired from
 
 - [Driesvints' Dotfiles](https://github.com/driesvints/dotfiles)
 - [Webpro's Dotfiles](https://github.com/webpro/dotfiles)
