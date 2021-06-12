@@ -1,3 +1,5 @@
+# REVIEW: using $(brew --prefix) slows the shell?
+
 # Removes Homebrew warning
 # export PATH="/usr/local/sbin:$PATH"
 
@@ -23,6 +25,14 @@ export PATH=$PATH:$ANDROID_HOME/emulator
 export PATH=$PATH:$ANDROID_HOME/tools
 export PATH=$PATH:$ANDROID_HOME/tools/bin
 export PATH=$PATH:$ANDROID_HOME/platform-tools
+
+# Go Development
+# REF: go: https://ahmadawais.com/install-go-lang-on-macos-with-homebrew/
+# REF: go alternative: https://jimkang.medium.com/install-go-on-mac-with-homebrew-5fa421fc55f5
+# REF: go alternative 2:https://www.digitalocean.com/community/tutorials/how-to-install-go-and-set-up-a-local-programming-environment-on-macos
+export GOPATH="${HOME}/.go"
+export GOROOT="$(brew --prefix golang)/libexec"
+export PATH="$PATH:${GOPATH}/bin:${GOROOT}/bin"
 
 # REF: Remove Duplicates in PATH - https://superuser.com/a/1321712
 export PATH="$(perl -e 'print join(":", grep { not $seen{$_}++ } split(/:/, $ENV{PATH}))')"

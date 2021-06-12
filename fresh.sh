@@ -31,6 +31,11 @@ curl -o $ITERM_COLOR_SCHEME_LOCATION/Dracula.itermcolors https://raw.githubuserc
 header "ZSH Setup"
 source ./zsh/zsh_setup.sh
 
+header "Creating folders for GO development"
+test -d "${GOPATH}" || mkdir "${GOPATH}"
+# mkdir -p "${GOPATH}/{bin,src,pkg}"
+test -d "${GOPATH}/src/github.com" || mkdir -p "${GOPATH}/src/github.com"
+
 # Symlink the Mackup config file to the home directory
 rm -rf $HOME/.mackup.cfg
 ln -s $DOTFILES/.mackup.cfg $HOME/.mackup.cfg

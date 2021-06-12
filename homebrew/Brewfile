@@ -38,6 +38,9 @@ brew 'xz'
 brew 'zlib'
 brew 'pyenv'
 
+# ======= GO ======= #
+brew 'golang'
+
 # ======= Apps ======= #
 cask 'alfred'
 cask 'beekeeper-studio'
