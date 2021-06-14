@@ -81,7 +81,8 @@ export NVM_AUTO_USE=true
 
 # Added for Heroku AutoComplete
 # REF: https://docs.brew.sh/Shell-Completion#configuring-completions-in-zsh
-FPATH=$(brew --prefix)/share/zsh/site-functions:$FPATH
+# FPATH=$(brew --prefix)/share/zsh/site-functions:$FPATH
+FPATH=/usr/local/share/zsh/site-functions:$FPATH
 
 source $ZSH/oh-my-zsh.sh
 
@@ -147,7 +148,9 @@ if command -v pyenv 1>/dev/null 2>&1; then
 fi
 
 # Sourcing Brew installed theme
-source $(brew --prefix)/opt/powerlevel10k/powerlevel10k.zsh-theme
+# source $(brew --prefix)/opt/powerlevel10k/powerlevel10k.zsh-theme
+# source $(brew --prefix powerlevel10k)/powerlevel10k.zsh-theme
+source /usr/local/opt/powerlevel10k/powerlevel10k.zsh-theme
 
 # To customize prompt, run `p10k configure` or edit ~/.p10k.zsh.
 if [[ ! -f ~/.p10k.zsh ]]; then

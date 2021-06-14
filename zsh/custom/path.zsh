@@ -4,7 +4,8 @@
 # export PATH="/usr/local/sbin:$PATH"
 
 # Change `grep` path to use homebrew installed version
-export PATH="$(brew --prefix)/opt/grep/libexec/gnubin:$PATH"
+# export PATH="$(brew --prefix)/opt/grep/libexec/gnubin:$PATH"
+export PATH="/usr/local/opt/grep/libexec/gnubin:$PATH"
 
 # Use brew installed `git`
 export PATH="/usr/local/sbin:$PATH"
@@ -31,7 +32,8 @@ export PATH=$PATH:$ANDROID_HOME/platform-tools
 # REF: go alternative: https://jimkang.medium.com/install-go-on-mac-with-homebrew-5fa421fc55f5
 # REF: go alternative 2:https://www.digitalocean.com/community/tutorials/how-to-install-go-and-set-up-a-local-programming-environment-on-macos
 export GOPATH="${HOME}/.go"
-export GOROOT="$(brew --prefix golang)/libexec"
+# export GOROOT="$(brew --prefix golang)/libexec"
+export GOROOT="/usr/local/opt/go/libexec"
 export PATH="$PATH:${GOPATH}/bin:${GOROOT}/bin"
 
 # REF: Remove Duplicates in PATH - https://superuser.com/a/1321712
