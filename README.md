@@ -24,7 +24,8 @@ chmod +x fresh.sh
 
 ### TODO
 
-1. Generate and copy SSH keys for github
+- [ ] Generate and copy SSH keys for github
+- [ ] Modify ./git/ignore file
 
 #### Sources
 
