@@ -139,12 +139,18 @@ source $ZSH/oh-my-zsh.sh
 export PATH="$HOME/.jenv/bin:$PATH"
 eval "$(jenv init -)"
 
-export PYENV_ROOT="$HOME/.pyenv"
-export PATH="$PYENV_ROOT/bin:$PATH"
+# Simple Python version management
+# REF: pyenv - https://github.com/pyenv/pyenv
+# export PYENV_ROOT="$HOME/.pyenv"
+# export PATH="$PYENV_ROOT/bin:$PATH"
 eval "$(pyenv init --path)"
-# Python Environment Manager - (pyenv)
 if command -v pyenv 1>/dev/null 2>&1; then
   eval "$(pyenv init -)"
+fi
+# a pyenv plugin to manage virtualenv (a.k.a. python-virtualenv)
+# REF: python-virtualenv - https://github.com/pyenv/pyenv-virtualenv
+if which pyenv-virtualenv-init > /dev/null; then 
+  eval "$(pyenv virtualenv-init -)"; 
 fi
 
 # Sourcing Brew installed theme
