@@ -4,8 +4,9 @@ alias vimzcfg="vim ~/.zshrc"
 # Shortcuts
 alias copyssh="pbcopy < $HOME/.ssh/id_rsa.pub"
 alias shrug="echo '¯\_(ツ)_/¯' | pbcopy"
-alias reloadshell="source $HOME/.zshrc"
 alias c="clear"
+alias reloadshell="source $HOME/.zshrc"
+alias reload="exec ${SHELL} -l" # invoke as a login shell
 
 # Directories
 alias dotfiles="cd $DOTFILES"
@@ -67,7 +68,6 @@ alias update='update_all'
 
 # Google Chrome
 alias chrome='/Applications/Google\ Chrome.app/Contents/MacOS/Google\ Chrome'
-alias canary='/Applications/Google\ Chrome\ Canary.app/Contents/MacOS/Google\ Chrome\ Canary'
 
 # IP addresses
 alias ip="dig +short myip.opendns.com @resolver1.opendns.com"
@@ -152,9 +152,6 @@ alias pumpitup="osascript -e 'set volume output volume 100'"
 # REF: [C] explained: http://www.commandlinefu.com/commands/view/402/exclude-grep-from-your-grepped-output-of-ps-alias-included-in-description
 alias chromekill="ps ux | grep '[C]hrome Helper --type=renderer' | grep -v extension-process | tr -s ' ' | cut -d ' ' -f2 | xargs kill"
 
-# Reload the shell (i.e. invoke as a login shell)
-alias reload="exec ${SHELL} -l"
-
 # Print each PATH entry on a separate line
 alias path='echo -e ${PATH//:/\\n}'
 
@@ -164,3 +161,7 @@ alias brew='env PATH="${PATH//$(pyenv root)\/shims:/}" brew'
 # Generate a secure password and copy it to clipboard
 # REF: https://gitlab.com/dnsmichi/dotfiles/-/blob/main/.oh-my-zsh/custom/aliases.zsh
 alias genpw='LC_ALL=C tr -dc "[:alnum:]" < /dev/urandom | head -c 20 | pbcopy'
+
+# Clear log to improve the speed of zsh (omz) 
+# REF: https://superuser.com/a/437259
+alias clear_zlog="sudo rm -rf /private/var/log/asl/*.asl"
