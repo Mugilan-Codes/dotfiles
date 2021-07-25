@@ -62,11 +62,16 @@ ZSH_CUSTOM_AUTOUPDATE_QUIET=true
 # "mm/dd/yyyy"|"dd.mm.yyyy"|"yyyy-mm-dd"
 # or set a custom format using the strftime function format specifications,
 # see 'man strftime' for details.
-HIST_STAMPS="dd/mm/yyyy"
+HIST_STAMPS="dd.mm.yyyy"
 
 # Would you like to use another custom folder than $ZSH/custom?
 # ZSH_CUSTOM=/path/to/new-custom-folder
 ZSH_CUSTOM=$DOTFILES/zsh/custom
+
+export NVM_COMPLETION=true
+export NVM_LAZY_LOAD=true
+export NVM_LAZY_LOAD_EXTRA_COMMANDS=('vim')
+export NVM_AUTO_USE=true
 
 # Which plugins would you like to load?
 # Standard plugins can be found in $ZSH/plugins/
@@ -74,10 +79,6 @@ ZSH_CUSTOM=$DOTFILES/zsh/custom
 # Example format: plugins=(rails git textmate ruby lighthouse)
 # Add wisely, as too many plugins slow down shell startup.
 plugins=(git zsh-nvm zsh-autosuggestions zsh-syntax-highlighting autoupdate)
-
-export NVM_LAZY_LOAD=true
-export NVM_COMPLETION=true
-export NVM_AUTO_USE=true
 
 # Added for Heroku AutoComplete
 # REF: https://docs.brew.sh/Shell-Completion#configuring-completions-in-zsh
