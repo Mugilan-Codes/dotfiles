@@ -24,10 +24,10 @@ brew 'vim'
 brew 'watchman'
 
 # ======= Java ======== #
-tap 'adoptopenjdk/openjdk'
-cask 'adoptopenjdk' # Latest java
 cask 'corretto8'
 cask 'corretto11'
+cask 'temurin' # latest java
+cask 'temurin11'
 cask 'jenv'
 
 # ======= Python ======= #
