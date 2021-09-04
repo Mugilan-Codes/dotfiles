@@ -166,3 +166,4 @@ else
   source ~/.p10k.zsh
 fi
 
+export PATH=$PATH:/usr/local/bin
