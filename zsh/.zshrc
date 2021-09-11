@@ -64,6 +64,14 @@ ZSH_CUSTOM_AUTOUPDATE_QUIET=true
 # see 'man strftime' for details.
 HIST_STAMPS="dd.mm.yyyy"
 
+# REF: https://www.soberkoder.com/better-zsh-history/
+setopt HIST_IGNORE_ALL_DUPS # This ensures all previous lines matching the current command is removed from history before the current command is saved
+HISTSIZE=2000 # 50000
+SAVEHIST=1000 # 10000
+# following should be turned off, if sharing history via setopt SHARE_HISTORY
+setopt INC_APPEND_HISTORY
+HISTTIMEFORMAT="[%F %T] "
+
 # Would you like to use another custom folder than $ZSH/custom?
 # ZSH_CUSTOM=/path/to/new-custom-folder
 ZSH_CUSTOM=$DOTFILES/zsh/custom
@@ -112,29 +120,6 @@ source $ZSH/oh-my-zsh.sh
 # Example aliases
 # alias zshconfig="mate ~/.zshrc"
 # alias ohmyzsh="mate ~/.oh-my-zsh"
-
-# ===== NVM ===== #
-# export NVM_DIR="$HOME/.nvm"
-# [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
-# [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
-
-# (https://www.reddit.com/r/node/comments/4tg5jg/lazy_load_nvm_for_faster_shell_start/d5ib9fs?utm_source=share&utm_medium=web2x&context=3)
-# declare -a NODE_GLOBALS=(`find ~/.nvm/versions/node -maxdepth 3 -type l -wholename '*/bin/*' | xargs -n1 basename | sort | uniq`)
-
-# NODE_GLOBALS+=("node")
-# NODE_GLOBALS+=("nvm")
-
-# load_nvm () {
-#     echo "🚨 NVM not loaded! Loading now..."
-#     export NVM_DIR="$HOME/.nvm"
-#     [ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh"
-#     [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"
-# }
-
-# for cmd in "${NODE_GLOBALS[@]}"; do
-#     eval "${cmd}(){ unset -f ${NODE_GLOBALS}; load_nvm; ${cmd} \$@ }"
-# done
-# ===== NVM ===== #
 
 # Java Environment Manager - (jenv)
 export PATH="$HOME/.jenv/bin:$PATH"
