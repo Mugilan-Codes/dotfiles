@@ -1,3 +1,8 @@
+#### FIG ENV VARIABLES ####
+# Please make sure this block is at the start of this file.
+[ -s ~/.fig/shell/pre.sh ] && source ~/.fig/shell/pre.sh
+#### END FIG ENV VARIABLES ####
+
 # Path to dotfiles
 export DOTFILES=$HOME/.dotfiles
 
@@ -76,17 +81,16 @@ HISTTIMEFORMAT="[%F %T] "
 # ZSH_CUSTOM=/path/to/new-custom-folder
 ZSH_CUSTOM=$DOTFILES/zsh/custom
 
-export NVM_COMPLETION=true
-export NVM_LAZY_LOAD=true
-export NVM_LAZY_LOAD_EXTRA_COMMANDS=('vim')
-export NVM_AUTO_USE=true
+# Shell completions for fnm
+# REF: fnm (fast node manager) - https://github.com/Schniz/fnm
+eval "$(fnm env)"
 
 # Which plugins would you like to load?
 # Standard plugins can be found in $ZSH/plugins/
 # Custom plugins may be added to $ZSH_CUSTOM/plugins/
 # Example format: plugins=(rails git textmate ruby lighthouse)
 # Add wisely, as too many plugins slow down shell startup.
-plugins=(git zsh-nvm zsh-autosuggestions zsh-syntax-highlighting autoupdate)
+plugins=(git zsh-autosuggestions zsh-syntax-highlighting autoupdate)
 
 # Added for Heroku AutoComplete
 # REF: https://docs.brew.sh/Shell-Completion#configuring-completions-in-zsh
@@ -152,3 +156,8 @@ else
 fi
 
 export PATH=$PATH:/usr/local/bin
+
+#### FIG ENV VARIABLES ####
+# Please make sure this block is at the end of this file.
+[ -s ~/.fig/fig.sh ] && source ~/.fig/fig.sh
+#### END FIG ENV VARIABLES ####
