@@ -11,12 +11,13 @@ ln -s $DOTFILES/zsh/.zshrc $HOME/.zshrc
 
 echo "==> Installing Custom zsh plugins..."
 ZSH_CUSTOM=$DOTFILES/zsh/custom
-echo "===> zsh-nvm"
-git clone https://github.com/lukechilds/zsh-nvm $ZSH_CUSTOM/plugins/zsh-nvm
+
 echo "===> zsh-autosuggestions"
 git clone https://github.com/zsh-users/zsh-autosuggestions $ZSH_CUSTOM/plugins/zsh-autosuggestions
+
 echo "===> zsh-syntax-highlighting"
 git clone https://github.com/zsh-users/zsh-syntax-highlighting.git $ZSH_CUSTOM/plugins/zsh-syntax-highlighting
+
 echo "===> autoupdate"
 git clone https://github.com/TamCore/autoupdate-oh-my-zsh-plugins $ZSH_CUSTOM/plugins/autoupdate
 
