@@ -45,6 +45,7 @@ brew 'golang'
 
 # ======= Apps ======= #
 cask 'alfred'
+cask 'android-file-transfer' # Android File Transfer for Mac
 cask 'beekeeper-studio'
 cask 'bitwarden'
 cask 'caffeine'
@@ -80,6 +81,7 @@ cask 'wpsoffice'
 cask 'font-meslo-for-powerline' # VSCode
 cask 'font-meslo-lg-nerd-font' # Recommended font for powerlevel10k theme
 cask 'font-source-code-pro-for-powerline'
+cask 'font-fira-code'
 
 # ======= Theme ======= #
 brew 'romkatv/powerlevel10k/powerlevel10k'
