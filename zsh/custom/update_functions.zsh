@@ -7,6 +7,7 @@ brew_update() {
   brew doctor
 }
 
+# FIXME: Upgrading typescript@next to latest typescript when using this
 npm_update() {
   echo "Update npm & packages"
   npm install npm -g
@@ -19,5 +20,5 @@ update_all() {
 
   brew_update
   
-  npm_update
+  # npm_update
 }

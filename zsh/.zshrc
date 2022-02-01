@@ -67,7 +67,7 @@ ZSH_CUSTOM_AUTOUPDATE_QUIET=true
 # "mm/dd/yyyy"|"dd.mm.yyyy"|"yyyy-mm-dd"
 # or set a custom format using the strftime function format specifications,
 # see 'man strftime' for details.
-HIST_STAMPS="dd.mm.yyyy"
+HIST_STAMPS="yyyy-mm-dd"
 
 # REF: https://www.soberkoder.com/better-zsh-history/
 setopt HIST_IGNORE_ALL_DUPS # This ensures all previous lines matching the current command is removed from history before the current command is saved
