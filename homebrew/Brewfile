@@ -19,6 +19,7 @@ brew 'grep' # same comment as 'coreutils'
 brew 'httpie' # Command Line Alternative for Postman
 brew 'mackup'
 brew 'neofetch'
+brew 'pnpm' # Node Package Manager (https://pnpm.io/)
 brew 'tmux' # Teminal Multiplexer. (Need to set up this)
 brew 'tree' # List directories in a tree structure
 brew 'vim'
@@ -39,6 +40,12 @@ brew 'xz'
 brew 'zlib'
 brew 'pyenv'
 brew 'pyenv-virtualenv'
+# brew 'poetry'
+
+# ======= Flutter ======= #
+# REF: Flutter Version Management (https://fvm.app/)
+tap 'leoafarias/fvm' 
+brew 'fvm'
 
 # ======= GO ======= #
 brew 'golang'
@@ -54,11 +61,11 @@ cask 'dbeaver-community'
 cask 'dbngin'
 cask 'discord'
 cask 'docker'
-cask 'dropbox'
+# cask 'dropbox' # TODO: uncomment after proper setup
 cask 'firefox'
 cask 'firefox-developer-edition'
 cask 'flux'
-cask 'google-backup-and-sync'
+# cask 'google-backup-and-sync' # TODO: uncomment after proper setup
 cask 'google-chrome'
 cask 'iina'
 cask 'iterm2'
@@ -70,8 +77,8 @@ cask 'sublime-text'
 cask 'telegram'
 cask 'the-unarchiver'
 cask 'transmission'
-cask 'virtualbox' # Requires permission
-cask 'virtualbox-extension-pack'
+# cask 'virtualbox' # Requires permission
+# cask 'virtualbox-extension-pack' # TODO: uncomment after proper setup
 cask 'visual-studio-code'
 cask 'vlc'
 cask 'whatsapp'
