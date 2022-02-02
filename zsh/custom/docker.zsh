@@ -1,17 +1,15 @@
 # TODO: add more
 # REF: https://medium.com/hackernoon/handy-docker-aliases-4bd85089a3b8
 
+# TODO: add explanation
 alias dc="docker-compose"
-
-alias dcu="dc up"
-alias dcud="dcu -d"
-alias dcudb="dcud --build"
-
-alias dcd="dc down"
-alias dcdv="dcd -v"
-
+alias dcu="docker-compose up"
+alias dcud="docker-compose up -d"
+alias dcudb="docker-compose up -d --build"
+alias dcd="docker-compose down"
+alias dcdv="docker-compose down -v"
 alias dl="docker logs"
-alias dlf="dl -f"
+alias dlf="docker logs -f"
 
 # REF: https://www.reddit.com/r/docker/comments/l5l2f4/simplifying_the_docker_command_line/gkx68rv?utm_source=share&utm_medium=web2x&context=3
 alias dps='docker ps -a --format "table {{.ID}}\t{{.Image}}\t{{.Names}}\t{{.CreatedAt}}\t{{.Status}}\t{{.Ports}}"'
