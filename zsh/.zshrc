@@ -83,7 +83,8 @@ ZSH_CUSTOM=$DOTFILES/zsh/custom
 
 # Shell completions for fnm
 # REF: fnm (fast node manager) - https://github.com/Schniz/fnm
-eval "$(fnm env)"
+# eval "$(fnm env)"
+eval "$(fnm env --use-on-cd)"
 
 # Which plugins would you like to load?
 # Standard plugins can be found in $ZSH/plugins/
