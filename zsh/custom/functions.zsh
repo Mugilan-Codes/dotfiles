@@ -22,12 +22,10 @@ manpdf() {
 cdf() {
   target=`osascript -e 'tell application "Finder" to if (count of Finder windows) > 0 then get POSIX path of (target of front Finder window as text)'`
   if [ "$target" != "" ]; then
-    cd "$target"; pwd
+    cd "$target"
+    curr_dir=$(pwd)
+    echo "Current directory is $curr_dir"
   else
     echo 'No Finder window found' >&2
   fi
-}
-
-header() {
-  echo "$(tput sgr 0 1)$(tput setaf 6)$1$(tput sgr0)"
 }
