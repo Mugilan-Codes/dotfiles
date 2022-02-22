@@ -19,7 +19,8 @@ brew 'grep' # same comment as 'coreutils'
 brew 'httpie' # Command Line Alternative for Postman
 brew 'mackup'
 brew 'neofetch'
-brew 'neovim'
+# Ambitious Vim-fork focused on extensibility and agility
+brew 'neovim' 
 brew 'pnpm' # Node Package Manager (https://pnpm.io/)
 brew 'tmux' # Teminal Multiplexer. (Need to set up this)
 brew 'tree' # List directories in a tree structure
@@ -41,7 +42,7 @@ brew 'xz'
 brew 'zlib'
 brew 'pyenv'
 brew 'pyenv-virtualenv'
-# brew 'poetry'
+brew 'poetry'
 
 # ======= Flutter ======= #
 # REF: Try official installation docs: https://flutter.dev/docs/get-started/install/macos
@@ -94,3 +95,4 @@ cask 'font-fira-code'
 
 # ======= Theme ======= #
 brew 'romkatv/powerlevel10k/powerlevel10k'
+

@@ -1,0 +1,207 @@
+tap "agrinman/tap"
+tap "dart-lang/dart"
+tap "ethereum/ethereum"
+tap "heroku/brew"
+tap "homebrew/bundle"
+tap "homebrew/cask"
+tap "homebrew/cask-fonts"
+tap "homebrew/cask-versions"
+tap "homebrew/core"
+tap "homebrew/services"
+tap "leoafarias/fvm"
+tap "mongodb/brew"
+tap "romkatv/powerlevel10k"
+# Cryptography and SSL/TLS Toolkit
+brew "openssl@1.1"
+# Clone of cat(1) with syntax highlighting and Git integration
+brew "bat"
+# Library for command-line editing
+brew "readline"
+# Command-line interface for SQLite
+brew "sqlite"
+# General-purpose data compression with high compression ratio
+brew "xz"
+# Cross-platform make
+brew "cmake"
+# Dependency manager for Cocoa projects
+brew "cocoapods"
+# GNU File, Shell, and Text utilities
+brew "coreutils"
+# Minify and secure Docker images
+brew "docker-slim"
+# Official Go implementation of the Ethereum protocol
+brew "ethereum"
+# Modern replacement for 'ls'
+brew "exa"
+# Play, record, convert, and stream audio and video
+brew "ffmpeg"
+# Fast and simple Node.js version manager
+brew "fnm"
+# GNU compiler collection
+brew "gcc"
+# GitHub command-line tool
+brew "gh"
+# Distributed revision control system
+brew "git"
+# GNU Pretty Good Privacy (PGP) package
+brew "gnupg"
+# Open source programming language to build simple/reliable/efficient software
+brew "go"
+# GNU grep, egrep and fgrep
+brew "grep"
+# Manage your Java environment
+brew "jenv"
+# Keep your Mac's application settings in sync
+brew "mackup"
+# Mac App Store command-line interface
+brew "mas"
+# Open source relational database management system
+brew "mysql"
+# Fast, highly customisable system info script
+brew "neofetch"
+# Ambitious Vim-fork focused on extensibility and agility
+brew "neovim"
+# 📦🚀 Fast, disk space efficient package manager
+brew "pnpm"
+# Python package management tool
+brew "poetry"
+# Object-relational database system
+brew "postgresql"
+# Python version management
+brew "pyenv"
+# Pyenv plugin to manage virtualenv
+brew "pyenv-virtualenv"
+# Search tool like grep and The Silver Searcher
+brew "ripgrep"
+# Version control system designed to be a better CVS
+brew "subversion"
+# Terminal multiplexer
+brew "tmux"
+# Implementation of Java Servlet and JavaServer Pages
+brew "tomcat"
+# Implementation of Java Servlet and JavaServer Pages
+brew "tomcat@8"
+# Display directories as trees (with optional color/HTML output)
+brew "tree"
+# Vi 'workalike' with many additional features
+brew "vim"
+# Watch files and take action when they change
+brew "watchman"
+# Download YouTube videos from the command-line
+brew "youtube-dl"
+# General-purpose lossless data-compression library
+brew "zlib"
+# UNIX shell (command interpreter)
+brew "zsh"
+# Expose your local web server to the internet with a public url: https://tunnelto.dev
+brew "agrinman/tap/tunnelto"
+# Everything you need to get started with Heroku
+brew "heroku/brew/heroku"
+# Simple cli to manage Flutter SDK versions per project
+brew "leoafarias/fvm/fvm"
+# High-performance, schema-free, document-oriented database
+brew "mongodb/brew/mongodb-community"
+# A Zsh Theme
+brew "romkatv/powerlevel10k/powerlevel10k"
+# Prebuilt OpenJDK binaries
+cask "adoptopenjdk8"
+# Application launcher and productivity software
+cask "alfred"
+# Transfer files from and to an Android smartphone
+cask "android-file-transfer"
+# Allows connection to a computer remotely
+cask "anydesk"
+# Multi-track audio editor and recorder
+cask "audacity"
+# Two-factor authentication software
+cask "authy"
+# Cross platform SQL editor and database management app
+cask "beekeeper-studio"
+# Desktop password and login vault
+cask "bitwarden"
+# Utility that prevents the system from going to sleep
+cask "caffeine"
+# GUI app for Homebrew
+cask "cakebrew"
+# OpenJDK distribution from Amazon
+cask "corretto8"
+# Universal database tool and SQL client
+cask "dbeaver-community"
+# Database version management tool
+cask "dbngin"
+# App to build and share containerized applications and microservices
+cask "docker"
+# Client for the Dropbox cloud storage service
+cask "dropbox"
+# Reimagine your terminal
+cask "fig"
+# Web browser
+cask "firefox"
+# Web browser
+cask "firefox-developer-edition"
+# Screen color temperature controller
+cask "flux"
+# Garamond typeface based on the 1592 Berner specimen
+cask "font-eb-garamond"
+cask "font-fira-code"
+cask "font-meslo-for-powerline"
+cask "font-meslo-lg-nerd-font"
+# Personal blockchain for Ethereum development
+cask "ganache"
+# Web browser
+cask "google-chrome"
+# Grammarly for desktop
+cask "grammarly-desktop"
+# Windows manager and desktop organizer
+cask "hazeover"
+# Free and open-source media player
+cask "iina"
+# JetBrains tools manager
+cask "jetbrains-toolbox"
+cask "mark-text"
+# Provides updates to various Microsoft products
+cask "microsoft-auto-update"
+# Office suite
+cask "microsoft-office"
+# Meet, chat, call, and collaborate in just one place
+cask "microsoft-teams"
+# Open source implementation of Microsoft's .NET Framework
+cask "mono-mdk-for-visual-studio"
+# Collaboration platform for API development
+cask "postman"
+# Web browser environment to carry out e-assessments safely
+cask "safe-exam-browser"
+# Music streaming service
+cask "spotify"
+# Text editor for code, markup and prose
+cask "sublime-text"
+# Data visualization software
+cask "tableau"
+# Combine, shape, and clean your data for analysis
+cask "tableau-prep"
+# Messaging app with a focus on speed and security
+cask "telegram"
+# JDK from the Eclipse Foundation (Adoptium)
+cask "temurin11"
+# SSH client
+cask "termius"
+# Unpacks archive files
+cask "the-unarchiver"
+# Customizable timing of breaks
+cask "time-out"
+# Open-source BitTorrent client
+cask "transmission"
+# Virtualizer for x86 hardware
+cask "virtualbox"
+# Extend the functionality of VirtualBox
+cask "virtualbox-extension-pack"
+# Open-source code editor
+cask "visual-studio-code"
+# Desktop client for WhatsApp
+cask "whatsapp"
+# All-in-one office suite
+cask "wpsoffice"
+# Video communication and virtual meeting platform
+cask "zoom"
+mas "Day One", id: 1055511498
+mas "Xcode", id: 497799835

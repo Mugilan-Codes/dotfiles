@@ -5,6 +5,7 @@
 1. Still need to be tested
 1. No idea it will work
 1. Setup Iterm2 first by downloading it directly from website.
+1. Setup Neovim and tmux (checkout alacritty)
 
 ```zsh
 sudo softwareupdate -i -a
@@ -12,6 +13,8 @@ xcode-select --install
 git clone git@github.com:Mugilan-Codes/dotfiles.git ~/.dotfiles
 cd ~/.dotfiles
 chmod +x fresh.sh
+chmod +x bootstrap.sh
+./bootstrap.sh
 ```
 
 ### Plan
