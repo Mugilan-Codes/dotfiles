@@ -2,10 +2,11 @@
 
 ## Needs Work
 
-1. Still need to be tested
-1. No idea it will work
-1. Setup Iterm2 first by downloading it directly from website.
-1. Setup Neovim and tmux (checkout alacritty)
+- Still need to be tested
+- No idea it will work
+- Setup Iterm2 first by downloading it directly from website.
+- Setup Neovim and tmux (checkout alacritty)
+- [Manage Multiple JDKs on Mac OS, Linux and Windows WSL2](https://medium.com/@brunoborges/manage-multiple-jdks-on-mac-os-linux-and-windows-wsl2-3a73467b685c)
 
 ```zsh
 sudo softwareupdate -i -a

@@ -1,16 +1,5 @@
 #! /bin/sh
 
-header() {
-  echo "$(tput sgr 0 1)$(tput setaf 6)$1$(tput sgr0)"
-}
-
-export DOTFILES=$HOME/.dotfiles
-
-header "Setting up Mugilan's Mac..."
-
-header "Homebrew"
-source ./homebrew/brew.sh
-
 header "Setting up Git"
 source ./git/git-setup.sh
 
