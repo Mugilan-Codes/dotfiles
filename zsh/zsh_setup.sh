@@ -9,6 +9,7 @@ echo "==> Symlinking .zshrc file"
 rm -rf $HOME/.zshrc
 ln -s $DOTFILES/zsh/.zshrc $HOME/.zshrc
 
+TODO: alias custom files instead of symlinking the whole directorhy in dots
 echo "==> Installing Custom zsh plugins..."
 ZSH_CUSTOM=$DOTFILES/zsh/custom
 

@@ -26,3 +26,8 @@ update_all() {
 
   update_brew
 }
+
+# Helper utility
+header() {
+  echo "$(tput sgr 0 1)$(tput setaf 6)$1$(tput sgr0)"
+}
