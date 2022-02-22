@@ -1,7 +1,8 @@
 update_brew() {
   # TODO: use Brewfile and `brew bundle` to update
   header "Update Homebrew (Cask) & packages"
-  # brew bundle -v
+  # brew bundle -v --global
+  # brew bundle -v --file=$HOME/Brewfile
   brew update
   brew upgrade
   # brew upgrade --cask
