@@ -13,6 +13,13 @@
 [pull]
 	rebase = true
 
+[user]
+	email = mugilancodes@gmail.com
+	name = Mugilan
+
+[github]
+	user = "Mugilan-Codes"
+
 [includeIf "gitdir:~/Projects/"]
 	path = ~/Projects/.gitconfig
 
