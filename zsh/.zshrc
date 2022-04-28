@@ -1,8 +1,5 @@
-#### FIG ENV VARIABLES ####
-# Please make sure this block is at the start of this file.
-[ -s ~/.fig/shell/pre.sh ] && source ~/.fig/shell/pre.sh
-#### END FIG ENV VARIABLES ####
-
+# Fig pre block. Keep at the top of this file.
+. "$HOME/.fig/shell/zshrc.pre.zsh"
 # Path to dotfiles
 export DOTFILES=$HOME/.dotfiles
 
@@ -91,7 +88,7 @@ eval "$(fnm env --use-on-cd)"
 # Custom plugins may be added to $ZSH_CUSTOM/plugins/
 # Example format: plugins=(rails git textmate ruby lighthouse)
 # Add wisely, as too many plugins slow down shell startup.
-plugins=(git zsh-autosuggestions zsh-syntax-highlighting autoupdate)
+plugins=(z git tmux zsh-autosuggestions zsh-syntax-highlighting autoupdate)
 
 # Added for Heroku AutoComplete
 # REF: https://docs.brew.sh/Shell-Completion#configuring-completions-in-zsh
@@ -158,7 +155,5 @@ fi
 
 export PATH=$PATH:/usr/local/bin
 
-#### FIG ENV VARIABLES ####
-# Please make sure this block is at the end of this file.
-[ -s ~/.fig/fig.sh ] && source ~/.fig/fig.sh
-#### END FIG ENV VARIABLES ####
+# Fig post block. Keep at the bottom of this file.
+. "$HOME/.fig/shell/zshrc.post.zsh"

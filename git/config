@@ -13,10 +13,15 @@
 [pull]
 	rebase = true
 
-[user]
-	user = Mugilan-Codes
-	name = Mugilan
-	email = mugilancodes@gmail.com
+[includeIf "gitdir:~/Projects/"]
+	path = ~/Projects/.gitconfig
+
+# Work Git Config
+[includeIf "gitdir:~/dev/work/viewzen/"]
+	path = ~/dev/work/viewzen/.gitconfig
+# Use Work SSH config
+[url "git@github-vz:mugilan-viewzen"]
+	insteadOf = git@github.com:mugilan-viewzen
 
 [init]
 	defaultBranch = main
@@ -42,3 +47,9 @@
 # REF: https://stackoverflow.com/a/36500841/12381908
 [url "ssh://git@github.com/"]
   insteadOf = https://github.com/
+
+[filter "lfs"]
+	required = true
+	clean = git-lfs clean -- %f
+	smudge = git-lfs smudge -- %f
+	process = git-lfs filter-process

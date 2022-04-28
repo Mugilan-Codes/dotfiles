@@ -165,3 +165,7 @@ alias genpw='LC_ALL=C tr -dc "[:alnum:]" < /dev/urandom | head -c 20 | pbcopy'
 # Clear log to improve the speed of zsh (omz) 
 # REF: https://superuser.com/a/437259
 alias clear_zlog="sudo rm -rf /private/var/log/asl/*.asl"
+
+# Flutter Version Managememt (FVM)
+alias f="fvm flutter"
+alias d="fvm dart"
