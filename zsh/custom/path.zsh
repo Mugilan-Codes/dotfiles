@@ -36,8 +36,12 @@ export GOPATH="${HOME}/.go"
 export GOROOT="/usr/local/opt/go/libexec"
 export PATH="$PATH:${GOPATH}/bin:${GOROOT}/bin"
 
-# REF: Remove Duplicates in PATH - https://superuser.com/a/1321712
-export PATH="$(perl -e 'print join(":", grep { not $seen{$_}++ } split(/:/, $ENV{PATH}))')"
+# Flutter PATH
+# export PATH="$HOME/fvm/default/bin"
+export PATH="/Users/mugil/fvm/default/bin"
 
 # Flutter Fire Path
 export PATH="$PATH":"$HOME/.pub-cache/bin"
+
+# REF: Remove Duplicates in PATH - https://superuser.com/a/1321712
+export PATH="$(perl -e 'print join(":", grep { not $seen{$_}++ } split(/:/, $ENV{PATH}))')"
