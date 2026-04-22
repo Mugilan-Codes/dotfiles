@@ -180,6 +180,33 @@ finder() {
   echo "Moved to: $dir"
 }
 
+# Dump the current Homebrew state into the dotfiles Brewfile.
+# Also shows the Brewfile diff if the dotfiles repo exists.
+# Usage:
+#   brewdump
+brewdump() {
+  local repo="$HOME/dotfiles"
+  local file="$repo/Brewfile"
+
+  command -v brew >/dev/null 2>&1 || {
+    echo "brew not found"
+    return 1
+  }
+
+  brew bundle dump --file="$file" --force || return 1
+
+  if command -v git >/dev/null 2>&1 && [[ -d "$repo/.git" ]]; then
+    if ! git -C "$repo" diff --quiet -- "$file"; then
+      echo "Brewfile updated. Changes:"
+      git -C "$repo" --no-pager diff -- "$file"
+    else
+      echo "Brewfile unchanged."
+    fi
+  else
+    echo "Updated: $file"
+  fi
+}
+
 # ─────────────────────────────
 # 🔧 Git Helpers
 # ─────────────────────────────
