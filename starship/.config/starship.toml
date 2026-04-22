@@ -1,0 +1,15 @@
+# Get editor completions based on the config schema
+"$schema" = 'https://starship.rs/config-schema.json'
+
+# Replace the "❯" symbol in the prompt with "➜"
+[character] # The name of the module we are configuring is "character"
+success_symbol = "[➜](bold green) "
+error_symbol = "[✗](bold red) "
+
+# Disables dart module until fvm version can be used 
+[dart]
+disabled = true
+
+# REF: https://starship.rs/config/#node-js
+[nodejs]
+format = "via [🤖 $version](bold green) "
