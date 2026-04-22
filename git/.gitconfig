@@ -1,0 +1,170 @@
+# ───────────────────────────────
+# 🔧 Core Configuration
+# ───────────────────────────────
+[core]
+	editor = vim                            # Use Vim as default editor
+	whitespace = -trailing-space            # Ignore trailing spaces in diffs/merges
+	excludesfile = ~/.gitignore-global      # Global .gitignore
+	sshCommand = ssh -i ~/.ssh/id_ed25519   # Use personal SSH key by default
+
+[color]
+	ui = auto                               # Enable color in all supported output
+
+[init]
+	defaultBranch = main                    # Use 'main' for new repos
+
+# ───────────────────────────────
+# 🧑‍💻 Identity
+# ───────────────────────────────
+[user]
+	name = Mugilan ES
+	email = mugilancodes@gmail.com
+
+[github]
+	user = "Mugilan-Codes"
+
+# ───────────────────────────────
+# 🏢 Work-specific config (only applies inside ~/dev/work/vzlabs/)
+# ───────────────────────────────
+[includeIf "gitdir:~/dev/work/vzlabs/"]
+	path = ~/dev/work/vzlabs/.gitconfig
+
+# ───────────────────────────────
+# 🚀 Git behavior tweaks
+# ───────────────────────────────
+[push]
+	autoSetupRemote = true                  # Automatically track remote on first push
+
+[pull]
+	rebase = true                           # Always rebase instead of merge when pulling
+
+[rebase]
+	autoStash = true                        # Temporarily stash local changes during rebase
+
+[fetch]
+	prune = true                            # Remove deleted branches on fetch
+
+[help]
+	autocorrect = 1                         # Auto-correct typos with minimal delay (1/10 sec)
+
+# ───────────────────────────────
+# 🔐 Force SSH usage for GitHub
+# ───────────────────────────────
+[url "ssh://git@github.com/"]
+	insteadOf = https://github.com/
+
+# ───────────────────────────────
+# 📦 Git LFS Support
+# ───────────────────────────────
+[filter "lfs"]
+	clean = git-lfs clean -- %f
+	smudge = git-lfs smudge -- %f
+	process = git-lfs filter-process
+	required = true
+
+# ───────────────────────────────
+# 🔁 Aliases
+# ───────────────────────────────
+[alias]
+	# 🧹 Delete merged branches (defaults to main)
+	bclean = "!f() { git branch --merged ${1-main} | grep -v \"${1-main}$\" | xargs -r git branch -D; }; f"
+
+	# 🆕 Show new commits added by last pull (e.g., git new HEAD)
+	new = !sh -c 'git log $1@{1}..$1@{0} "$@"'
+
+	# 🔃 Delete all local tags and fetch fresh ones
+	new-tags = "!f() { git tag -l | xargs -r git tag -d; git fetch --tags; }; f"
+
+	# 🧼 Prune local branches with no remote
+	prune-local = branch -vv | grep \": gone]\" | awk \"{print \\$1}\" | xargs -r git branch -D
+
+	# 🔄 Create local branches for all remote branches
+	track-all-remote = "!for branch in $(git branch -r | grep -v \"\\->\"); do local_branch=$(echo $branch | sed \"s/origin\\///\"); if ! git show-ref --verify --quiet refs/heads/$local_branch; then git branch --track $local_branch $branch; fi; done"
+
+	# 🗂️ List untracked files
+	untracked = ls-files --others --exclude-standard
+
+	# 🚀 Interactive rebase with autosquash (for fixup!)
+	ri = rebase -i --autosquash
+
+	# 🌲 Git log with graph and one-liners
+	lg = log --oneline --graph --decorate --all
+
+	# ✅ Amend last commit without changing its message
+	amend = commit --amend --no-edit
+
+	# 💾 Stash current changes with message
+	save = "!f() { git stash push -m \"$@\"; }; f"
+
+	# 📌 Show last commit with file list
+	last = log -1 HEAD --stat
+
+	# 📝 Commit with diff preview
+	cm = commit -v
+
+	# 🔥 Delete remote branch
+	rbd = "!f() { git push origin --delete \"$@\"; }; f"
+
+	# ⏪ Undo last commit but keep changes
+	undo = reset --soft HEAD^
+
+	# 🔍 Show staged vs last commit diff
+	ds = diff --staged
+
+	# 🧭 Show current branch name
+	current = rev-parse --abbrev-ref HEAD
+
+	# ⚔️ Show files in conflict
+	mc = diff --name-only --diff-filter=U
+
+	# 🔄 Safe setup for reviewing PRs locally (only adds remote if missing)
+	setpr = "!f() { \
+	  if ! git remote | grep -q '^pr$'; then \
+	    git remote add pr $(git config remote.origin.url); \
+	  fi; \
+	  git config remote.pr.fetch '+refs/pull/*/head:refs/remotes/pr/*'; \
+	}; f"
+
+	# 📥 Fetch all open PRs as local branches like `pr-42`
+	fetch-open-prs = "!f() { \
+	  gh pr list --limit 100 --state open --json number --jq '.[] | .number' | \
+	  while read pr; do \
+	    echo \"📥 Fetching PR #$pr\"; \
+	    git fetch origin pull/$pr/head:pr-$pr; \
+	  done; \
+	}; f"
+
+	# 🚀 Add all modified/created files
+	aa = add .
+
+	# ❌ Unstage files
+	unstage = reset HEAD --
+
+	# 🔎 Show diff of staged changes
+	dc = diff --cached
+
+	# 🔍 Who last modified each line
+	who = "!f() { git log --pretty=format:'%h %an %ad %s' --date=short -- \"$@\"; }; f"
+
+	# 🤔 Blame with ignored revs
+	blame-clean = blame --ignore-revs-file .git-blame-ignore-revs
+
+	# 🕒 View commit history with timestamps
+	timeline = reflog --date=local --pretty="%C(yellow)%h%Creset %ad - %gs"
+
+	# ⛔ Abort any in-progress Git operation
+	abort = "!f() { \
+	  git merge --abort 2>/dev/null || true; \
+	  git rebase --abort 2>/dev/null || true; \
+	  git cherry-pick --abort 2>/dev/null || true; \
+	  echo '🛑 Any operation in progress has been aborted.'; \
+	}; f"
+
+	# ⬇️ Checkout PR by number
+	pr = "!f() { gh pr checkout \"$1\"; }; f"
+
+	# auto-delete all local pr-* branches after merge
+	clean-prs = "!git branch | grep '^  pr-' | xargs -r git branch -D"
+
+	hist-fzf = "!git log --oneline | fzf --preview 'git show --color=always {1}'"
+

@@ -1,0 +1,9 @@
+.DS_Store
+*.swp
+*.swo
+*.bak
+*.tmp
+.env
+.env.*
+.secret
+secrets/
