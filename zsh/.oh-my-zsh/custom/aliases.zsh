@@ -28,6 +28,8 @@ alias completions="code ~/.oh-my-zsh/custom/completions.zsh"
 alias path='echo $PATH | tr ":" "\n"'
 
 alias bdump="brewdump"
+alias bsave="brewsave"
+alias bpush="brewpush"
 
 # ─────────────────────────────
 # 📂 File Listing (eza)

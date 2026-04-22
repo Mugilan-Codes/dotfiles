@@ -180,8 +180,8 @@ finder() {
   echo "Moved to: $dir"
 }
 
-# Dump the current Homebrew state into the dotfiles Brewfile.
-# Also shows the Brewfile diff if the dotfiles repo exists.
+# Dump current Homebrew state into the dotfiles Brewfile.
+# Shows diff only if Brewfile changed.
 # Usage:
 #   brewdump
 brewdump() {
@@ -204,6 +204,72 @@ brewdump() {
     fi
   else
     echo "Updated: $file"
+  fi
+}
+
+# Install a Homebrew formula, then refresh Brewfile if install succeeds.
+# Usage:
+#   brewadd jq
+#   brewadd --cask iterm2
+brewadd() {
+  [[ $# -eq 0 ]] && { echo "Usage: brewadd <brew install args>"; return 1; }
+  brew install "$@" && brewdump
+}
+
+# Uninstall a Homebrew formula/cask, then refresh Brewfile if uninstall succeeds.
+# Usage:
+#   brewrm jq
+#   brewrm --cask iterm2
+brewrm() {
+  [[ $# -eq 0 ]] && { echo "Usage: brewrm <brew uninstall args>"; return 1; }
+  brew uninstall "$@" && brewdump
+}
+
+# Tap a Homebrew repo, then refresh Brewfile.
+# Usage:
+#   brewtap hashicorp/tap
+brewtap() {
+  [[ $# -eq 0 ]] && { echo "Usage: brewtap <tap>"; return 1; }
+  brew tap "$@" && brewdump
+}
+
+# Untap a Homebrew repo, then refresh Brewfile.
+# Usage:
+#   brewuntap hashicorp/tap
+brewuntap() {
+  [[ $# -eq 0 ]] && { echo "Usage: brewuntap <tap>"; return 1; }
+  brew untap "$@" && brewdump
+}
+
+# Dump Brewfile and commit it if changed.
+# Usage:
+#   brewsave
+#   brewsave "Update Brewfile after installing jq"
+brewsave() {
+  local repo="$HOME/dotfiles"
+  local msg="${1:-Update Brewfile}"
+
+  brewdump || return 1
+
+  if [[ -d "$repo/.git" ]] && ! git -C "$repo" diff --quiet -- Brewfile; then
+    git -C "$repo" add Brewfile &&
+    git -C "$repo" commit -m "$msg"
+  else
+    echo "No Brewfile changes to commit."
+  fi
+}
+
+# Commit + push Brewfile if changed
+# Usage:
+#   brewpush
+#   brewpush "Update Brewfile"
+brewpush() {
+  local msg="${1:-Update Brewfile}"
+
+  brewsave "$msg" || return 1
+
+  if [[ -d "$HOME/dotfiles/.git" ]]; then
+    git -C "$HOME/dotfiles" push
   fi
 }
 
