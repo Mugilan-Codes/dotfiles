@@ -202,8 +202,9 @@ setopt HIST_FIND_NO_DUPS
 setopt HIST_IGNORE_ALL_DUPS
 
 # Add Docker CLI completions before loading Oh My Zsh.
+# Add neatCLI completions in .zfunc
 # Oh My Zsh will initialize completions for us.
-fpath=("$HOME/.docker/completions" $fpath)
+fpath=("$HOME/.docker/completions" "$HOME/.zfunc" $fpath)
 
 # FNM
 # Auto-switch Node.js versions based on .nvmrc / .node-version files.

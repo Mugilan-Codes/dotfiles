@@ -167,6 +167,35 @@ alias emptytrash="rm -rf ~/.Trash/*"
 alias bt="btop"
 
 # ─────────────────────────────
+# 🧹 neatCLI Core
+# ─────────────────────────────
+
+alias n="neatcli"
+alias ntui="neatcli tui"
+alias nhist="neatcli history"
+alias nundo="neatcli undo"
+
+# Downloads cleanup previews
+alias ndl="neatcli organize ~/Downloads --by-type --show-all-files"
+alias ndls="neatcli stats ~/Downloads"
+alias ndups="neatcli duplicates ~/Downloads"
+alias nsim="neatcli similar ~/Downloads"
+
+# Execute versions
+alias ndlx="neatcli organize ~/Downloads --by-type --execute"
+alias ncleanold="neatcli clean ~/Downloads --older-than 30d"
+alias ncleanoldx="neatcli clean ~/Downloads --older-than 30d --trash --execute"
+
+# ─────────────────────────────
+# 🧹 neatCLI Downloads Workflow
+# ─────────────────────────────
+
+alias dlsafe="dlclean"      # Preview cleanup (safe, no changes)
+alias dlgo="dlcleanx"       # Execute cleanup (asks confirmation)
+alias dloldsafe="dlold"     # Preview old files cleanup
+alias dloldgo="dloldx"      # Delete old files (moves to Trash)
+
+# ─────────────────────────────
 # 🗃 Projects
 # ─────────────────────────────
 

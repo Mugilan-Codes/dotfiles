@@ -606,3 +606,159 @@ cleanderived() {
   rm -rf ~/Library/Developer/Xcode/DerivedData/*
   echo "Removed Xcode DerivedData."
 }
+
+# ─────────────────────────────
+# 🧹 neatCLI Helpers
+# ─────────────────────────────
+
+# Generate neatCLI zsh completions.
+# Usage:
+#   neatcomp
+neatcomp() {
+  mkdir -p "$HOME/.zfunc"
+  neatcli completions zsh > "$HOME/.zfunc/_neatcli"
+  compinit
+  echo "neatCLI completions installed & reloaded"
+}
+
+# Preview organizing any folder by type.
+# Usage:
+#   neatpreview
+#   neatpreview ~/Downloads
+neatpreview() {
+  local dir="${1:-.}"
+  neatcli organize "$dir" --by-type --show-all-files
+}
+
+# Execute organizing any folder by type.
+# Usage:
+#   neatexec ~/Downloads
+neatexec() {
+  local dir="${1:-.}"
+  neatcli organize "$dir" --by-type --execute
+}
+
+# Find duplicates in any folder.
+# Usage:
+#   neatdups
+#   neatdups ~/Downloads
+neatdups() {
+  local dir="${1:-.}"
+  neatcli duplicates "$dir"
+}
+
+# Trash duplicate files after confirmation.
+# Usage:
+#   neatdupsx ~/Downloads
+neatdupsx() {
+  local dir="${1:-.}"
+  neatcli duplicates "$dir" --delete --trash --execute
+}
+
+# Organize photos by EXIF date taken.
+# Usage:
+#   neatphotos ~/Pictures
+neatphotos() {
+  local dir="${1:-.}"
+  neatcli organize "$dir" --by-date-taken
+}
+
+# Execute photo organization by EXIF date taken.
+# Usage:
+#   neatphotosx ~/Pictures
+neatphotosx() {
+  local dir="${1:-.}"
+  neatcli organize "$dir" --by-date-taken --execute
+}
+
+# Show folder stats.
+# Usage:
+#   neatstats
+#   neatstats ~/Downloads
+neatstats() {
+  local dir="${1:-.}"
+  neatcli stats "$dir"
+}
+
+# Safe Downloads cleanup workflow.
+# Step 1: stats
+# Step 2: preview organization
+# Step 3: check duplicates
+# Step 4: optionally execute
+# Usage:
+#   dlclean
+dlclean() {
+  local dir="$HOME/Downloads"
+
+  echo "📊 Downloads stats:"
+  neatcli stats "$dir"
+
+  echo ""
+  echo "🧹 Preview organization:"
+  neatcli organize "$dir" --by-type --show-all-files
+
+  echo ""
+  echo "🔍 Duplicate check:"
+  neatcli duplicates "$dir"
+
+  echo ""
+  echo "Nothing was changed."
+  echo "Run 'dlcleanx' to execute the organization."
+}
+
+# Execute Downloads organization safely.
+# Usage:
+#   dlcleanx
+dlcleanx() {
+  local dir="$HOME/Downloads"
+
+  echo "This will organize: $dir"
+  echo "Files can be restored using: nundo"
+  echo ""
+
+  read "confirm?Type YES to continue: "
+
+  if [[ "$confirm" != "YES" ]]; then
+    echo "Cancelled."
+    return 1
+  fi
+
+  neatcli organize "$dir" --by-type --execute
+
+  echo ""
+  echo "Done. If something looks wrong, run:"
+  echo "  nundo"
+}
+
+# Clean old Downloads files safely by moving to Trash.
+# Default: older than 30 days.
+# Usage:
+#   dlold
+#   dlold 60d
+dlold() {
+  local dir="$HOME/Downloads"
+  local age="${1:-30d}"
+
+  neatcli clean "$dir" --older-than "$age" --trash
+}
+
+# Execute old Downloads cleanup.
+# Usage:
+#   dloldx
+#   dloldx 60d
+dloldx() {
+  local dir="$HOME/Downloads"
+  local age="${1:-30d}"
+
+  echo "This will move files older than $age from Downloads to Trash."
+  echo ""
+
+  read "confirm?Type YES to continue: "
+
+  if [[ "$confirm" != "YES" ]]; then
+    echo "Cancelled."
+    return 1
+  fi
+
+  neatcli clean "$dir" --older-than "$age" --trash --execute
+}
