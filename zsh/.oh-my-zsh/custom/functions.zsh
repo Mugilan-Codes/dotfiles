@@ -553,7 +553,13 @@ task-fzf() {
 # 🧹 Maintenance Helpers
 # ─────────────────────────────
 
-# Clean user cache safely.
+# Clean user cache files.
+#
+# WARNING:
+# This removes files under ~/Library/Caches.
+# It is usually safe, but apps may recreate caches and may feel slower briefly.
+# Avoid running during active work.
+#
 # Usage:
 #   cleanmac
 cleanmac() {
@@ -587,6 +593,17 @@ cleanyarn() {
 }
 
 # Flutter / Dart cleanup without touching project source files.
+#
+# Use when:
+#   - Flutter build behaves weirdly
+#   - Simulator cache causes odd issues
+#   - Dart analysis/server feels stuck
+#
+# Note:
+#   This expects `flutter` to be available as a command.
+#   If you only use FVM and do not have global flutter in PATH,
+#   prefer running `f clean` inside the project.
+#
 # Usage:
 #   cleanfluttercache
 cleanfluttercache() {
@@ -955,7 +972,24 @@ docker-disk() {
   docker system df -v
 }
 
-# Quick PostgreSQL container for testing.
+# Quick temporary PostgreSQL container for testing.
+#
+# Use when:
+#   - You need a fast local Postgres DB for Spring Boot/Node testing
+#   - You do not want to write a full compose.yaml yet
+#
+# Default connection:
+#   Host: localhost
+#   Port: 5432
+#   DB: testdb
+#   User: mugilan
+#   Password: password
+#
+# Notes:
+#   - Container name is fixed: pgquick
+#   - If it already exists, run pgquickrm first
+#   - Use a different port if 5432 is busy: pgquick 5433
+#
 # Usage:
 #   pgquick
 #   pgquick 5433
@@ -977,14 +1011,29 @@ pgquick() {
   echo "Password: password"
 }
 
-# Stop and remove pgquick container.
+# Stop and remove the temporary pgquick PostgreSQL container.
+#
+# Use when:
+#   - You are done testing
+#   - You want to recreate pgquick cleanly
+#
 # Usage:
 #   pgquickrm
 pgquickrm() {
   docker rm -f pgquick
 }
 
-# Quick Redis container for testing.
+# Quick temporary Redis container for testing.
+#
+# Use when:
+#   - You need Redis for Spring Boot/Node testing
+#   - You want to test cache/session/queue behavior quickly
+#
+# Notes:
+#   - Container name is fixed: redisquick
+#   - If it already exists, run redisquickrm first
+#   - Use a different port if 6379 is busy: redisquick 6380
+#
 # Usage:
 #   redisquick
 #   redisquick 6380
@@ -998,7 +1047,8 @@ redisquick() {
   echo "Redis running on localhost:$port"
 }
 
-# Stop and remove redisquick container.
+# Stop and remove the temporary redisquick Redis container.
+#
 # Usage:
 #   redisquickrm
 redisquickrm() {

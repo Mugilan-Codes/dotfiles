@@ -25,8 +25,15 @@ alias aliases="code ~/.oh-my-zsh/custom/aliases.zsh"
 alias functions="code ~/.oh-my-zsh/custom/functions.zsh"
 alias completions="code ~/.oh-my-zsh/custom/completions.zsh"
 
+# Print PATH entries line-by-line for debugging command resolution.
+# Use when `which -a <command>` shows unexpected binaries.
 alias path='echo $PATH | tr ":" "\n"'
 
+# Homebrew + Brewfile helpers.
+# Functions are defined in functions.zsh.
+# bdump = refresh Brewfile only
+# bsave = refresh Brewfile and commit if changed
+# bpush = refresh, commit, and push Brewfile
 alias bdump="brewdump"
 alias bsave="brewsave"
 alias bpush="brewpush"
@@ -51,7 +58,9 @@ alias ...="cd ../.."
 # Clear terminal.
 alias c="clear"
 
-# Open finder directory in terminal.
+# Move terminal into the frontmost Finder window's directory.
+# Useful when you visually opened a folder in Finder and want terminal there.
+# Function is defined in functions.zsh.
 alias fdhere="finder"
 
 # ─────────────────────────────
@@ -60,16 +69,29 @@ alias fdhere="finder"
 
 # Use FVM-managed Flutter and Dart by default.
 alias f="fvm flutter"
+
+# NOTE:
+# This intentionally makes `fd` mean "fvm dart".
+# Since this conflicts with the popular `fd` file-search binary,
+# use the `fdf` function when you want the real fd command.
 alias fd="fvm dart"
 
 # Direct local project Flutter binary.
 # Use only inside a repo that contains .fvm/flutter_sdk.
 alias fv=".fvm/flutter_sdk/bin/flutter"
 
-# Common Flutter maintenance shortcuts.
+# Clean Flutter build files and fetch packages again.
+# Use when builds behave oddly, dependencies changed, or generated files are stale.
 alias frefresh="f clean && f pub get"
+
+# Run build_runner once and delete conflicting generated outputs.
+# Use after changing models, MobX stores, json_serializable classes, etc.
 alias fbuildrunner="f pub run build_runner build --delete-conflicting-outputs"
+
+# Watch build_runner continuously.
+# Use during active development when generated files need to update repeatedly.
 alias fwatchrunner="f pub run build_runner watch --delete-conflicting-outputs"
+
 alias fdoctor="f doctor"
 alias flog="f logs"
 
@@ -79,9 +101,15 @@ alias flog="f logs"
 
 # Connect Android device over Wi-Fi debugging.
 # Update the IP if your device IP changes.
+# Use after connecting device by USB at least once and enabling adb tcpip.
 alias rnwifi='adb kill-server && adb tcpip 5555 && adb connect 192.168.0.105:5555 && adb devices'
 
 # Aggressively reset a React Native project.
+# WARNING:
+# - Deletes node_modules
+# - Reinstalls dependencies
+# - Resets Metro cache
+# Use only when normal reinstall/cache reset does not fix the issue.
 alias rnreset='watchman watch-del-all && rm -rf node_modules && npm install && npm start -- --reset-cache'
 
 # ─────────────────────────────
@@ -149,7 +177,9 @@ alias serve="python3 -m http.server 8080"
 # 💽 System / Maintenance
 # ─────────────────────────────
 
-# Update and clean Homebrew.
+# Update all Homebrew formulae/casks and clean old versions.
+# Use occasionally, not blindly before important work.
+# This can upgrade tools and sometimes introduce version changes.
 alias update="brew update && brew upgrade && brew autoremove && brew cleanup -s"
 
 # Quick CPU / RAM inspection.
@@ -159,8 +189,15 @@ alias ram="top -o mem"
 alias cpu="top -o cpu"
 
 # Disk usage helpers.
+# du1 = show size of immediate files/folders in current directory.
 alias du1="du -d 1 -h . | sort -h"
+
+# Check Trash size before emptying.
 alias trashsize="du -sh ~/.Trash"
+
+# WARNING:
+# Permanently empties macOS Trash from terminal.
+# Use `trashsize` first.
 alias emptytrash="rm -rf ~/.Trash/*"
 
 # Better system monitor.
@@ -254,7 +291,13 @@ alias zz="zoxfz"
 # 🐳 OrbStack / Docker
 # ─────────────────────────────
 
-# OrbStack
+# OrbStack control.
+# ostatus  = check if OrbStack is running
+# ostart   = start OrbStack
+# ostop    = stop OrbStack fully
+# orestart = restart only Docker engine inside OrbStack
+# over     = show OrbStack version
+# oconfig  = show current OrbStack config
 alias ostatus="orb status"
 alias ostart="orb start"
 alias ostop="orb stop"
@@ -262,32 +305,59 @@ alias orestart="orb restart docker"
 alias over="orb version"
 alias oconfig="orb config show"
 
-# Docker context
+# Docker context helpers.
+# Use dctx to confirm Docker is using OrbStack.
+# You want to see: orbstack *
 alias dctx="docker context ls"
 alias duseorb="docker context use orbstack"
 
-# Docker core
+# Docker core shortcuts.
 alias dk="docker"
 alias dc="docker compose"
 
-# Docker inspect/list
+# Docker inspect/list helpers.
+# dps  = running containers
+# dpsa = all containers, including stopped/crashed ones
+# di   = local Docker images
+# dv   = Docker volumes, often used by databases
+# dn   = Docker networks
 alias dps="docker ps"
 alias dpsa="docker ps -a"
 alias di="docker images"
 alias dv="docker volume ls"
 alias dn="docker network ls"
 
-# Docker Compose
+# Docker Compose workflow.
+# dcu  = start services in background
+# dcub = rebuild images and start services
+# dcd  = stop/remove compose containers, keeps volumes
+# dcdv = stop/remove compose containers AND volumes
+# dcl  = follow compose logs
+# dcps = show compose services in current project
 alias dcu="docker compose up -d"
 alias dcub="docker compose up -d --build"
 alias dcd="docker compose down"
+
+# WARNING:
+# Deletes Compose volumes for the current project.
+# This can delete local Postgres/MySQL/Redis data for that project.
+# Use only when you want a clean database reset.
 alias dcdv="docker compose down -v"
+
 alias dcl="docker compose logs -f"
 alias dcb="docker compose build"
 alias dcr="docker compose restart"
 alias dcps="docker compose ps"
 
-# Docker cleanup - safe shortcuts only
+# Docker cleanup.
+# dprune  = safe-ish cleanup; does NOT remove volumes by default
+# dnprune = remove unused networks
+# dvprune = remove unused volumes; be careful with database data
 alias dprune="docker system prune"
+
+# WARNING:
+# Removes unused Docker volumes.
+# Volumes often contain database data.
 alias dvprune="docker volume prune"
+
 alias dnprune="docker network prune"
