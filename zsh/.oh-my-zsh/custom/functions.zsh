@@ -553,19 +553,113 @@ task-fzf() {
 # 🧹 Maintenance Helpers
 # ─────────────────────────────
 
-# Clean user cache files.
+# Empty the current user's macOS Trash safely.
 #
-# WARNING:
-# This removes files under ~/Library/Caches.
-# It is usually safe, but apps may recreate caches and may feel slower briefly.
-# Avoid running during active work.
+# Why this exists:
+#   The old alias used `rm -rf ~/.Trash/*`, which was fast but too easy to
+#   trigger accidentally and did not ask for confirmation. This function shows
+#   the Trash size and item count first, then requires explicit confirmation.
+#
+# When to use:
+#   - After checking Trash size with `trashsize`
+#   - When you are sure you no longer need the files in Trash
+#   - When you want to empty Trash from terminal instead of Finder
+#
+# Warning:
+#   This permanently removes files from ~/.Trash. It does not move them
+#   somewhere else. There is no normal undo after this.
+#
+# Usage:
+#   emptytrash
+emptytrash() {
+  local trash_dir="$HOME/.Trash"
+
+  if [[ ! -d "$trash_dir" ]]; then
+    echo "Trash directory not found: $trash_dir"
+    return 1
+  fi
+
+  local size
+  local count
+  size=$(du -sh "$trash_dir" 2>/dev/null | awk '{print $1}')
+  count=$(find "$trash_dir" -mindepth 1 -maxdepth 1 2>/dev/null | wc -l | tr -d ' ')
+
+  if [[ "$count" == "0" ]]; then
+    echo "Trash is already empty."
+    return 0
+  fi
+
+  echo "WARNING: This will permanently empty your macOS Trash."
+  echo "Trash: $trash_dir"
+  echo "Size : ${size:-unknown}"
+  echo "Items: $count"
+  echo
+
+  read "confirm?Type EMPTY to permanently delete these files: "
+
+  if [[ "$confirm" != "EMPTY" ]]; then
+    echo "Cancelled."
+    return 1
+  fi
+
+  find "$trash_dir" -mindepth 1 -maxdepth 1 -exec rm -rf {} +
+  echo "Trash emptied."
+}
+
+# Clean user cache files safely with confirmation.
+#
+# Why this exists:
+#   The old version immediately removed everything under ~/Library/Caches.
+#   That is usually safe, but it is still an aggressive cleanup and should not
+#   happen accidentally. This function shows the cache size first and requires
+#   explicit confirmation.
+#
+# When to use:
+#   - macOS apps feel bloated or cache-heavy
+#   - You want to reclaim local disk space
+#   - You are not in the middle of active work
+#
+# Warning:
+#   Apps may recreate cache files later and may feel slower briefly after this.
+#   Some cache files may be skipped if currently in use.
 #
 # Usage:
 #   cleanmac
 cleanmac() {
-  echo "Cleaning user cache..."
-  rm -rf ~/Library/Caches/*
-  echo "Done."
+  local cache_dir="$HOME/Library/Caches"
+
+  if [[ ! -d "$cache_dir" ]]; then
+    echo "Cache directory not found: $cache_dir"
+    return 1
+  fi
+
+  local size
+  local count
+  size=$(du -sh "$cache_dir" 2>/dev/null | awk '{print $1}')
+  count=$(find "$cache_dir" -mindepth 1 -maxdepth 1 2>/dev/null | wc -l | tr -d ' ')
+
+  if [[ "$count" == "0" ]]; then
+    echo "User cache directory is already empty."
+    return 0
+  fi
+
+  echo "WARNING: This will remove user cache files."
+  echo "Cache: $cache_dir"
+  echo "Size : ${size:-unknown}"
+  echo "Items: $count"
+  echo
+  echo "Avoid running this during active work."
+  echo
+
+  read "confirm?Type CLEAN to remove user cache files: "
+
+  if [[ "$confirm" != "CLEAN" ]]; then
+    echo "Cancelled."
+    return 1
+  fi
+
+  find "$cache_dir" -mindepth 1 -maxdepth 1 -exec rm -rf {} + 2>/dev/null
+  echo "Done. Some cache files may be skipped if they were in use."
 }
 
 # Homebrew cleanup.
@@ -1173,12 +1267,21 @@ usedcount() {
   local name="$1"
   local count
 
+  # Token-based match instead of regex-based grep.
+  # This works better for aliases like `..` and `...`, where dots would
+  # otherwise behave like regex wildcards.
   count=$(
-    fc -l 1 2>/dev/null \
-      | awk '{ $1=""; sub(/^ /, ""); print }' \
-      | grep -E "(^|[ ;|&])${name}([ ;|&]|$)" \
-      | wc -l \
-      | tr -d ' '
+    fc -l 1 2>/dev/null       | awk -v target="$name" '''
+          {
+            $1=""
+            sub(/^ /, "")
+            n = split($0, parts, /[[:space:];|&]+/)
+            for (i = 1; i <= n; i++) {
+              if (parts[i] == target) c++
+            }
+          }
+          END { print c + 0 }
+        '''
   )
 
   echo "$name used $count time(s) in shell history"

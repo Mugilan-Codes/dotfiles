@@ -22,7 +22,8 @@ alias zprofile="code ~/.zprofile"
 alias zshenv="code ~/.zshenv"
 alias zlogin="code ~/.zlogin"
 alias aliases="code ~/.oh-my-zsh/custom/aliases.zsh"
-alias functions="code ~/.oh-my-zsh/custom/functions.zsh"
+# Open functions file. Avoid aliasing `functions` because zsh already has a builtin with that name.
+alias zfunctions="code ~/.oh-my-zsh/custom/functions.zsh"
 alias completions="code ~/.oh-my-zsh/custom/completions.zsh"
 
 # Print PATH entries line-by-line for debugging command resolution.
@@ -127,7 +128,8 @@ alias pnx="pn dlx"
 # Common scripts.
 alias dev="pn dev"
 alias lint="pn lint"
-alias test="pn test"
+# Avoid aliasing `test` because it is a shell builtin.
+alias ptest="pn test"
 
 # ─────────────────────────────
 # 🔧 Git
@@ -192,13 +194,10 @@ alias cpu="top -o cpu"
 # du1 = show size of immediate files/folders in current directory.
 alias du1="du -d 1 -h . | sort -h"
 
-# Check Trash size before emptying.
-alias trashsize="du -sh ~/.Trash"
-
-# WARNING:
-# Permanently empties macOS Trash from terminal.
-# Use `trashsize` first.
-alias emptytrash="rm -rf ~/.Trash/*"
+# Check macOS Trash size.
+# If this shows "Operation not permitted", give Full Disk Access to your terminal app:
+# System Settings → Privacy & Security → Full Disk Access
+alias trashsize='du -sh ~/.Trash 2>/dev/null || echo "Permission denied. Give Full Disk Access to your terminal app, then restart the terminal."'
 
 # Better system monitor.
 alias bt="btop"
