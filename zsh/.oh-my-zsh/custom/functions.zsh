@@ -686,12 +686,16 @@ cleanyarn() {
   yarn cache clean
 }
 
-# Flutter / Dart cleanup without touching project source files.
+# Flutter / Dart cleanup with confirmation.
 #
 # Use when:
 #   - Flutter build behaves weirdly
 #   - Simulator cache causes odd issues
 #   - Dart analysis/server feels stuck
+#
+# Warning:
+#   This removes simulator caches and Dart server cache. It does not touch
+#   project source files, but apps/tools may rebuild caches afterwards.
 #
 # Note:
 #   This expects `flutter` to be available as a command.
@@ -703,6 +707,17 @@ cleanyarn() {
 cleanfluttercache() {
   command -v flutter >/dev/null 2>&1 || { echo "flutter not found"; return 1; }
 
+  echo "WARNING: This will clean Flutter build output and local Flutter/Dart caches."
+  echo "It does not delete project source files."
+  echo
+
+  read "confirm?Type FLUTTERCLEAN to continue: "
+
+  if [[ "$confirm" != "FLUTTERCLEAN" ]]; then
+    echo "Cancelled."
+    return 1
+  fi
+
   echo "Cleaning Flutter and simulator caches..."
   flutter clean 2>/dev/null || true
   rm -rf ~/Library/Developer/CoreSimulator/Caches/*
@@ -710,11 +725,42 @@ cleanfluttercache() {
   echo "Done."
 }
 
-# Remove Xcode DerivedData.
+# Remove Xcode DerivedData safely with confirmation.
+#
+# Use when:
+#   - Xcode/iOS builds are stuck
+#   - Old DerivedData is taking too much space
+#   - Flutter iOS build behaves oddly
+#
+# Warning:
+#   This does not delete source code, but Xcode will rebuild indexes/build data.
+#
 # Usage:
 #   cleanderived
 cleanderived() {
-  rm -rf ~/Library/Developer/Xcode/DerivedData/*
+  local derived_dir="$HOME/Library/Developer/Xcode/DerivedData"
+
+  if [[ ! -d "$derived_dir" ]]; then
+    echo "DerivedData directory not found: $derived_dir"
+    return 0
+  fi
+
+  local size
+  size=$(du -sh "$derived_dir" 2>/dev/null | awk '{print $1}')
+
+  echo "WARNING: This will remove Xcode DerivedData."
+  echo "Path: $derived_dir"
+  echo "Size: ${size:-unknown}"
+  echo
+
+  read "confirm?Type DERIVED to continue: "
+
+  if [[ "$confirm" != "DERIVED" ]]; then
+    echo "Cancelled."
+    return 1
+  fi
+
+  find "$derived_dir" -mindepth 1 -maxdepth 1 -exec rm -rf {} + 2>/dev/null
   echo "Removed Xcode DerivedData."
 }
 
@@ -1271,7 +1317,8 @@ usedcount() {
   # This works better for aliases like `..` and `...`, where dots would
   # otherwise behave like regex wildcards.
   count=$(
-    fc -l 1 2>/dev/null       | awk -v target="$name" '''
+    fc -l 1 2>/dev/null \
+      | awk -v target="$name" '
           {
             $1=""
             sub(/^ /, "")
@@ -1281,7 +1328,7 @@ usedcount() {
             }
           }
           END { print c + 0 }
-        '''
+        '
   )
 
   echo "$name used $count time(s) in shell history"

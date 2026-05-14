@@ -217,7 +217,11 @@ alias ndls="neatcli stats ~/Downloads"
 alias ndups="neatcli duplicates ~/Downloads"
 alias nsim="neatcli similar ~/Downloads"
 
-# Execute versions
+# Execute versions.
+# ndlx reorganizes Downloads immediately.
+# ncleanold previews old-file cleanup.
+# ncleanoldx moves old files to Trash immediately.
+# Safer confirmed workflows are available below as: dlgo and dloldgo.
 alias ndlx="neatcli organize ~/Downloads --by-type --execute"
 alias ncleanold="neatcli clean ~/Downloads --older-than 30d"
 alias ncleanoldx="neatcli clean ~/Downloads --older-than 30d --trash --execute"
