@@ -1004,3 +1004,132 @@ redisquick() {
 redisquickrm() {
   docker rm -f redisquick
 }
+
+# ─────────────────────────────
+# 🧭 Alias / Function Namespace Helpers
+# ─────────────────────────────
+
+# Check whether a name is already used by zsh.
+#
+# Why this exists:
+#   Before creating a new alias or function, you can check whether the name is
+#   already taken by an alias, function, builtin command, external command, or
+#   zsh reserved word.
+#
+# When to use:
+#   - Before adding a new alias
+#   - Before adding a new function
+#   - When a command behaves unexpectedly
+#   - When you want to know whether a short name like "dcu", "gs", "k", etc. is safe
+#
+# Usage:
+#   namecheck dcu
+#   namecheck docker
+#   namecheck dcu docker-health pgquick
+#
+# Example:
+#   namecheck dcu
+#
+# Output meaning:
+#   ✅ Free      -> safe to use as a new alias/function name
+#   ⚠️ Not free -> name already exists somewhere
+namecheck() {
+  emulate -L zsh
+
+  if [[ $# -eq 0 ]]; then
+    echo "Usage: namecheck <name> [name2 name3 ...]"
+    return 1
+  fi
+
+  local name
+  local found
+
+  for name in "$@"; do
+    echo
+    echo "== $name =="
+
+    found=0
+
+    if (( ${+aliases[$name]} )); then
+      echo "Alias: ${aliases[$name]}"
+      found=1
+    fi
+
+    if (( ${+functions[$name]} )); then
+      echo "Function: defined"
+      found=1
+    fi
+
+    if (( ${+builtins[$name]} )); then
+      echo "Builtin: zsh builtin"
+      found=1
+    fi
+
+    if (( ${+commands[$name]} )); then
+      echo "Command: ${commands[$name]}"
+      found=1
+    fi
+
+    if (( ${+reswords[$name]} )); then
+      echo "Reserved word: zsh reserved word"
+      found=1
+    fi
+
+    if (( found == 0 )); then
+      echo "✅ Free: you can use this name"
+    else
+      echo "⚠️ Not free: this name already exists"
+      echo
+      whence -va "$name" 2>/dev/null
+    fi
+  done
+}
+
+
+# Count how many times a command/alias/function appears in your zsh history.
+#
+# Why this exists:
+#   zsh does not automatically tell you whether you actually use your aliases
+#   and functions. This searches your shell history and gives a rough usage count.
+#
+# When to use:
+#   - When cleaning your dotfiles
+#   - Before deleting old aliases/functions
+#   - To find whether a shortcut is actually useful
+#   - To compare whether you use the alias or the full command more often
+#
+# Usage:
+#   usedcount dcu
+#   usedcount docker-health
+#   usedcount pgquick
+#
+# Example:
+#   usedcount dcu
+#
+# Output:
+#   dcu used 12 time(s) in shell history
+#
+# Note:
+#   This is history-based, so it is not perfect. If old history was deleted,
+#   the count will only reflect the history currently available.
+usedcount() {
+  emulate -L zsh
+
+  if [[ -z "$1" ]]; then
+    echo "Usage: usedcount <command-or-alias-name>"
+    return 1
+  fi
+
+  local name="$1"
+  local count
+
+  count=$(
+    fc -l 1 2>/dev/null \
+      | awk '{ $1=""; sub(/^ /, ""); print }' \
+      | grep -E "(^|[ ;|&])${name}([ ;|&]|$)" \
+      | wc -l \
+      | tr -d ' '
+  )
+
+  echo "$name used $count time(s) in shell history"
+}
