@@ -762,3 +762,245 @@ dloldx() {
 
   neatcli clean "$dir" --older-than "$age" --trash --execute
 }
+
+# ─────────────────────────────
+# 🐳 OrbStack / Docker Functions
+# ─────────────────────────────
+
+# Show complete OrbStack + Docker health.
+# Usage:
+#   docker-health
+docker-health() {
+  echo "== OrbStack =="
+  orb status 2>/dev/null || echo "OrbStack is not running or orb CLI is unavailable"
+
+  echo
+  echo "== OrbStack Config =="
+  orb config show | grep -E "cpu|memory_mib|rosetta|k8s.enable|docker.expose_ports_to_lan|machines.expose_ports_to_lan|mount_hide_shared|docker.set_context" 2>/dev/null
+
+  echo
+  echo "== Docker Contexts =="
+  docker context ls
+
+  echo
+  echo "== Docker CLI =="
+  which -a docker
+
+  echo
+  echo "== Docker Version =="
+  docker version
+
+  echo
+  echo "== Compose Version =="
+  docker compose version
+
+  echo
+  echo "== Running Containers =="
+  docker ps
+}
+
+# Force Docker CLI to use OrbStack.
+# Usage:
+#   docker-use-orb
+docker-use-orb() {
+  docker context use orbstack
+  docker context ls
+}
+
+# Full OrbStack restart.
+# Useful after config changes.
+# Usage:
+#   orbreload
+orbreload() {
+  orb stop && orb start
+  docker context use orbstack >/dev/null 2>&1
+  orb status
+}
+
+# Restart only OrbStack Docker engine.
+# Usage:
+#   docker-restart
+docker-restart() {
+  orb restart docker
+  docker version
+}
+
+# Open shell inside a running container.
+# Tries bash first, then sh.
+# Usage:
+#   dsh container_name
+#   dsh container_name bash
+#   dsh container_name sh
+dsh() {
+  if [[ -z "$1" ]]; then
+    echo "Usage: dsh <container-name-or-id> [bash|sh]"
+    return 1
+  fi
+
+  local container="$1"
+  local shell="${2:-}"
+
+  if [[ -n "$shell" ]]; then
+    docker exec -it "$container" "$shell"
+    return
+  fi
+
+  docker exec -it "$container" bash 2>/dev/null || docker exec -it "$container" sh
+}
+
+# Follow logs for a container.
+# Usage:
+#   dlogs container_name
+dlogs() {
+  if [[ -z "$1" ]]; then
+    echo "Usage: dlogs <container-name-or-id>"
+    return 1
+  fi
+
+  docker logs -f "$1"
+}
+
+# Show container IP address.
+# Usage:
+#   dip container_name
+dip() {
+  if [[ -z "$1" ]]; then
+    echo "Usage: dip <container-name-or-id>"
+    return 1
+  fi
+
+  docker inspect -f '{{range.NetworkSettings.Networks}}{{.IPAddress}}{{end}}' "$1"
+}
+
+# Show mapped ports for a container.
+# Usage:
+#   dports container_name
+dports() {
+  if [[ -z "$1" ]]; then
+    echo "Usage: dports <container-name-or-id>"
+    return 1
+  fi
+
+  docker port "$1"
+}
+
+# Inspect a container/image/volume/network.
+# Usage:
+#   dinspect container_name
+dinspect() {
+  if [[ -z "$1" ]]; then
+    echo "Usage: dinspect <docker-object-name-or-id>"
+    return 1
+  fi
+
+  docker inspect "$1"
+}
+
+# Remove stopped containers only.
+# Usage:
+#   docker-clean-containers
+docker-clean-containers() {
+  echo "This removes stopped containers only."
+  docker container prune
+}
+
+# Safe Docker cleanup.
+# Removes stopped containers, unused networks, dangling images, and build cache.
+# Does NOT remove volumes.
+# Usage:
+#   docker-clean-safe
+docker-clean-safe() {
+  echo "This removes:"
+  echo "- stopped containers"
+  echo "- unused networks"
+  echo "- dangling images"
+  echo "- build cache"
+  echo
+  echo "It does NOT remove Docker volumes."
+  echo
+
+  docker system prune
+}
+
+# Hard Docker cleanup.
+# WARNING: removes unused images and volumes.
+# Can delete local DB data.
+# Usage:
+#   docker-clean-hard
+docker-clean-hard() {
+  echo "WARNING:"
+  echo "This removes:"
+  echo "- stopped containers"
+  echo "- unused networks"
+  echo "- unused images"
+  echo "- build cache"
+  echo "- unused volumes"
+  echo
+  echo "This can delete local Postgres/MySQL/Redis data stored in Docker volumes."
+  echo
+
+  read "confirm?Type DELETE to continue: "
+
+  if [[ "$confirm" == "DELETE" ]]; then
+    docker system prune -a --volumes
+  else
+    echo "Cancelled."
+  fi
+}
+
+# Show Docker disk usage.
+# Usage:
+#   docker-disk
+docker-disk() {
+  docker system df -v
+}
+
+# Quick PostgreSQL container for testing.
+# Usage:
+#   pgquick
+#   pgquick 5433
+pgquick() {
+  local port="${1:-5432}"
+
+  docker run --name pgquick \
+    -e POSTGRES_DB=testdb \
+    -e POSTGRES_USER=mugilan \
+    -e POSTGRES_PASSWORD=password \
+    -p "$port:5432" \
+    -d postgres:16
+
+  echo "Postgres running:"
+  echo "Host: localhost"
+  echo "Port: $port"
+  echo "DB: testdb"
+  echo "User: mugilan"
+  echo "Password: password"
+}
+
+# Stop and remove pgquick container.
+# Usage:
+#   pgquickrm
+pgquickrm() {
+  docker rm -f pgquick
+}
+
+# Quick Redis container for testing.
+# Usage:
+#   redisquick
+#   redisquick 6380
+redisquick() {
+  local port="${1:-6379}"
+
+  docker run --name redisquick \
+    -p "$port:6379" \
+    -d redis:7
+
+  echo "Redis running on localhost:$port"
+}
+
+# Stop and remove redisquick container.
+# Usage:
+#   redisquickrm
+redisquickrm() {
+  docker rm -f redisquick
+}

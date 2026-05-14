@@ -249,3 +249,45 @@ alias tm="tmuxx"
 
 # Jump to a recent directory interactively.
 alias zz="zoxfz"
+
+# ─────────────────────────────
+# 🐳 OrbStack / Docker
+# ─────────────────────────────
+
+# OrbStack
+alias ostatus="orb status"
+alias ostart="orb start"
+alias ostop="orb stop"
+alias orestart="orb restart docker"
+alias over="orb version"
+alias oconfig="orb config show"
+
+# Docker context
+alias dctx="docker context ls"
+alias duseorb="docker context use orbstack"
+
+# Docker core
+alias dk="docker"
+alias dc="docker compose"
+
+# Docker inspect/list
+alias dps="docker ps"
+alias dpsa="docker ps -a"
+alias di="docker images"
+alias dv="docker volume ls"
+alias dn="docker network ls"
+
+# Docker Compose
+alias dcu="docker compose up -d"
+alias dcub="docker compose up -d --build"
+alias dcd="docker compose down"
+alias dcdv="docker compose down -v"
+alias dcl="docker compose logs -f"
+alias dcb="docker compose build"
+alias dcr="docker compose restart"
+alias dcps="docker compose ps"
+
+# Docker cleanup - safe shortcuts only
+alias dprune="docker system prune"
+alias dvprune="docker volume prune"
+alias dnprune="docker network prune"
