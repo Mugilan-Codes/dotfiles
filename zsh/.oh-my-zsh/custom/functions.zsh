@@ -259,18 +259,40 @@ brewsave() {
   fi
 }
 
-# Commit + push Brewfile if changed
+# Dump current Homebrew state, commit Brewfile if changed, then push dotfiles.
+#
+# Use when:
+#   - You installed/removed Homebrew packages
+#   - You want your dotfiles Brewfile synced to git remote
+#   - You want a one-command Brewfile save + push workflow
+#
+# Notes:
+#   - Runs `brewdump` first
+#   - Commits only if Brewfile changed
+#   - Does nothing if Brewfile is unchanged
+#
 # Usage:
 #   brewpush
-#   brewpush "Update Brewfile"
+#   brewpush "Update Brewfile after installing jq"
 brewpush() {
+  local repo="$HOME/dotfiles"
   local msg="${1:-Update Brewfile}"
 
-  brewsave "$msg" || return 1
+  brewdump || return 1
 
-  if [[ -d "$HOME/dotfiles/.git" ]]; then
-    git -C "$HOME/dotfiles" push
+  if [[ ! -d "$repo/.git" ]]; then
+    echo "Not a git repo: $repo"
+    return 1
   fi
+
+  if git -C "$repo" diff --quiet -- Brewfile; then
+    echo "No Brewfile changes to commit or push."
+    return 0
+  fi
+
+  git -C "$repo" add Brewfile &&
+  git -C "$repo" commit -m "$msg" &&
+  git -C "$repo" push
 }
 
 # ─────────────────────────────
@@ -301,22 +323,71 @@ gcreate() {
   git checkout -b "$1"
 }
 
-# Interactively delete merged local branches.
-# Keeps main/master and ignores the currently checked out branch.
+# Interactively delete merged local Git branches.
+#
+# Use when:
+#   - You have many old local feature branches
+#   - Branches have already been merged
+#   - You want to clean local branches safely using fzf
+#
+# What it does:
+#   - Verifies you are inside a Git repo
+#   - Fetches and prunes remote-tracking branches
+#   - Lists only merged local branches
+#   - Excludes main/master/develop/dev
+#   - Excludes the currently checked-out branch
+#   - Lets you multi-select branches with fzf
+#   - Deletes selected branches using safe `git branch -d`
+#
+# Notes:
+#   - `git branch -d` refuses to delete unmerged branches.
+#   - This does not delete remote branches.
+#
 # Usage:
 #   gclean
+#   git-clean-branches
 git-clean-branches() {
-  echo "Fetching remote..."
-  git fetch -p
+  emulate -L zsh
 
-  echo "Merged branches (excluding main/master):"
-  git branch --merged \
-    | grep -v '^\*' \
-    | grep -v '^main$' \
-    | grep -v '^master$' \
-    | sed 's/^[[:space:]]*//' \
-    | fzf -m --preview "git log --oneline {}" \
-    | xargs -I {} git branch -d "{}"
+  git rev-parse --is-inside-work-tree >/dev/null 2>&1 || {
+    echo "Not inside a git repo"
+    return 1
+  }
+
+  echo "Fetching remote..."
+  git fetch -p || return 1
+
+  local current_branch
+  current_branch=$(git branch --show-current)
+
+  local branches
+  branches=$(
+    git branch --merged \
+      | sed 's/^[*[:space:]]*//' \
+      | grep -Ev '^(main|master|develop|dev)$' \
+      | grep -vx "$current_branch" \
+      | grep -v '^$'
+  )
+
+  if [[ -z "$branches" ]]; then
+    echo "No merged branches to clean."
+    return 0
+  fi
+
+  local selected
+  selected=$(
+    print -r -- "$branches" \
+      | fzf -m --preview 'git log --oneline --decorate --graph --color=always -- {}'
+  )
+
+  [[ -z "$selected" ]] && {
+    echo "Cancelled."
+    return 0
+  }
+
+  print -r -- "$selected" | while IFS= read -r branch; do
+    git branch -d -- "$branch"
+  done
 }
 
 # ─────────────────────────────
@@ -365,18 +436,42 @@ fzf-content() {
 }
 
 # Interactive live grep using ripgrep + fzf.
-# Opens the selected file at the matching line in VS Code when possible.
+#
+# Use when:
+#   - You want to search inside files interactively
+#   - You do not know the exact file name
+#   - You want preview + line-number based opening in VS Code
+#
+# How it works:
+#   - Opens fzf first
+#   - Type your search query inside fzf
+#   - ripgrep reloads matches live
+#   - Selecting a result opens the file at the matched line
+#
+# Notes:
+#   - Alias is `fgl`, not `fg`, because `fg` is reserved for shell job control.
+#   - Requires `rg` and `fzf`.
+#   - Uses `bat` for preview if available.
+#
 # Usage:
-#   fg
-# Type your query inside fzf after it opens.
+#   fgl
+#   fglive
 fglive() {
+  local preview_cmd
+
+  if command -v bat >/dev/null 2>&1; then
+    preview_cmd='bat --style=numbers --color=always {1} --highlight-line {2}'
+  else
+    preview_cmd='sed -n "1,120p" {1}'
+  fi
+
   local result
   result=$(
-    rg --line-number --no-heading --color=always "." . 2>/dev/null \
-      | fzf --ansi \
-            --delimiter ':' \
-            --preview 'bat --style=numbers --color=always {1} --highlight-line {2}' \
-            --bind 'change:reload:rg --line-number --no-heading --color=always {q} . 2>/dev/null || true'
+    fzf --ansi \
+        --disabled \
+        --delimiter ':' \
+        --preview "$preview_cmd" \
+        --bind 'change:reload:rg --line-number --no-heading --color=always {q} . 2>/dev/null || true'
   )
 
   [[ -z "$result" ]] && return
@@ -502,15 +597,43 @@ tmuxdev() {
 # 🚀 zoxide + fzf
 # ─────────────────────────────
 
-# Jump to a recent directory using zoxide + fzf.
-# If zoxide history is empty, fall back to fd directory search.
+# Jump to a recent/frequent directory using zoxide + fzf.
+#
+# Use when:
+#   - You want to jump quickly to a project or folder
+#   - You do not want to type long paths
+#   - You want an interactive directory picker
+#
+# How it works:
+#   - Uses zoxide history first
+#   - Shows recent/frequent directories in fzf
+#   - Shows a preview:
+#       - Git log if the directory is a Git repo
+#       - Directory listing otherwise
+#   - If zoxide has no history yet, falls back to fd directory search under $HOME
+#
+# Notes:
+#   - First use: zoxide needs history. `cd` into a few folders normally first.
+#   - Alias is usually `zz`.
+#   - Requires `zoxide` and `fzf`.
+#   - Uses `fd` for fallback search.
+#   - Uses `eza` for preview if available.
+#
 # Usage:
 #   zz
-# First use: zoxide needs some history. Just `cd` into a few directories first.
+#   zoxfz
 zoxfz() {
   local dir
+  local first
 
-  if [[ -z "$(zoxide query -l 1 2>/dev/null)" ]]; then
+  if ! command -v zoxide >/dev/null 2>&1; then
+    echo "zoxide not found"
+    return 1
+  fi
+
+  first=$(zoxide query -l 2>/dev/null | head -n 1)
+
+  if [[ -z "$first" ]]; then
     echo "No zoxide history yet. Falling back to fd directory search..."
     dir=$(command fd --type d --hidden --exclude .git . "$HOME" 2>/dev/null | fzf --prompt="jump ▶ ")
     [[ -n "$dir" ]] && cd "$dir"
@@ -522,9 +645,9 @@ zoxfz() {
       | fzf --prompt="jump ▶ " \
             --preview='
               if [ -d "{}/.git" ]; then
-                git -C {} --no-pager log --oneline --decorate --graph -10
+                git -C "{}" --no-pager log --oneline --decorate --graph -10
               else
-                eza -1 --icons --color=always {} | head -40
+                eza -1 --icons --color=always "{}" | head -40
               fi
             '
   )
@@ -720,8 +843,12 @@ cleanfluttercache() {
 
   echo "Cleaning Flutter and simulator caches..."
   flutter clean 2>/dev/null || true
-  rm -rf ~/Library/Developer/CoreSimulator/Caches/*
-  rm -rf ~/.dartServer/
+
+  local sim_cache="$HOME/Library/Developer/CoreSimulator/Caches"
+  [[ -d "$sim_cache" ]] && find "$sim_cache" -mindepth 1 -maxdepth 1 -exec rm -rf {} +
+
+  rm -rf "$HOME/.dartServer"
+
   echo "Done."
 }
 

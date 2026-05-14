@@ -264,8 +264,10 @@ alias searchf="fzf-content"
 # Open or create today's work log.
 alias journal="dailylog"
 
-# Interactive live grep.
-alias fg="fglive"
+# Interactive live grep using ripgrep + fzf.
+# Keeps `fg` free for zsh job control.
+# Function is defined in functions.zsh.
+alias fgl="fglive"
 
 # ─────────────────────────────
 # 📋 Taskwarrior
