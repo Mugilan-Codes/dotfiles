@@ -69,6 +69,7 @@ alias fdhere="finder"
 # ─────────────────────────────
 
 # Use FVM-managed Flutter and Dart by default.
+# fdart avoids shadowing the real `fd` file-search command.
 alias f="fvm flutter"
 alias fdart="fvm dart"
 
@@ -101,6 +102,7 @@ alias flog="f logs"
 alias rnwifi='adb kill-server && adb tcpip 5555 && adb connect 192.168.0.105:5555 && adb devices'
 
 # Aggressively reset a React Native project after confirmation.
+# Deletes node_modules, reinstalls dependencies, and resets Metro cache.
 # Function is defined in functions.zsh.
 
 # ─────────────────────────────
@@ -127,6 +129,7 @@ alias ptest="pn test"
 
 # Personal git shortcuts.
 # Oh My Zsh already provides many git aliases, so keep this small.
+# ga stages every changed file in the current repo; review with `git status` first.
 alias ga="git add ."
 alias gnew="git checkout -b"
 
@@ -158,6 +161,7 @@ alias publicip='curl -fsSL ifconfig.me && echo'
 alias dnslist='scutil --dns | grep "nameserver\[[0-9]*\]"'
 
 # Flush DNS cache on macOS.
+# Requires sudo and restarts the mDNSResponder service.
 alias flushdns='sudo dscacheutil -flushcache; sudo killall -HUP mDNSResponder'
 
 # Ping Google DNS quickly for connectivity test.
@@ -213,7 +217,7 @@ alias nsim="neatcli similar ~/Downloads"
 
 # Execute versions.
 # These route through confirmed workflows in functions.zsh.
-# ncleanold previews old-file cleanup.
+# ncleanold previews old-file cleanup without moving files.
 alias ndlx="dlcleanx"
 alias ncleanold="neatcli clean ~/Downloads --older-than 30d"
 alias ncleanoldx="dloldx"
@@ -232,6 +236,7 @@ alias dloldgo="dloldx"      # Delete old files (moves to Trash)
 # ─────────────────────────────
 
 # Fast jumps to your common project folders.
+# These are machine-specific paths for this Mac.
 alias cdp="cd ~/Projects"
 alias cdw="cd ~/dev/work/vzlabs"
 alias cdapp="cd ~/Projects/Work/appverse-mobileapp"
@@ -241,6 +246,7 @@ alias cdapp="cd ~/Projects/Work/appverse-mobileapp"
 # ─────────────────────────────
 
 # Download best available MP4 video + M4A audio where possible.
+# Use only for media you have rights to download.
 alias ytdownload='yt-dlp -f "bv*[ext=mp4]+ba[ext=m4a]/b[ext=mp4]/bv*+ba/b"'
 
 # ─────────────────────────────
@@ -342,9 +348,9 @@ alias dcr="docker compose restart"
 alias dcps="docker compose ps"
 
 # Docker cleanup.
-# dprune  = safe-ish cleanup; does NOT remove volumes by default
-# dnprune = remove unused networks
-# dvprune = remove unused volumes after confirmation
+# dprune  = removes stopped containers, unused networks, dangling images, and cache
+# dnprune = removes unused networks
+# dvprune = removes unused volumes after confirmation
 alias dprune="docker system prune"
 alias dvprune="docker-volume-prune"
 alias dnprune="docker network prune"

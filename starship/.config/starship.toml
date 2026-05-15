@@ -6,7 +6,7 @@
 success_symbol = "[➜](bold green) "
 error_symbol = "[✗](bold red) "
 
-# Disables dart module until fvm version can be used 
+# Disable Dart module until Starship can use the FVM-managed version.
 [dart]
 disabled = true
 

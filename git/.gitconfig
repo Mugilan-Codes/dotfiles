@@ -66,17 +66,18 @@
 # 🔁 Aliases
 # ───────────────────────────────
 [alias]
-		# 🧹 Delete merged branches safely (defaults to main)
-		bclean = "!f() { base=${1-main}; git branch --merged \"$base\" --format='%(refname:short)' | grep -Ev \"^($base|main|master|develop|dev)$\" | grep -v '^$' | xargs -r git branch -d; }; f"
+	# 🧹 Delete merged local branches safely with git branch -d (defaults to main)
+	bclean = "!f() { base=${1-main}; git branch --merged \"$base\" --format='%(refname:short)' | grep -Ev \"^($base|main|master|develop|dev)$\" | grep -v '^$' | xargs -r git branch -d; }; f"
 
 	# 🆕 Show new commits added by last pull (e.g., git new HEAD)
 	new = !sh -c 'git log $1@{1}..$1@{0} "$@"'
 
 	# 🔃 Delete all local tags and fetch fresh ones
+	# Warning: removes every local tag before fetching from remote.
 	new-tags = "!f() { git tag -l | xargs -r git tag -d; git fetch --tags; }; f"
 
-		# 🧼 Prune gone local branches safely
-		prune-local = "!git branch -vv | grep ': gone]' | awk '{print $1}' | xargs -r git branch -d"
+	# 🧼 Delete gone local branches safely with git branch -d
+	prune-local = "!git branch -vv | grep ': gone]' | awk '{print $1}' | xargs -r git branch -d"
 
 	# 🔄 Create local branches for all remote branches
 	track-all-remote = "!for branch in $(git branch -r | grep -v \"\\->\"); do local_branch=$(echo $branch | sed \"s/origin\\///\"); if ! git show-ref --verify --quiet refs/heads/$local_branch; then git branch --track $local_branch $branch; fi; done"
@@ -102,10 +103,11 @@
 	# 📝 Commit with diff preview
 	cm = commit -v
 
-	# 🔥 Delete remote branch
+	# 🔥 Delete a remote branch from origin
+	# Warning: removes the branch on the remote.
 	rbd = "!f() { git push origin --delete \"$@\"; }; f"
 
-	# ⏪ Undo last commit but keep changes
+	# ⏪ Undo last commit but keep changes staged/available locally
 	undo = reset --soft HEAD^
 
 	# 🔍 Show staged vs last commit diff
@@ -152,8 +154,8 @@
 	# 🕒 View commit history with timestamps
 	timeline = reflog --date=local --pretty="%C(yellow)%h%Creset %ad - %gs"
 
-	# ⛔ Abort any in-progress Git operation
-	abort = "!f() { \
+	# ⛔ Abort any in-progress merge, rebase, or cherry-pick
+		abort = "!f() { \
 	  git merge --abort 2>/dev/null || true; \
 	  git rebase --abort 2>/dev/null || true; \
 	  git cherry-pick --abort 2>/dev/null || true; \
@@ -163,7 +165,7 @@
 	# ⬇️ Checkout PR by number
 	pr = "!f() { gh pr checkout \"$1\"; }; f"
 
-		# auto-delete merged local pr-* branches after merge
-		clean-prs = "!git branch --list 'pr-*' --format='%(refname:short)' | xargs -r git branch -d"
+	# auto-delete merged local pr-* branches after merge
+	clean-prs = "!git branch --list 'pr-*' --format='%(refname:short)' | xargs -r git branch -d"
 
 	hist-fzf = "!git log --oneline | fzf --preview 'git show --color=always {1}'"

@@ -7,6 +7,7 @@
 # ─────────────────────────────
 
 # Kill all processes listening on a given TCP port.
+# Use when a local dev server is stuck on a port.
 # Usage:
 #   killport 3000
 killport() {
@@ -28,7 +29,7 @@ killport() {
 }
 
 # Force-kill all processes listening on a given TCP port.
-# Use only if normal killport does not work.
+# Sends SIGKILL; use only if normal killport does not work.
 # Usage:
 #   killportf 3000
 killportf() {
@@ -103,6 +104,7 @@ servehere() {
 
 # Restart macOS Core Audio daemon.
 # Useful if audio gets stuck or devices behave oddly.
+# Requires sudo and kills the Core Audio daemon so macOS can restart it.
 # Usage:
 #   fixaudio
 fixaudio() {
@@ -112,6 +114,7 @@ fixaudio() {
 
 # Fix npm global permissions for the active npm prefix.
 # Useful if global installs fail due to ownership issues.
+# Warning: uses sudo chown -R on npm global install directories.
 # Usage:
 #   fixperm
 fixperm() {
@@ -207,6 +210,7 @@ finder() {
 
 # Dump current Homebrew state into the dotfiles Brewfile.
 # Shows diff only if Brewfile changed.
+# Overwrites the tracked Brewfile with the current machine's Homebrew state.
 # Usage:
 #   brewdump
 brewdump() {
@@ -267,6 +271,7 @@ brewuntap() {
 }
 
 # Dump Brewfile and commit it if changed.
+# Changes Git history in this dotfiles repo by creating a commit.
 # Usage:
 #   brewsave
 #   brewsave "Update Brewfile after installing jq"
@@ -325,6 +330,7 @@ brewpush() {
 # ─────────────────────────────
 
 # Add, commit, and push current HEAD quickly.
+# Warning: runs `git add .`, commits, and pushes the current branch.
 # Usage:
 #   gcommit "feat: add login validation"
 gcommit() {
@@ -921,6 +927,7 @@ cleanmac() {
 }
 
 # Homebrew cleanup.
+# Removes unused dependencies and old Homebrew downloads.
 # Usage:
 #   cleanbrew
 cleanbrew() {
@@ -937,6 +944,7 @@ cleannpm() {
 }
 
 # Yarn cache cleanup.
+# Deletes Yarn's package cache; installs may need to re-download packages.
 # Usage:
 #   cleanyarn
 cleanyarn() {
@@ -1031,6 +1039,7 @@ cleanderived() {
 # ─────────────────────────────
 
 # Generate neatCLI zsh completions.
+# Writes ~/.zfunc/_neatcli and reloads completions.
 # Usage:
 #   neatcomp
 neatcomp() {
@@ -1050,6 +1059,7 @@ neatpreview() {
 }
 
 # Execute organizing any folder by type.
+# Moves files according to neatCLI's organization rules after confirmation.
 # Usage:
 #   neatexec ~/Downloads
 neatexec() {
@@ -1077,6 +1087,7 @@ neatdups() {
 }
 
 # Trash duplicate files after confirmation.
+# Moves detected duplicates to Trash using neatCLI.
 # Usage:
 #   neatdupsx ~/Downloads
 neatdupsx() {
@@ -1103,6 +1114,7 @@ neatphotos() {
 }
 
 # Execute photo organization by EXIF date taken.
+# Moves photo files according to neatCLI's date-taken rules after confirmation.
 # Usage:
 #   neatphotosx ~/Pictures
 neatphotosx() {
@@ -1156,6 +1168,7 @@ dlclean() {
 }
 
 # Execute Downloads organization safely.
+# Moves files in ~/Downloads by type after confirmation.
 # Usage:
 #   dlcleanx
 dlcleanx() {
@@ -1192,6 +1205,7 @@ dlold() {
 }
 
 # Execute old Downloads cleanup.
+# Moves old files from ~/Downloads to Trash after confirmation.
 # Usage:
 #   dloldx
 #   dloldx 60d
@@ -1217,6 +1231,7 @@ dloldx() {
 # ─────────────────────────────
 
 # Show complete OrbStack + Docker health.
+# Use when Docker commands behave oddly or context/version looks wrong.
 # Usage:
 #   docker-health
 docker-health() {
@@ -1258,6 +1273,7 @@ docker-use-orb() {
 
 # Full OrbStack restart.
 # Useful after config changes.
+# Stops and starts OrbStack, then restores the Docker context.
 # Usage:
 #   orbreload
 orbreload() {
@@ -1267,6 +1283,7 @@ orbreload() {
 }
 
 # Restart only OrbStack Docker engine.
+# Use when containers/compose are stuck but OrbStack itself is fine.
 # Usage:
 #   docker-restart
 docker-restart() {
@@ -1394,6 +1411,7 @@ dinspect() {
 }
 
 # Remove stopped containers only.
+# Docker asks for confirmation before pruning.
 # Usage:
 #   docker-clean-containers
 docker-clean-containers() {
@@ -1404,6 +1422,7 @@ docker-clean-containers() {
 # Safe Docker cleanup.
 # Removes stopped containers, unused networks, dangling images, and build cache.
 # Does NOT remove volumes.
+# Docker asks for confirmation before pruning.
 # Usage:
 #   docker-clean-safe
 docker-clean-safe() {
@@ -1496,6 +1515,8 @@ pgquick() {
 # Use when:
 #   - You are done testing
 #   - You want to recreate pgquick cleanly
+# Warning:
+#   Force-removes the fixed `pgquick` container if it exists.
 #
 # Usage:
 #   pgquickrm
@@ -1528,6 +1549,9 @@ redisquick() {
 }
 
 # Stop and remove the temporary redisquick Redis container.
+#
+# Warning:
+#   Force-removes the fixed `redisquick` container if it exists.
 #
 # Usage:
 #   redisquickrm
