@@ -28,7 +28,7 @@ alias completions="code ~/.oh-my-zsh/custom/completions.zsh"
 
 # Print PATH entries line-by-line for debugging command resolution.
 # Use when `which -a <command>` shows unexpected binaries.
-alias path='echo $PATH | tr ":" "\n"'
+alias showpath='echo $PATH | tr ":" "\n"'
 
 # Homebrew + Brewfile helpers.
 # Functions are defined in functions.zsh.
@@ -70,12 +70,7 @@ alias fdhere="finder"
 
 # Use FVM-managed Flutter and Dart by default.
 alias f="fvm flutter"
-
-# NOTE:
-# This intentionally makes `fd` mean "fvm dart".
-# Since this conflicts with the popular `fd` file-search binary,
-# use the `fdf` function when you want the real fd command.
-alias fd="fvm dart"
+alias fdart="fvm dart"
 
 # Direct local project Flutter binary.
 # Use only inside a repo that contains .fvm/flutter_sdk.
@@ -105,13 +100,8 @@ alias flog="f logs"
 # Use after connecting device by USB at least once and enabling adb tcpip.
 alias rnwifi='adb kill-server && adb tcpip 5555 && adb connect 192.168.0.105:5555 && adb devices'
 
-# Aggressively reset a React Native project.
-# WARNING:
-# - Deletes node_modules
-# - Reinstalls dependencies
-# - Resets Metro cache
-# Use only when normal reinstall/cache reset does not fix the issue.
-alias rnreset='watchman watch-del-all && rm -rf node_modules && npm install && npm start -- --reset-cache'
+# Aggressively reset a React Native project after confirmation.
+# Function is defined in functions.zsh.
 
 # ─────────────────────────────
 # 🧰 Node / PNPM / Dev
@@ -186,7 +176,7 @@ alias serve="python3 -m http.server 8080"
 # Update all Homebrew formulae/casks and clean old versions.
 # Use occasionally, not blindly before important work.
 # This can upgrade tools and sometimes introduce version changes.
-alias update="brew update && brew upgrade && brew autoremove && brew cleanup -s"
+alias brewup="brew update && brew upgrade && brew autoremove && brew cleanup -s"
 
 # Quick CPU / RAM inspection.
 alias topmem="ps aux | sort -nr -k 4 | head -15"
@@ -222,13 +212,11 @@ alias ndups="neatcli duplicates ~/Downloads"
 alias nsim="neatcli similar ~/Downloads"
 
 # Execute versions.
-# ndlx reorganizes Downloads immediately.
+# These route through confirmed workflows in functions.zsh.
 # ncleanold previews old-file cleanup.
-# ncleanoldx moves old files to Trash immediately.
-# Safer confirmed workflows are available below as: dlgo and dloldgo.
-alias ndlx="neatcli organize ~/Downloads --by-type --execute"
+alias ndlx="dlcleanx"
 alias ncleanold="neatcli clean ~/Downloads --older-than 30d"
-alias ncleanoldx="neatcli clean ~/Downloads --older-than 30d --trash --execute"
+alias ncleanoldx="dloldx"
 
 # ─────────────────────────────
 # 🧹 neatCLI Downloads Workflow
@@ -337,21 +325,16 @@ alias dv="docker volume ls"
 alias dn="docker network ls"
 
 # Docker Compose workflow.
-# dcu  = start services in background
-# dcub = rebuild images and start services
-# dcd  = stop/remove compose containers, keeps volumes
-# dcdv = stop/remove compose containers AND volumes
+# dcu   = start services in background
+# dcub  = rebuild images and start services
+# dcd   = stop/remove compose containers, keeps volumes
+# dcdv  = stop/remove compose containers AND volumes after confirmation
 # dcl  = follow compose logs
 # dcps = show compose services in current project
 alias dcu="docker compose up -d"
 alias dcub="docker compose up -d --build"
 alias dcd="docker compose down"
-
-# WARNING:
-# Deletes Compose volumes for the current project.
-# This can delete local Postgres/MySQL/Redis data for that project.
-# Use only when you want a clean database reset.
-alias dcdv="docker compose down -v"
+alias dcdv="docker-compose-down-volumes"
 
 alias dcl="docker compose logs -f"
 alias dcb="docker compose build"
@@ -361,12 +344,7 @@ alias dcps="docker compose ps"
 # Docker cleanup.
 # dprune  = safe-ish cleanup; does NOT remove volumes by default
 # dnprune = remove unused networks
-# dvprune = remove unused volumes; be careful with database data
+# dvprune = remove unused volumes after confirmation
 alias dprune="docker system prune"
-
-# WARNING:
-# Removes unused Docker volumes.
-# Volumes often contain database data.
-alias dvprune="docker volume prune"
-
+alias dvprune="docker-volume-prune"
 alias dnprune="docker network prune"

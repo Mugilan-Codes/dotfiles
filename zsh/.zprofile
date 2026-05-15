@@ -1,28 +1,3 @@
-# # ─────────────────────────────────────────────
-# # ✅ Login shell-specific config
-# # Loaded on login shells (first Terminal tab, SSH, etc.)
-# # ─────────────────────────────────────────────
-
-# # ─ Homebrew (Apple Silicon) ─
-# eval "$(/opt/homebrew/bin/brew shellenv)"
-
-# # ─ JetBrains Toolbox CLI scripts ─
-# export PATH="$PATH:$HOME/Library/Application Support/JetBrains/Toolbox/scripts"
-
-# # # ─ Amazon Q (if installed) ─
-# # for qfile in \
-# #   "$HOME/Library/Application Support/amazon-q/shell/zprofile.pre.zsh" \
-# #   "$HOME/Library/Application Support/amazon-q/shell/zprofile.post.zsh"
-# # do
-# #   [[ -f "$qfile" ]] && source "$qfile"
-# # done
-
-# # Added by OrbStack: command-line tools and integration
-# # This won't be added again if you remove it.
-# source ~/.orbstack/shell/init.zsh 2>/dev/null || :
-
-# ====== REMOVE ABOVE LINES ======
-
 # ~/.zprofile
 # Loaded for login shells.
 # Use this file for session-wide PATH and toolchain setup.

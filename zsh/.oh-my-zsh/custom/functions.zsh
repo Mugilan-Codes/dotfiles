@@ -132,7 +132,7 @@ fixperm() {
 
 # Find files/directories using the real `fd` binary.
 # Includes hidden files and skips .git by default.
-# This avoids conflict with your alias: fd="fvm dart"
+# This uses the real fd command directly.
 # Usage:
 #   fdf
 #   fdf package
@@ -140,6 +140,31 @@ fixperm() {
 #   fdf -t d
 fdf() {
   command fd --hidden --exclude .git "$@"
+}
+
+# Aggressively reset a React Native project after confirmation.
+#
+# Warning:
+#   Deletes node_modules, reinstalls dependencies, and resets Metro cache.
+#
+# Usage:
+#   rnreset
+rnreset() {
+  echo "WARNING: This will reset the current React Native project."
+  echo "It will delete node_modules, reinstall dependencies, and reset Metro cache."
+  echo
+
+  read "confirm?Type RNRESET to continue: "
+
+  if [[ "$confirm" != "RNRESET" ]]; then
+    echo "Cancelled."
+    return 1
+  fi
+
+  watchman watch-del-all &&
+  rm -rf node_modules &&
+  npm install &&
+  npm start -- --reset-cache
 }
 
 # Fuzzy-pick a directory under the current path and cd into it.
@@ -1029,6 +1054,16 @@ neatpreview() {
 #   neatexec ~/Downloads
 neatexec() {
   local dir="${1:-.}"
+  echo "This will organize: $dir"
+  echo
+
+  read "confirm?Type YES to continue: "
+
+  if [[ "$confirm" != "YES" ]]; then
+    echo "Cancelled."
+    return 1
+  fi
+
   neatcli organize "$dir" --by-type --execute
 }
 
@@ -1046,6 +1081,16 @@ neatdups() {
 #   neatdupsx ~/Downloads
 neatdupsx() {
   local dir="${1:-.}"
+  echo "This will move duplicate files in $dir to Trash."
+  echo
+
+  read "confirm?Type YES to continue: "
+
+  if [[ "$confirm" != "YES" ]]; then
+    echo "Cancelled."
+    return 1
+  fi
+
   neatcli duplicates "$dir" --delete --trash --execute
 }
 
@@ -1062,6 +1107,16 @@ neatphotos() {
 #   neatphotosx ~/Pictures
 neatphotosx() {
   local dir="${1:-.}"
+  echo "This will organize photos in $dir by EXIF date taken."
+  echo
+
+  read "confirm?Type YES to continue: "
+
+  if [[ "$confirm" != "YES" ]]; then
+    echo "Cancelled."
+    return 1
+  fi
+
   neatcli organize "$dir" --by-date-taken --execute
 }
 
@@ -1217,6 +1272,54 @@ orbreload() {
 docker-restart() {
   orb restart docker
   docker version
+}
+
+# Stop/remove Docker Compose containers and volumes after confirmation.
+#
+# Warning:
+#   This can delete local Postgres/MySQL/Redis data for the current project.
+#
+# Usage:
+#   dcdv
+#   docker-compose-down-volumes
+docker-compose-down-volumes() {
+  echo "WARNING: This will run docker compose down -v in:"
+  pwd
+  echo
+  echo "Compose volumes often contain local database data."
+  echo
+
+  read "confirm?Type VOLUMES to continue: "
+
+  if [[ "$confirm" != "VOLUMES" ]]; then
+    echo "Cancelled."
+    return 1
+  fi
+
+  docker compose down -v
+}
+
+# Remove unused Docker volumes after confirmation.
+#
+# Warning:
+#   Volumes often contain database data.
+#
+# Usage:
+#   dvprune
+#   docker-volume-prune
+docker-volume-prune() {
+  echo "WARNING: This will remove unused Docker volumes."
+  echo "Volumes often contain local database data."
+  echo
+
+  read "confirm?Type VOLUMES to continue: "
+
+  if [[ "$confirm" != "VOLUMES" ]]; then
+    echo "Cancelled."
+    return 1
+  fi
+
+  docker volume prune
 }
 
 # Open shell inside a running container.
