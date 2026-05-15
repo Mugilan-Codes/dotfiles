@@ -173,6 +173,8 @@ gmsg       # generate commit message from staged changes
 gci        # generate message and commit after confirmation
 gcai       # alias for gci
 gclean     # interactively delete merged local branches
+gwtc       # create a Git worktree for a branch
+gwtl       # list Git worktrees
 git lg     # graph log
 git ds     # staged diff
 git save "message"  # stash with a message
@@ -184,6 +186,8 @@ git save "message"  # stash with a message
 brewadd jq        # install and refresh Brewfile
 brewrm jq         # uninstall and refresh Brewfile
 bdump             # refresh Brewfile
+brewcheck         # verify installed packages match Brewfile
+brewoutdated      # preview outdated Homebrew packages
 bsave             # refresh and commit Brewfile if changed
 bpush             # refresh, commit, and push Brewfile if changed
 brewup            # update/upgrade/cleanup Homebrew packages
@@ -225,6 +229,9 @@ aliases           # edit aliases
 zfunctions        # edit functions
 completions       # edit completions
 showpath          # print PATH one entry per line
+dotdoctor         # check core tools and stowed config links
+dotlinks          # find broken symlinks under $HOME
+dotstow           # re-stow dotfiles after confirmation
 reload            # reload Oh My Zsh
 rz                # restart zsh
 rzl               # restart login zsh
@@ -248,6 +255,13 @@ brewrm jq
 
 ```bash
 bdump
+```
+
+### Verify Brewfile
+
+```bash
+brewcheck
+brewoutdated
 ```
 
 ### Save to git
@@ -288,6 +302,7 @@ Use `rzl` after changing login-shell setup like PATH entries in `.zprofile`.
 - `gcommit` runs `git add .`, commits, and pushes; prefer staged workflows with `gmsg` / `gci` when you need review
 - Docker volume cleanup can delete local database data
 - `brewup` can upgrade many tools at once
+- `dotstow` updates home-directory symlinks and asks for confirmation first
 
 ---
 

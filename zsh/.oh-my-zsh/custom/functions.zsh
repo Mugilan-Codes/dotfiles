@@ -325,6 +325,118 @@ brewpush() {
   git -C "$repo" push
 }
 
+# Check whether installed Homebrew packages match the tracked Brewfile.
+# Use before or after setup to verify this Mac is reproducible from Brewfile.
+# Usage:
+#   brewcheck
+brewcheck() {
+  local file="$HOME/dotfiles/Brewfile"
+
+  command -v brew >/dev/null 2>&1 || { echo "brew not found"; return 1; }
+
+  if [[ ! -f "$file" ]]; then
+    echo "Brewfile not found: $file"
+    return 1
+  fi
+
+  brew bundle check --file="$file"
+}
+
+# Show outdated Homebrew formulae and casks without upgrading anything.
+# Use before brewup when you want to preview what would change.
+# Usage:
+#   brewoutdated
+brewoutdated() {
+  command -v brew >/dev/null 2>&1 || { echo "brew not found"; return 1; }
+  brew outdated --greedy
+}
+
+# Re-stow this dotfiles repo after confirmation.
+#
+# Warning:
+#   This updates symlinks for zsh, tmux, git, and starship in your home directory.
+#
+# Usage:
+#   dotstow
+dotstow() {
+  local repo="$HOME/dotfiles"
+  local packages=(zsh tmux git starship)
+
+  command -v stow >/dev/null 2>&1 || { echo "stow not found"; return 1; }
+
+  if [[ ! -d "$repo" ]]; then
+    echo "Dotfiles repo not found: $repo"
+    return 1
+  fi
+
+  echo "This will re-stow packages from: $repo"
+  echo "Packages: ${packages[*]}"
+  echo
+
+  read "confirm?Type STOW to continue: "
+
+  if [[ "$confirm" != "STOW" ]]; then
+    echo "Cancelled."
+    return 1
+  fi
+
+  (cd "$repo" && stow --restow "${packages[@]}")
+}
+
+# Find broken symlinks under your home directory.
+# Use after moving files or re-stowing dotfiles.
+# Usage:
+#   dotlinks
+dotlinks() {
+  find "$HOME" -maxdepth 4 -type l ! -exec test -e {} \; -print 2>/dev/null
+}
+
+# Check core dotfiles tools and expected stowed config links.
+# Use after setup or when shell tooling behaves unexpectedly.
+# Usage:
+#   dotdoctor
+dotdoctor() {
+  local repo="$HOME/dotfiles"
+  local missing=0
+  local cmd
+
+  echo "== Required commands =="
+  for cmd in brew stow git zsh tmux starship fzf fd rg zoxide fnm eza code; do
+    if command -v "$cmd" >/dev/null 2>&1; then
+      echo "ok: $cmd"
+    else
+      echo "missing: $cmd"
+      missing=1
+    fi
+  done
+
+  echo
+  echo "== Dotfiles repo =="
+  if [[ -d "$repo/.git" ]]; then
+    echo "ok: $repo"
+  else
+    echo "missing: $repo"
+    missing=1
+  fi
+
+  echo
+  echo "== Expected symlinks =="
+  local link
+  for link in "$HOME/.zshrc" "$HOME/.gitconfig" "$HOME/.tmux.conf" "$HOME/.config/starship.toml"; do
+    if [[ -L "$link" ]]; then
+      echo "ok: $link -> $(readlink "$link")"
+    elif [[ -e "$link" ]]; then
+      echo "not symlink: $link"
+      missing=1
+    else
+      echo "missing: $link"
+      missing=1
+    fi
+  done
+
+  return "$missing"
+}
+
 # ─────────────────────────────
 # 🔧 Git Helpers
 # ─────────────────────────────
@@ -529,6 +641,49 @@ git-clean-branches() {
   print -r -- "$selected" | while IFS= read -r branch; do
     git branch -d -- "$branch"
   done
+}
+
+# Create a Git worktree for a branch under ../<repo>-<branch>.
+# Use when you need to work on another branch without disturbing this checkout.
+# Usage:
+#   gwtc feature/login
+#   gwtc feature/login ../login-work
+gwtc() {
+  emulate -L zsh
+
+  if [[ -z "$1" ]]; then
+    echo "Usage: gwtc <branch> [path]"
+    return 1
+  fi
+
+  git rev-parse --is-inside-work-tree >/dev/null 2>&1 || {
+    echo "Not inside a git repo"
+    return 1
+  }
+
+  local branch="$1"
+  local repo_name
+  local safe_branch
+  local path
+
+  repo_name=$(basename "$(git rev-parse --show-toplevel)")
+  safe_branch="${branch//\//-}"
+  path="${2:-../${repo_name}-${safe_branch}}"
+
+  git worktree add "$path" "$branch"
+}
+
+# List Git worktrees with paths, branches, and HEAD commits.
+# Use before switching context or cleaning old worktrees.
+# Usage:
+#   gwtl
+gwtl() {
+  git rev-parse --is-inside-work-tree >/dev/null 2>&1 || {
+    echo "Not inside a git repo"
+    return 1
+  }
+
+  git worktree list
 }
 
 # ─────────────────────────────
