@@ -323,6 +323,116 @@ gcreate() {
   git checkout -b "$1"
 }
 
+# Generate a Conventional Commit message from staged Git changes.
+# Uses Codex in read-only mode and prints only the message on success.
+# Usage:
+#   git add <files>
+#   gmsg
+gmsg() {
+  emulate -L zsh
+
+  git rev-parse --is-inside-work-tree >/dev/null 2>&1 || {
+    echo "Not inside a git repo" >&2
+    return 1
+  }
+
+  git diff --cached --quiet --exit-code && {
+    echo "No staged changes found. Stage files first with: git add <files>" >&2
+    return 1
+  }
+
+  command -v codex >/dev/null 2>&1 || {
+    echo "codex CLI not found" >&2
+    return 1
+  }
+
+  local repo_root
+  local msg_file
+  local message
+  local prompt
+
+  repo_root=$(git rev-parse --show-toplevel) || return 1
+  msg_file=$(mktemp "${TMPDIR:-/tmp}/gmsg.XXXXXX") || return 1
+
+  prompt='Generate a Git commit message for the staged changes only.
+
+Requirements:
+- Inspect only staged changes. Use `git diff --cached` and related staged-only commands.
+- Do not inspect unstaged changes.
+- Do not modify files.
+- Follow Conventional Commits.
+- Keep the summary line at 72 characters or fewer.
+- Add a body only if it is useful.
+- Return only the commit message text.
+- Do not wrap the message in Markdown fences or quotes.'
+
+  {
+    codex exec --sandbox read-only --ephemeral --cd "$repo_root" --output-last-message "$msg_file" "$prompt" >/dev/null || {
+      echo "Failed to generate commit message with codex" >&2
+      return 1
+    }
+
+    message=$(awk '
+      NF { seen = 1 }
+      seen { lines[++n] = $0 }
+      END {
+        while (n && lines[n] == "") n--
+        for (i = 1; i <= n; i++) print lines[i]
+      }
+    ' "$msg_file")
+
+    if [[ -z "$message" ]]; then
+      echo "Generated commit message was empty." >&2
+      return 1
+    fi
+
+    print -r -- "$message"
+  } always {
+    rm -f "$msg_file"
+  }
+}
+
+# Generate a commit message with gmsg, show it, and commit only after confirmation.
+# Uses `git commit -F` so multi-line messages are preserved.
+# Usage:
+#   git add <files>
+#   gci
+gci() {
+  emulate -L zsh
+
+  local msg_file
+  local reply
+
+  msg_file=$(mktemp "${TMPDIR:-/tmp}/gci.XXXXXX") || return 1
+  {
+    gmsg > "$msg_file" || return 1
+
+    if [[ ! -s "$msg_file" ]]; then
+      echo "Generated commit message was empty." >&2
+      return 1
+    fi
+
+    echo "Generated commit message:"
+    echo
+    cat "$msg_file"
+    echo
+
+    read "reply?Commit with this message? [y/N] "
+    case "$reply" in
+      [yY]|[yY][eE][sS])
+        git commit -F "$msg_file"
+        return $?
+        ;;
+      *)
+        echo "Commit cancelled."
+        return 0
+        ;;
+    esac
+  } always {
+    rm -f "$msg_file"
+  }
+}
+
 # Interactively delete merged local Git branches.
 #
 # Use when:

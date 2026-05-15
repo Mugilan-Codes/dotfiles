@@ -140,6 +140,10 @@ alias ptest="pn test"
 alias ga="git add ."
 alias gnew="git checkout -b"
 
+# AI-assisted commit helper.
+# Function is defined in functions.zsh.
+alias gcai="gci"
+
 # Interactive merged-branch cleanup helper.
 # Function is defined in functions.zsh.
 alias gclean="git-clean-branches"

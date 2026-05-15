@@ -161,6 +161,14 @@ sessionize
 tmuxdev
 ```
 
+### Git commands
+
+```bash
+gmsg
+gci
+gcai
+```
+
 ### System
 
 ```bash
