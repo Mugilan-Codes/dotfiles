@@ -399,14 +399,26 @@ dotdoctor() {
   local repo="$HOME/dotfiles"
   local missing=0
   local cmd
+  local required=(brew stow git zsh tmux starship fzf fd rg zoxide)
+  local optional=(fnm eza code)
 
   echo "== Required commands =="
-  for cmd in brew stow git zsh tmux starship fzf fd rg zoxide fnm eza code; do
+  for cmd in "${required[@]}"; do
     if command -v "$cmd" >/dev/null 2>&1; then
       echo "ok: $cmd"
     else
       echo "missing: $cmd"
       missing=1
+    fi
+  done
+
+  echo
+  echo "== Optional commands =="
+  for cmd in "${optional[@]}"; do
+    if command -v "$cmd" >/dev/null 2>&1; then
+      echo "ok: $cmd"
+    else
+      echo "optional missing: $cmd"
     fi
   done
 
@@ -670,7 +682,12 @@ gwtc() {
   safe_branch="${branch//\//-}"
   path="${2:-../${repo_name}-${safe_branch}}"
 
-  git worktree add "$path" "$branch"
+  if [[ -e "$path" ]]; then
+    echo "Worktree path already exists: $path"
+    return 1
+  fi
+
+  git worktree add "$path" "$branch" && echo "Worktree created: $path"
 }
 
 # List Git worktrees with paths, branches, and HEAD commits.
