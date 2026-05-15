@@ -86,7 +86,7 @@ brew install git
 ### 3. Clone this repo
 
 ```bash
-git clone https://github.com/<your-username>/dotfiles.git ~/dotfiles
+git clone git@github.com:Mugilan-Codes/dotfiles.git ~/dotfiles
 cd ~/dotfiles
 ```
 
@@ -146,6 +146,8 @@ exec zsh
 zz        # jump to recent/frequent directories
 cdf       # fuzzy-pick a directory under the current path
 finder    # cd into the frontmost Finder window
+finderopen # open current directory in Finder
+cpwd      # copy current directory path
 cdp       # jump to ~/Projects
 ```
 
@@ -156,6 +158,14 @@ fdf       # real fd file search
 fo        # fuzzy-open a file
 searchf   # search file contents, then open a match
 fgl       # live ripgrep search with fzf
+```
+
+### Network / System
+
+```bash
+wifiinfo  # show Wi-Fi interface and SSID
+nettest   # quick internet, DNS, and public IP check
+battery   # show concise battery status
 ```
 
 ### tmux
@@ -175,6 +185,8 @@ gcai       # alias for gci
 gclean     # interactively delete merged local branches
 gwtc       # create a Git worktree for a branch
 gwtl       # list Git worktrees
+gbcopy     # copy current branch name
+ghash      # copy latest commit short hash
 git lg     # graph log
 git ds     # staged diff
 git save "message"  # stash with a message
@@ -229,6 +241,7 @@ aliases           # edit aliases
 zfunctions        # edit functions
 completions       # edit completions
 showpath          # print PATH one entry per line
+pathdups          # show duplicate PATH entries
 dotdoctor         # check core tools and stowed config links
 dotlinks          # find broken symlinks under $HOME
 dotstow           # re-stow dotfiles after confirmation

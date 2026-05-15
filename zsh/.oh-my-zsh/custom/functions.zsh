@@ -198,6 +198,20 @@ tmpd() {
   echo "Entered $dir"
 }
 
+# Copy the current working directory to the clipboard.
+# Use when you need to paste the current path into Finder, an editor, or a note.
+# Usage:
+#   cpwd
+cpwd() {
+  command -v pbcopy >/dev/null 2>&1 || {
+    echo "pbcopy not found"
+    return 1
+  }
+
+  pwd | pbcopy
+  echo "Copied: $(pwd)"
+}
+
 # Open the current Finder directory in terminal
 # Usage:
 #   finder
@@ -206,6 +220,52 @@ finder() {
   dir=$(osascript -e 'tell application "Finder" to POSIX path of (target of front window as alias)')
   cd "$dir" || return
   echo "Moved to: $dir"
+}
+
+# Open the current directory in Finder.
+# Use when you are working in terminal and want to inspect the same folder visually.
+# Usage:
+#   finderopen
+finderopen() {
+  command -v open >/dev/null 2>&1 || {
+    echo "open not found"
+    return 1
+  }
+
+  open .
+}
+
+# Show duplicate entries in PATH without changing PATH.
+# Use when command resolution looks wrong or `showpath` looks noisy.
+# Usage:
+#   pathdups
+pathdups() {
+  emulate -L zsh
+
+  local -A seen duplicates
+  local entry display
+  local found=0
+  local path_entries=("${(@s/:/)PATH}")
+
+  for entry in "${path_entries[@]}"; do
+    display="$entry"
+    [[ -z "$display" ]] && display="<empty>"
+
+    if [[ -n "${seen[$display]}" ]]; then
+      duplicates[$display]=1
+    else
+      seen[$display]=1
+    fi
+  done
+
+  for entry in "${(@k)duplicates}"; do
+    echo "$entry"
+    found=1
+  done
+
+  if (( found == 0 )); then
+    echo "No duplicate PATH entries found."
+  fi
 }
 
 # Dump current Homebrew state into the dotfiles Brewfile.
@@ -447,6 +507,124 @@ dotdoctor() {
   done
 
   return "$missing"
+}
+
+# ─────────────────────────────
+# 🌐 Network Helpers
+# ─────────────────────────────
+
+# Show the current Wi-Fi interface and network name.
+# Use when local networking is odd and you need to confirm the active Wi-Fi.
+# Usage:
+#   wifiinfo
+wifiinfo() {
+  command -v networksetup >/dev/null 2>&1 || {
+    echo "networksetup not found"
+    return 1
+  }
+
+  local iface
+  local default_iface
+  local ip_addr
+  local ssid
+  local networksetup_ssid
+
+  iface=$(
+    networksetup -listallhardwareports 2>/dev/null \
+      | awk '/Hardware Port: Wi-Fi|Hardware Port: AirPort/ { getline; print $2; exit }'
+  )
+
+  if [[ -z "$iface" ]]; then
+    echo "Wi-Fi interface not found."
+    return 1
+  fi
+
+  default_iface=$(route -n get default 2>/dev/null | awk '/interface:/ { print $2; exit }')
+  ip_addr=$(ipconfig getifaddr "$iface" 2>/dev/null)
+  ssid=$(
+    ipconfig getsummary "$iface" 2>/dev/null \
+      | awk -F ' : ' '/^[[:space:]]*SSID[[:space:]]:/ { print $2; exit }'
+  )
+
+  if [[ -z "$ssid" ]]; then
+    networksetup_ssid=$(networksetup -getairportnetwork "$iface" 2>/dev/null)
+    case "$networksetup_ssid" in
+      "Current Wi-Fi Network: "*)
+        ssid="${networksetup_ssid#Current Wi-Fi Network: }"
+        ;;
+    esac
+  fi
+
+  echo "Wi-Fi Interface: $iface"
+  echo "Default Interface: ${default_iface:-unknown}"
+  echo "IP Address: ${ip_addr:-unavailable}"
+  case "$ssid" in
+    "Current Wi-Fi Network: "*)
+      echo "SSID: ${ssid#Current Wi-Fi Network: }"
+      ;;
+    *"not associated"*)
+      echo "SSID: not connected or unavailable"
+      ;;
+    "")
+      echo "SSID: not connected or unavailable"
+      ;;
+    *)
+      echo "SSID: $ssid"
+      ;;
+  esac
+}
+
+# Run a quick network health check.
+# Use when you want to confirm internet reachability, DNS, and public IP quickly.
+# Usage:
+#   nettest
+nettest() {
+  emulate -L zsh
+
+  echo "Internet:"
+  if ping -c 1 -W 1000 1.1.1.1 >/dev/null 2>&1; then
+    echo "  ok: reached 1.1.1.1"
+  else
+    echo "  fail: could not reach 1.1.1.1"
+  fi
+
+  echo "DNS:"
+  if command -v dscacheutil >/dev/null 2>&1; then
+    if dscacheutil -q host -a name example.com >/dev/null 2>&1; then
+      echo "  ok: resolved example.com"
+    else
+      echo "  fail: could not resolve example.com"
+    fi
+  elif command -v dig >/dev/null 2>&1; then
+    if dig +time=2 +tries=1 example.com >/dev/null 2>&1; then
+      echo "  ok: resolved example.com"
+    else
+      echo "  fail: could not resolve example.com"
+    fi
+  else
+    echo "  skipped: no DNS lookup command found"
+  fi
+
+  echo "Public IP:"
+  if (( ${+aliases[publicip]} )); then
+    local ip
+    ip=$(eval "${aliases[publicip]}" 2>/dev/null)
+    if [[ -n "$ip" ]]; then
+      echo "  $ip"
+    else
+      echo "  unavailable"
+    fi
+  elif command -v curl >/dev/null 2>&1; then
+    local ip
+    ip=$(curl --connect-timeout 2 -fsSL ifconfig.me 2>/dev/null)
+    if [[ -n "$ip" ]]; then
+      echo "  $ip"
+    else
+      echo "  unavailable"
+    fi
+  else
+    echo "  skipped: publicip alias and curl unavailable"
+  fi
 }
 
 # ─────────────────────────────
@@ -701,6 +879,55 @@ gwtl() {
   }
 
   git worktree list
+}
+
+# Copy the current Git branch name to the clipboard.
+# Use when you need to paste a branch name into a PR, ticket, or message.
+# Usage:
+#   gbcopy
+gbcopy() {
+  git rev-parse --is-inside-work-tree >/dev/null 2>&1 || {
+    echo "Not inside a git repo"
+    return 1
+  }
+
+  local branch
+  branch=$(git symbolic-ref --quiet --short HEAD 2>/dev/null)
+
+  if [[ -z "$branch" ]]; then
+    echo "Detached HEAD; no branch name to copy."
+    return 1
+  fi
+
+  if command -v pbcopy >/dev/null 2>&1; then
+    print -r -- "$branch" | pbcopy
+    echo "Copied: $branch"
+  else
+    echo "pbcopy not found. Branch: $branch"
+    return 1
+  fi
+}
+
+# Copy the latest commit short hash to the clipboard.
+# Use when you need a commit reference for CI, deploy notes, or debugging.
+# Usage:
+#   ghash
+ghash() {
+  git rev-parse --is-inside-work-tree >/dev/null 2>&1 || {
+    echo "Not inside a git repo"
+    return 1
+  }
+
+  local hash
+  hash=$(git rev-parse --short HEAD 2>/dev/null) || return 1
+
+  if command -v pbcopy >/dev/null 2>&1; then
+    print -r -- "$hash" | pbcopy
+    echo "Copied: $hash"
+  else
+    echo "pbcopy not found. Hash: $hash"
+    return 1
+  fi
 }
 
 # ─────────────────────────────
@@ -988,6 +1215,37 @@ task-fzf() {
 # ─────────────────────────────
 # 🧹 Maintenance Helpers
 # ─────────────────────────────
+
+# Show concise MacBook battery and charging status.
+# Use when you want terminal-visible battery state without opening macOS UI.
+# Usage:
+#   battery
+battery() {
+  command -v pmset >/dev/null 2>&1 || {
+    echo "pmset not found"
+    return 1
+  }
+
+  pmset -g batt | awk '
+    NR == 1 { source = $0; sub(/^Now drawing from /, "", source); gsub(/'\''/, "", source) }
+    NR == 2 {
+      gsub(/^[[:space:]]+/, "")
+      split($0, parts, ";")
+      percent = parts[1]
+      status = parts[2]
+      time = parts[3]
+      if (match(percent, /[0-9]+%/)) percent = substr(percent, RSTART, RLENGTH)
+      gsub(/^[[:space:]]+|[[:space:]]+$/, "", percent)
+      gsub(/^[[:space:]]+|[[:space:]]+$/, "", status)
+      sub(/[[:space:]]*present: true$/, "", time)
+      gsub(/^[[:space:]]+|[[:space:]]+$/, "", time)
+      print "Power: " source
+      print "Battery: " percent
+      if (status != "") print "Status: " status
+      if (time != "") print "Time: " time
+    }
+  '
+}
 
 # Empty the current user's macOS Trash safely.
 #

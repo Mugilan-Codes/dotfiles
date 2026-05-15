@@ -29,3 +29,6 @@ export PATH="$PATH:$HOME/Library/Application Support/JetBrains/Toolbox/scripts"
 # OrbStack shell integration
 # Load only if present.
 [[ -f "$HOME/.orbstack/shell/init.zsh" ]] && source "$HOME/.orbstack/shell/init.zsh"
+
+# Keep PATH stable when login shells are restarted.
+typeset -U path PATH
