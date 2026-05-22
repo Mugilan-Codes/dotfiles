@@ -939,6 +939,9 @@ ghash() {
 # Usage:
 #   fo
 fzf-open() {
+  command -v fd >/dev/null 2>&1 || { echo "fd not found"; return 1; }
+  command -v fzf >/dev/null 2>&1 || { echo "fzf not found"; return 1; }
+
   local preview_cmd
   if command -v bat >/dev/null 2>&1; then
     preview_cmd='bat --style=numbers --color=always {} | head -100'
@@ -961,6 +964,9 @@ fzf-content() {
     echo "Usage: fzf-content <search-term>"
     return 1
   fi
+
+  command -v rg >/dev/null 2>&1 || { echo "rg not found"; return 1; }
+  command -v fzf >/dev/null 2>&1 || { echo "fzf not found"; return 1; }
 
   local preview_cmd
   if command -v bat >/dev/null 2>&1; then
@@ -997,6 +1003,9 @@ fzf-content() {
 #   fgl
 #   fglive
 fglive() {
+  command -v rg >/dev/null 2>&1 || { echo "rg not found"; return 1; }
+  command -v fzf >/dev/null 2>&1 || { echo "fzf not found"; return 1; }
+
   local preview_cmd
 
   if command -v bat >/dev/null 2>&1; then

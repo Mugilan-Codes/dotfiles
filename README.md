@@ -103,6 +103,7 @@ brew install stow
 ### 5. Apply dotfiles with GNU Stow
 
 ```bash
+stow --simulate --verbose zsh tmux git starship
 stow zsh
 stow tmux
 stow git
@@ -338,6 +339,7 @@ Keep names clear and avoid shadowing common tools like `test`, `fd`, `fg`, `dc`,
 ```bash
 cd ~/dotfiles
 git pull
+stow --simulate --verbose zsh tmux git starship
 stow zsh tmux git starship
 exec zsh
 ```

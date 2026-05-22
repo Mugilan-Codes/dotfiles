@@ -27,7 +27,9 @@ fpath=("$HOME/.docker/completions" "$HOME/.zfunc" $fpath)
 
 # FNM
 # Auto-switch Node.js versions based on .nvmrc / .node-version files.
-eval "$(fnm env --use-on-cd --version-file-strategy=recursive)"
+if command -v fnm >/dev/null 2>&1; then
+  eval "$(fnm env --use-on-cd --version-file-strategy=recursive)"
+fi
 
 # Plugins
 plugins=(git zsh-autosuggestions zsh-syntax-highlighting)
@@ -43,11 +45,18 @@ export SDKMAN_DIR="$HOME/.sdkman"
 [[ -s "$HOME/.sdkman/bin/sdkman-init.sh" ]] && source "$HOME/.sdkman/bin/sdkman-init.sh"
 
 # Prompt
-eval "$(starship init zsh)"
+if command -v starship >/dev/null 2>&1; then
+  eval "$(starship init zsh)"
+fi
 
 # Interactive tooling
-source <(fzf --zsh)
-eval "$(zoxide init zsh)"
+if command -v fzf >/dev/null 2>&1; then
+  source <(fzf --zsh)
+fi
+
+if command -v zoxide >/dev/null 2>&1; then
+  eval "$(zoxide init zsh)"
+fi
 
 # Custom aliases, functions, and completions
 source "$ZSH/custom/aliases.zsh"
