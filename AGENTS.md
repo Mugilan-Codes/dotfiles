@@ -17,8 +17,9 @@ The repo uses GNU Stow to symlink dotfile packages into `$HOME`. Homebrew packag
 - `tmux/.tmux.conf`: tmux prefix, panes, navigation, resizing, reload binding, and status bar.
 - `git/.gitconfig`: global Git settings, include rules, and Git aliases.
 - `starship/.config/starship.toml`: prompt symbols and module settings.
+- `macos/finder/`: optional macOS Finder preference automation; this is not a Stow package.
 
-Unknown / to confirm: there are no tracked `scripts/`, `bin/`, standalone install scripts, bootstrap scripts, or non-zsh doctor scripts at the time this file was created.
+There is no single tracked bootstrap script. `macos/finder/setup-finder.sh` is a scoped macOS preference script and should not be run automatically unless explicitly requested.
 
 ## 3. Setup and common commands
 
@@ -57,7 +58,7 @@ namecheck newname
 usedcount existingname
 ```
 
-There is no single tracked setup script. Setup is currently a sequence of README commands plus zsh helper functions after the dotfiles are loaded.
+There is no single tracked repo bootstrap script. Core setup is currently a sequence of README commands plus zsh helper functions after the dotfiles are loaded. Finder setup is optional under `macos/finder`.
 
 ## 4. Editing rules
 
@@ -88,6 +89,7 @@ There is no single tracked setup script. Setup is currently a sequence of README
 - Do not commit secrets, API keys, tokens, SSH keys, private credentials, `.env` files, or private machine-only config.
 - Do not add destructive commands without clear warnings and confirmation prompts.
 - Treat cleanup helpers, Docker volume removal, branch deletion, `git add .` workflows, and Homebrew upgrades as potentially risky.
+- Treat `macos/finder` as macOS preference automation: keep backups first, make changes idempotent, and do not run it automatically.
 
 ## 7. Validation checklist
 

@@ -33,6 +33,10 @@ This repo recreates my daily shell, terminal, Git, Homebrew, tmux, Starship, and
 
 - `starship` configuration
 
+### macOS Preferences
+
+- optional Finder defaults setup in `macos/finder`
+
 ---
 
 ## Structure
@@ -42,6 +46,10 @@ dotfiles/
 ├── Brewfile
 ├── git/
 │   └── .gitconfig
+├── macos/
+│   └── finder/
+│       ├── README.md
+│       └── setup-finder.sh
 ├── starship/
 │   └── .config/starship.toml
 ├── tmux/
@@ -136,6 +144,14 @@ sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/too
 ```bash
 exec zsh
 ```
+
+### Optional: Apply Finder Defaults
+
+```bash
+bash ~/dotfiles/macos/finder/setup-finder.sh
+```
+
+See `macos/finder/README.md` for details, backups, and manual Sidebar/List View steps.
 
 ---
 
