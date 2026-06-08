@@ -1,131 +1,102 @@
 # AGENTS.md
 
-## 1. Repository purpose
+Instructions for Codex and other AI agents working in this dotfiles repository.
 
-This is a personal dotfiles repository for a macOS/Linux developer terminal setup. It manages shell, Git, tmux, Starship prompt, Homebrew packages, and daily CLI workflows.
+## Repository Purpose
 
-The repo uses GNU Stow to symlink dotfile packages into `$HOME`. Homebrew packages, casks, taps, and VS Code extensions are tracked in `Brewfile`.
+This is a personal macOS/Linux dotfiles repo. It uses GNU Stow to symlink package directories into `$HOME` and tracks:
 
-## 2. Repository layout
+- shell startup files and Oh My Zsh customizations
+- tmux configuration
+- global Git configuration
+- Starship prompt configuration
+- Homebrew package state in `Brewfile`
+- local Codex/agent skills under `agents/.agents/skills`
 
-- `README.md`: setup guide, daily workflow cheatsheet, safety notes, and maintenance commands.
-- `Brewfile`: Homebrew bundle state.
-- `zsh/`: stowed zsh files: `.zshrc`, `.zprofile`, `.zshenv`, `.zlogin`, and Oh My Zsh custom files.
-- `zsh/.oh-my-zsh/custom/aliases.zsh`: short command aliases grouped by topic.
-- `zsh/.oh-my-zsh/custom/functions.zsh`: workflows that need arguments, checks, branching, confirmations, or multiple commands.
-- `zsh/.oh-my-zsh/custom/completions.zsh`: custom completion sources.
-- `tmux/.tmux.conf`: tmux prefix, panes, navigation, resizing, reload binding, and status bar.
-- `git/.gitconfig`: global Git settings, include rules, and Git aliases.
-- `starship/.config/starship.toml`: prompt symbols and module settings.
-- `macos/finder/`: optional macOS Finder preference automation; this is not a Stow package.
+There is no single bootstrap script. New-machine setup is documented in `README.md`.
 
-There is no single tracked bootstrap script. `macos/finder/setup-finder.sh` is a scoped macOS preference script and should not be run automatically unless explicitly requested.
+## Current Stow Packages
 
-## 3. Setup and common commands
+- `zsh`: `.zshrc`, `.zprofile`, `.zshenv`, `.zlogin`, Oh My Zsh custom aliases/functions/completions
+- `tmux`: `.tmux.conf`
+- `git`: `.gitconfig`
+- `starship`: `.config/starship.toml`
+- `agents`: `.agents/skills`
 
-New setup is documented in `README.md`:
+`macos/finder` is optional macOS preference automation and is not a Stow package.
 
-```sh
-/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
-eval "$(/opt/homebrew/bin/brew shellenv)"
-brew install git
-git clone git@github.com:Mugilan-Codes/dotfiles.git ~/dotfiles
-cd ~/dotfiles
-brew install stow
-stow zsh
-stow tmux
-stow git
-stow starship
-brew bundle --file=~/dotfiles/Brewfile
-sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
-exec zsh
-```
+## Working Rules
 
-Common maintenance commands from the repo:
+- Inspect before modifying: start with repo structure, relevant files, and `git status --short --untracked-files=all`.
+- Keep changes small, scoped, and reviewable.
+- Preserve the existing package structure. New home-directory files should live under the right Stow package path.
+- Do not alter unrelated packages while fixing docs or one package.
+- Do not overwrite real home-directory files. If a Stow target already exists and is not a symlink, stop and report it.
+- Do not run broad or destructive commands unless explicitly requested.
+- Do not commit, stage, push, restow, upgrade Homebrew packages, or run cleanup helpers unless explicitly asked.
+- Do not commit secrets, API keys, tokens, SSH keys, private credentials, `.env` files, `.DS_Store`, swap files, temporary files, or machine-only local config.
 
-```sh
-brew bundle --file=~/dotfiles/Brewfile
-brewcheck
-brewoutdated
-bdump
-dotdoctor
-dotlinks
-dotstow
-reload
-rz
-rzl
-namecheck newname
-usedcount existingname
-```
+## Editing Conventions
 
-There is no single tracked repo bootstrap script. Core setup is currently a sequence of README commands plus zsh helper functions after the dotfiles are loaded. Finder setup is optional under `macos/finder`.
+- Preserve comments, grouping, and warning text unless they are wrong or stale.
+- Keep direct shortcuts in `zsh/.oh-my-zsh/custom/aliases.zsh`.
+- Keep argument-heavy or safety-sensitive workflows in `zsh/.oh-my-zsh/custom/functions.zsh`.
+- Keep completions in `zsh/.oh-my-zsh/custom/completions.zsh`.
+- Keep universal environment variables minimal in `zsh/.zshenv`.
+- Keep login-shell PATH/toolchain setup in `zsh/.zprofile`.
+- Keep interactive shell setup in `zsh/.zshrc`.
+- For reusable docs, prefer `$HOME` over hard-coded `/Users/mugilan` paths unless the absolute path is intentionally shown as a machine-specific example or historical note.
 
-## 4. Editing rules
+## Package Notes
 
-- Preserve existing style, comments, grouping, and explanatory warnings.
-- Prefer small, focused changes over broad rewrites.
-- Keep aliases in `aliases.zsh` and logic-heavy helpers in `functions.zsh`.
-- Before adding a new alias or function, check for conflicts with `namecheck <name>` when available.
-- Use `usedcount <name>` before removing or renaming established shortcuts when available.
-- Do not remove comments unless they are wrong or outdated.
-- Keep Homebrew changes in `Brewfile`; use existing helpers such as `bdump`, `brewadd`, and `brewrm` when working from an installed shell.
+### `agents`
 
-## 5. Shell/zsh conventions
+- The `agents` Stow package manages `$HOME/.agents/skills`.
+- Skill folders live under `agents/.agents/skills/<skill-name>/`.
+- Each skill folder should contain a `SKILL.md` with non-empty `name` and `description` frontmatter.
+- Keep `agents/.agents/skills/SKILLS_GUIDE.md` and `agents/.agents/skills/SKILLS_REGISTRY.md` updated when skills are added, removed, renamed, or materially changed.
+- Ignore and remove local junk such as `.DS_Store`; do not include it in the package.
 
-- `.zshenv` is minimal and only for universal environment variables.
-- `.zprofile` is for login-shell PATH and toolchain setup.
-- `.zshrc` is for interactive shell behavior, Oh My Zsh, plugins, prompt, fzf, zoxide, aliases, functions, and completions.
-- `.zlogin` is intentionally empty.
-- Aliases are organized with section headers and short comments. Use aliases for direct shortcuts only.
-- Functions include usage comments and validation for missing arguments or missing commands where useful.
-- PATH changes should be added intentionally, with comments explaining why and with `typeset -U path PATH` preserved.
-- Completions belong in `zsh/.oh-my-zsh/custom/completions.zsh` or the configured completion paths noted in `.zshrc`.
+### `zsh`
 
-## 6. Dotfile safety rules
+- Before adding a helper name, use `namecheck <name>` when available.
+- Before removing or renaming an established shortcut, use `usedcount <name>` when available.
+- Treat cleanup helpers, Docker volume removal, branch deletion, and `git add .` workflows as risky.
 
-- Be careful with Stow symlinks. Do not overwrite real user files blindly.
-- If a Stow target already exists and is not a symlink, stop and report it instead of replacing it.
-- Do not hardcode machine-specific paths unless the repo already does so intentionally and the comment explains the intent.
-- Do not commit secrets, API keys, tokens, SSH keys, private credentials, `.env` files, or private machine-only config.
-- Do not add destructive commands without clear warnings and confirmation prompts.
-- Treat cleanup helpers, Docker volume removal, branch deletion, `git add .` workflows, and Homebrew upgrades as potentially risky.
-- Treat `macos/finder` as macOS preference automation: keep backups first, make changes idempotent, and do not run it automatically.
+### `Brewfile`
 
-## 7. Validation checklist
+- Keep Homebrew changes in `Brewfile`.
+- Prefer existing helpers such as `bdump`, `brewadd`, and `brewrm` when working from a shell where these dotfiles are loaded.
+- Do not run `brewup` automatically.
 
-Run relevant checks after changes:
+### `macos/finder`
+
+- Treat Finder setup as scoped preference automation.
+- Keep it idempotent and backup-oriented.
+- Do not run it unless explicitly requested.
+
+## Verification
+
+Run checks that match the files touched:
 
 ```sh
+git status --short --untracked-files=all
+git diff --check
+git diff --cached --check
 zsh -n zsh/.zshrc zsh/.zprofile zsh/.zshenv zsh/.zlogin zsh/.oh-my-zsh/custom/aliases.zsh zsh/.oh-my-zsh/custom/functions.zsh zsh/.oh-my-zsh/custom/completions.zsh
-stow --simulate --verbose zsh tmux git starship
+stow --simulate --verbose agents
+stow --simulate --verbose zsh tmux git starship agents
 brew bundle check --file=./Brewfile
-git diff -- README.md Brewfile zsh tmux git starship AGENTS.md
 ```
 
-Known caveat: the working tree may contain untracked macOS `.DS_Store` files inside stowed directories. If a Stow dry run reports `.DS_Store` conflicts, inspect or remove those metadata files intentionally; do not use `--adopt` blindly.
+For Stow changes, always run `stow --simulate --verbose ...` before recommending or applying real Stow operations.
 
-If working in a shell where these dotfiles are loaded, also run:
+## Reporting
 
-```sh
-dotdoctor
-dotlinks
-namecheck newname
-```
+Final responses should mention:
 
-Potentially destructive or broad commands: `dotstow` changes home-directory symlinks after confirmation, `brewup` upgrades installed packages, `gcommit` stages all changes and pushes, and Docker cleanup helpers may remove local data. Do not auto-run those unless explicitly requested.
-
-## 8. Git workflow expectations
-
-- Show changed files with `git diff` before summarizing work.
-- Do not commit automatically unless explicitly asked.
-- If asked to commit, keep commits focused and avoid mixing unrelated dotfile changes.
-- Explain what changed and why after editing.
-- Do not revert unrelated user changes in the working tree.
-
-## 9. Response style for future Codex tasks
-
-- Be concise and practical.
-- Mention files changed.
-- Mention validation performed.
-- Mention anything skipped, uncertain, or blocked.
-- Prefer repo-specific observations over generic agent advice.
+- files created, modified, and removed
+- validation commands run and their results
+- current Git status
+- risks, skipped checks, or follow-ups
+- suggested commit message when useful
