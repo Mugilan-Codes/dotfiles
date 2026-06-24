@@ -8,137 +8,252 @@ tap "leoafarias/fvm"
 tap "localsend/localsend"
 tap "ngrok/ngrok"
 tap "oven-sh/bun"
-tap "theboredteam/boring-notch"
+tap "theboredteam/boring-notch", "https://github.com/TheBoredTeam/homebrew-boring-notch"
 tap "xcodesorg/made"
 tap "xpipe-io/tap"
 tap "xykong/tap"
+# Automatic configure script builder
 brew "autoconf"
+# Tool for generating GNU Standards-compliant Makefiles
 brew "automake"
+# Cryptography and SSL/TLS Toolkit
 brew "openssl@3"
+# Clone of cat(1) with syntax highlighting and Git integration
 brew "bat"
+# Resource monitor. C++ version and continuation of bashtop and bpytop
 brew "btop"
+# YAML Parser
 brew "libyaml"
+# Powerful, clean, object-oriented scripting language
 brew "ruby"
+# Dependency manager for Cocoa projects
 brew "cocoapods"
+# GNU multiple precision arithmetic library
 brew "gmp"
+# GNU File, Shell, and Text utilities
 brew "coreutils"
+# Library for command-line editing
 brew "readline"
+# Secure runtime for JavaScript and TypeScript
 brew "deno"
+# Perl lib for reading and writing EXIF metadata
 brew "exiftool"
+# Modern, maintained replacement for ls
 brew "eza"
+# Like neofetch, but much faster because written mostly in C
 brew "fastfetch"
+# Easiest way to build and release mobile apps
 brew "fastlane"
+# Simple, fast and user-friendly alternative to find
 brew "fd"
+# Play, record, convert, and stream select audio and video codecs
 brew "ffmpeg"
+# Fast and simple Node.js version manager
 brew "fnm"
+# Command-line fuzzy finder written in Go
 brew "fzf"
+# GitHub command-line tool
 brew "gh"
+# Distributed revision control system
 brew "git"
+# Git extension for versioning large files
 brew "git-lfs"
+# Install and debug iPhone apps from the command-line
 brew "ios-deploy"
+# X.509 and CMS library
 brew "libksba"
+# Generic library support script
 brew "libtool"
+# LLM inference in C/C++
 brew "llama.cpp"
+# NCurses Disk Usage
 brew "ncdu"
+# Ambitious Vim-fork focused on extensibility and agility
 brew "neovim"
+# Create, run, and share large language models (LLMs)
 brew "ollama"
+# Package compiler and linker metadata toolkit
 brew "pkgconf"
+# Fast, disk space efficient package manager
 brew "pnpm"
+# Interpreted, interactive, object-oriented programming language
 brew "python@3.11"
+# Install various Ruby versions and implementations
 brew "ruby-build"
+# Display and control your Android device
 brew "scrcpy"
+# SMART hard drive monitoring
+brew "smartmontools"
+# Organize software neatly under a single directory tree (e.g. /usr/local)
 brew "stow"
+# Feature-rich console based todo list manager
 brew "task"
+# Very fast implementation of tldr in Rust
 brew "tealdeer"
+# Terminal multiplexer
 brew "tmux"
+# Manage complex tmux sessions easily
 brew "tmuxinator"
+# Display directories as trees (with optional color/HTML output)
 brew "tree"
+# Watch files and take action when they change
 brew "watchman"
+# JavaScript package manager
 brew "yarn"
+# Feature-rich command-line audio/video downloader
 brew "yt-dlp"
+# General-purpose lossless data-compression library
 brew "zlib"
+# Shell extension to navigate your filesystem faster
 brew "zoxide"
-brew "agrinman/tap/tunnelto"
-brew "anomalyco/tap/opencode"
-brew "fognil/tap/neatcli"
-brew "hashicorp/tap/terraform"
-brew "jesseduffield/lazydocker/lazydocker"
-brew "leoafarias/fvm/fvm"
-brew "oven-sh/bun/bun"
+# Stand alone ad blocker
 cask "adguard"
+# Application launcher and productivity software
 cask "alfred"
+# Enable Windows-like alt-tab
 cask "alt-tab"
+# Transfer files from and to an Android smartphone
 cask "android-file-transfer"
+# Android SDK component
 cask "android-platform-tools"
+# Memory training application
 cask "anki"
+# Application uninstaller
 cask "appcleaner"
+# Tool to flash OS images to SD cards & USB drives
 cask "balenaetcher"
+# Cross platform SQL editor and database management app
 cask "beekeeper-studio"
+# Screen capturing and editing tool
 cask "bettershot"
+# Send any size file between devices
 cask "blip"
+# Not so boring notch That Rocks 🎸🎶 
 cask "theboredteam/boring-notch/boring-notch"
+# Web browser focusing on privacy
 cask "brave-browser"
+# Open source IDE for exploring and testing APIs
 cask "bruno"
+# Utility that prevents the system from going to sleep
 cask "caffeine"
+# OpenAI's official browser with ChatGPT built in
 cask "chatgpt-atlas"
+# Anthropic's official Claude AI desktop app
 cask "claude"
+# Tool to show live information about the batteries in various devices
 cask "coconutbattery"
+# OpenAI's coding agent that runs in your terminal
 cask "codex"
+# Universal database tool and SQL client
 cask "dbeaver-community"
+# Utilities designed to make common development tasks easier
 cask "devtoys"
+# Voice and text chat software
 cask "discord"
+# Web browser focusing on privacy
 cask "duckduckgo"
+# Web browser
 cask "firefox"
+# Web browser
 cask "firefox@developer-edition"
+# Flip clock screensaver
 cask "fliqlo"
+# Beautiful Markdown previews in macOS Finder QuickLook
 cask "xykong/tap/flux-markdown"
+# Quick Look extension for folders
 cask "folder-preview-pro"
 cask "font-monaspace"
+# Web browser
 cask "google-chrome"
+# Client for the Google Drive storage service
 cask "google-drive"
+# Utility to hide menu bar items
 cask "hiddenbar"
+# Free and open-source media player
 cask "iina"
+# Tool to optimise images to a smaller size
 cask "imageoptim"
+# Terminal emulator as alternative to Apple's Terminal app
 cask "iterm2"
+# Menu bar calendar
 cask "itsycal"
+# JetBrains tools manager
 cask "jetbrains-toolbox"
+# An open source cross-platform alternative to AirDrop
 cask "localsend/localsend/localsend"
+# Clipboard manager
 cask "maccy"
+# Meet, chat, call, and collaborate in just one place
 cask "microsoft-teams"
+# Interactive tool for analyzing MongoDB data
 cask "mongodb-compass"
+# Tool to control external monitor brightness & volume
 cask "monitorcontrol"
+# Reverse proxy, secure introspectable tunnels to localhost
 cask "ngrok"
+# App to write, plan, collaborate, and get organised
 cask "notion"
+# Knowledge base that works on top of a local folder of plain text Markdown files
 cask "obsidian"
+# Replacement for Docker Desktop
 cask "orbstack"
+# WebKit based web browser
 cask "orion"
+# Utility to uninstall apps and remove leftover files from old/uninstalled apps
 cask "pearcleaner"
+# Collaboration platform for API development
 cask "postman"
+# Client for Proton Drive
 cask "proton-drive"
+# Client for Proton Mail and Proton Calendar
 cask "proton-mail"
+# Desktop client for Proton Pass
 cask "proton-pass"
+# VPN client focusing on security
 cask "protonvpn"
+# GUI for streamlined Redis application development
 cask "redis-insight"
+# Emoji picker optimised for blind people
 cask "rocket"
+# Screenshot measurement and annotation tool
 cask "shottr"
+# PDF reader and note-taking application
 cask "skim"
+# System monitor for the menu bar
 cask "stats"
+# Open-source media center
 cask "stremio"
+# Companion app for Stremio Web
 cask "stremioservice"
+# Text editor for code, markup and prose
 cask "sublime-text"
+# Mesh VPN based on WireGuard
 cask "tailscale-app"
+# Messaging app with a focus on speed and security
 cask "telegram"
+# SSH client
 cask "termius"
+# Unpacks archive files
 cask "the-unarchiver"
+# Customizable timing of breaks
 cask "time-out"
+# Web browser focusing on security
 cask "tor-browser"
+# Open-source BitTorrent client
 cask "transmission"
+# Batch rename utility
 cask "transnomino"
+# Multimedia player
 cask "vlc"
+# Rust-based terminal
 cask "warp"
+# Native desktop client for WhatsApp
 cask "whatsapp"
+# Install and switch between multiple versions of Xcode
 cask "xcodes-app"
+# Comic reader
 cask "yacreader"
+# Video communication and virtual meeting platform
 cask "zoom"
 vscode "aaron-bond.better-comments"
 vscode "adpyke.codesnap"
@@ -156,7 +271,6 @@ vscode "docker.docker"
 vscode "donjayamanne.githistory"
 vscode "dracula-theme.theme-dracula"
 vscode "dsznajder.es7-react-js-snippets"
-vscode "eamodio.gitlens"
 vscode "ecmel.vscode-html-css"
 vscode "esbenp.prettier-vscode"
 vscode "felixangelov.bloc"
@@ -197,7 +311,6 @@ vscode "rangav.vscode-thunder-client"
 vscode "redhat.vscode-yaml"
 vscode "ritwickdey.liveserver"
 vscode "shd101wyy.markdown-preview-enhanced"
-vscode "softwaredotcom.swdc-vscode"
 vscode "tomoki1207.pdf"
 vscode "usernamehw.errorlens"
 vscode "wesbos.theme-cobalt2"
