@@ -32,9 +32,9 @@ alias showpath='echo $PATH | tr ":" "\n"'
 
 # Homebrew + Brewfile helpers.
 # Functions are defined in functions.zsh.
-# bdump = refresh Brewfile only
-# bsave = refresh Brewfile and commit if changed
-# bpush = refresh, commit, and push Brewfile
+# bdump = preview and optionally replace Brewfile
+# bsave = update and commit only Brewfile after confirmation
+# bpush = prepare the Brewfile commit and print manual push guidance
 alias bdump="brewdump"
 alias bsave="brewsave"
 alias bpush="brewpush"

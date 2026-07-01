@@ -2,9 +2,23 @@
 # Loaded for login shells.
 # Use this file for session-wide PATH and toolchain setup.
 
-# Homebrew (Apple Silicon)
-# Adds /opt/homebrew/bin and related paths correctly for this machine.
-eval "$(/opt/homebrew/bin/brew shellenv)"
+# Homebrew
+# Prefer an existing PATH entry, then check common Apple Silicon, Intel, and
+# Linuxbrew locations. New-machine setup is primarily documented for macOS.
+if command -v brew >/dev/null 2>&1; then
+  eval "$(brew shellenv)"
+else
+  for brew_bin in \
+    /opt/homebrew/bin/brew \
+    /usr/local/bin/brew \
+    /home/linuxbrew/.linuxbrew/bin/brew; do
+    if [[ -x "$brew_bin" ]]; then
+      eval "$("$brew_bin" shellenv)"
+      break
+    fi
+  done
+  unset brew_bin
+fi
 
 # Flutter
 # Git source used by Flutter tooling when needed.

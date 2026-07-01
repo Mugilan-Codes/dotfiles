@@ -3,7 +3,7 @@
 # ───────────────────────────────
 [core]
 	editor = vim                            # Use Vim as default editor
-	whitespace = -trailing-space            # Ignore trailing spaces in diffs/merges
+	whitespace = trailing-space,space-before-tab # Detect common whitespace errors
 	excludesfile = ~/.gitignore-global      # Global .gitignore
 	sshCommand = ssh -i ~/.ssh/id_ed25519   # Use personal SSH key by default
 
@@ -45,7 +45,7 @@
 	prune = true                            # Remove deleted branches on fetch
 
 [help]
-	autocorrect = 1                         # Auto-correct typos with minimal delay (1/10 sec)
+	autocorrect = prompt                    # Ask before running a corrected command
 
 # ───────────────────────────────
 # 🔐 Force SSH usage for GitHub
@@ -70,7 +70,7 @@
 	bclean = "!f() { base=${1-main}; git branch --merged \"$base\" --format='%(refname:short)' | grep -Ev \"^($base|main|master|develop|dev)$\" | grep -v '^$' | xargs -r git branch -d; }; f"
 
 	# 🆕 Show new commits added by last pull (e.g., git new HEAD)
-	new = !sh -c 'git log $1@{1}..$1@{0} "$@"'
+	new = "!f() { ref=${1:-HEAD}; git log \"${ref}@{1}..${ref}@{0}\"; }; f"
 
 	# 🔃 Delete all local tags and fetch fresh ones
 	# Warning: removes every local tag before fetching from remote.

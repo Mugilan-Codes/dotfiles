@@ -1,10 +1,10 @@
 # Codex Skills Guide
 
-Last reviewed: 2026-06-08
+Last reviewed: 2026-07-01
 
 This guide documents the local skills installed under `$HOME/.agents/skills`. A skill is triggered by its `name` and `description` frontmatter in `SKILL.md`; the body is loaded only after Codex decides the skill applies.
 
-Audit note: the 2026-06-08 audit found 9 installed skill folders. Deleted skill folders are not retained as active guide entries.
+Audit note: the 2026-07-01 audit found 11 tracked reusable skill folders. Generated `framer-project-*` skills are local-only and excluded from Git because they may contain private project metadata.
 
 ## Installed Skills
 
@@ -18,6 +18,8 @@ Audit note: the 2026-06-08 audit found 9 installed skill folders. Deleted skill 
 | `staged-diff-review` | General-purpose | You want only staged Git changes reviewed before commit. | You want unstaged work, a branch diff, or a whole repository reviewed. |
 | `repo-onboarding` | General-purpose | You want a fast orientation to an unfamiliar repo: structure, commands, architecture, risks. | You already gave a narrow coding task. |
 | `dsa-solution-review` | General-purpose | You want a data-structures-and-algorithms solution reviewed or explained. | The problem is production application code rather than an algorithm exercise. |
+| `framer` | Integration workflow | You explicitly want to design, edit, inspect, or publish a Framer project. | The request is generic website or web-development work without clear Framer context. |
+| `framer-code-components` | Supporting reference | A Framer task requires creating or editing a code component after the base and project-scoped skills are loaded. | As a direct entry point; load it only through the required Framer workflow. |
 | `skills-maintainer` | General-purpose | You want to audit local skills, check broken references, or update this guide and registry. | You want to modify a project repository instead of the local skills setup. |
 
 ## Exact Trigger Phrases
@@ -51,6 +53,10 @@ Use these phrases directly when you want to force the skill:
 - `Use dsa-solution-review`
 - `review my DSA solution`
 - `compare my solution against TUF+`
+- `Use the framer skill`
+- `edit my Framer site`
+- `publish my Framer project`
+- `create a Framer code component`
 - `Use skills-maintainer`
 - `audit my local skills`
 - `update my skills guide`
@@ -71,12 +77,18 @@ Use these phrases directly when you want to force the skill:
 - `Use repo-onboarding to explain this repo's structure, commands, and main risks.`
 - `Use dsa-solution-review to review my Java solution and compare against TUF+ notes.`
 - `Explain brute, better, and optimal approaches for this DSA problem in Java.`
+- `Use the framer skill to update the pricing section on my Framer site.`
+- `Use Framer to create a configurable code component and add it to the canvas.`
+- `Use Framer to inspect and publish my connected Framer project.`
 - `Use skills-maintainer to audit my local skills and update the guide and registry.`
 
 ## Usage Notes
 
 - `grill-with-docs` has valid frontmatter and required files. Its `CONTEXT-FORMAT.md` multi-context paths are illustrative examples, not required files.
 - `teach` is intentionally marked optional in the registry because it is a stateful teaching workflow and is too heavy for one-off explanations.
+- `framer` requires explicit Framer context, CLI setup, network access, and a project session before project work begins.
+- `framer-code-components` is not a direct entry point. Load `framer`, run `session new`, load the generated project skill, and only then load it for code-component work.
+- Generated `framer-project-*` skills are session/project-specific local state. Keep them out of this public registry and refresh them with `session new`.
 - Start a fresh Codex session after adding, removing, renaming, or changing `SKILL.md` frontmatter so skill discovery metadata refreshes.
 
 ## Updating This Guide

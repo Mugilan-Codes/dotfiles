@@ -1,17 +1,29 @@
+# Third-party taps. Trust is scoped to the fully qualified packages below.
 tap "agrinman/tap"
 tap "anomalyco/tap"
-tap "dart-lang/dart"
 tap "fognil/tap"
 tap "hashicorp/tap"
 tap "jesseduffield/lazydocker"
 tap "leoafarias/fvm"
 tap "localsend/localsend"
-tap "ngrok/ngrok"
 tap "oven-sh/bun"
+# Boring Notch uses a custom remote; only its stable cask is trusted below.
 tap "theboredteam/boring-notch", "https://github.com/TheBoredTeam/homebrew-boring-notch"
-tap "xcodesorg/made"
-tap "xpipe-io/tap"
 tap "xykong/tap"
+# Expose local web services through secure tunnels
+brew "agrinman/tap/tunnelto", trusted: true
+# AI coding agent for the terminal
+brew "anomalyco/tap/opencode", trusted: true
+# File organization and cleanup CLI
+brew "fognil/tap/neatcli", trusted: true
+# Infrastructure as code tool
+brew "hashicorp/tap/terraform", trusted: true
+# Terminal UI for Docker and Docker Compose
+brew "jesseduffield/lazydocker/lazydocker", trusted: true
+# Flutter version manager
+brew "leoafarias/fvm/fvm", trusted: true
+# JavaScript runtime, bundler, and test runner
+brew "oven-sh/bun/bun", trusted: true
 # Automatic configure script builder
 brew "autoconf"
 # Tool for generating GNU Standards-compliant Makefiles
@@ -110,8 +122,6 @@ brew "zoxide"
 cask "adguard"
 # Application launcher and productivity software
 cask "alfred"
-# Enable Windows-like alt-tab
-cask "alt-tab"
 # Transfer files from and to an Android smartphone
 cask "android-file-transfer"
 # Android SDK component
@@ -129,7 +139,7 @@ cask "bettershot"
 # Send any size file between devices
 cask "blip"
 # Not so boring notch That Rocks 🎸🎶 
-cask "theboredteam/boring-notch/boring-notch"
+cask "theboredteam/boring-notch/boring-notch", trusted: true
 # Web browser focusing on privacy
 cask "brave-browser"
 # Open source IDE for exploring and testing APIs
@@ -159,7 +169,7 @@ cask "firefox@developer-edition"
 # Flip clock screensaver
 cask "fliqlo"
 # Beautiful Markdown previews in macOS Finder QuickLook
-cask "xykong/tap/flux-markdown"
+cask "xykong/tap/flux-markdown", trusted: true
 # Quick Look extension for folders
 cask "folder-preview-pro"
 cask "font-monaspace"
@@ -180,7 +190,7 @@ cask "itsycal"
 # JetBrains tools manager
 cask "jetbrains-toolbox"
 # An open source cross-platform alternative to AirDrop
-cask "localsend/localsend/localsend"
+cask "localsend/localsend/localsend", trusted: true
 # Clipboard manager
 cask "maccy"
 # Meet, chat, call, and collaborate in just one place
@@ -285,6 +295,7 @@ vscode "jeroen-meijer.pubspec-assist"
 vscode "johnpapa.vscode-peacock"
 vscode "kisstkondoros.vscode-gutter-preview"
 vscode "mattpocock.ts-error-translator"
+vscode "mechatroner.rainbow-csv"
 vscode "mgmcdermott.vscode-language-babel"
 vscode "mhutchie.git-graph"
 vscode "miguelsolorio.fluent-icons"

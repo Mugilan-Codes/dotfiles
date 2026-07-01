@@ -1,8 +1,8 @@
 # Dotfiles
 
-Personal macOS/Linux terminal setup managed with GNU Stow.
+Personal Apple Silicon macOS developer setup managed with GNU Stow.
 
-This repository tracks the configuration I use for daily development: zsh, tmux, Git, Starship, Homebrew packages, and local Codex/agent skills. Stow packages live as top-level directories and are symlinked into `$HOME`.
+This repository tracks the configuration I use for daily development: zsh, tmux, Git, Starship, Homebrew packages, and local Codex/agent skills. Stow packages live as top-level directories and are symlinked into `$HOME`. Homebrew startup also detects common Intel macOS and Linuxbrew locations, but the Android, Finder, application, and PATH setup is primarily macOS-specific.
 
 ## Stow Packages
 
@@ -64,6 +64,16 @@ Install Oh My Zsh if it is not already present:
 sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
 ```
 
+Install the two third-party plugins enabled by `.zshrc`:
+
+```sh
+ZSH_CUSTOM="${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}"
+[[ -d "$ZSH_CUSTOM/plugins/zsh-autosuggestions" ]] ||
+  git clone https://github.com/zsh-users/zsh-autosuggestions "$ZSH_CUSTOM/plugins/zsh-autosuggestions"
+[[ -d "$ZSH_CUSTOM/plugins/zsh-syntax-highlighting" ]] ||
+  git clone https://github.com/zsh-users/zsh-syntax-highlighting "$ZSH_CUSTOM/plugins/zsh-syntax-highlighting"
+```
+
 If the installer creates a real `~/.zshrc`, back it up before stowing this repo's `zsh` package.
 
 Preview symlinks before applying them:
@@ -83,6 +93,8 @@ Install packages from Homebrew:
 ```sh
 brew bundle --file=~/dotfiles/Brewfile
 ```
+
+The Brewfile grants Homebrew 6 trust only to the named third-party formulae and casks it installs. Do not trust an entire tap unless every current and future item in that tap should be allowed to run.
 
 Restart the shell:
 
@@ -136,7 +148,7 @@ git diff --check
 git diff --cached --check
 zsh -n zsh/.zshrc zsh/.zprofile zsh/.zshenv zsh/.zlogin zsh/.oh-my-zsh/custom/aliases.zsh zsh/.oh-my-zsh/custom/functions.zsh zsh/.oh-my-zsh/custom/completions.zsh
 stow --simulate --verbose zsh tmux git starship agents
-brew bundle check --file=./Brewfile
+brew bundle check --no-upgrade --file=./Brewfile
 ```
 
 When the dotfiles are already loaded, these helpers are also useful:
@@ -153,10 +165,13 @@ usedcount existingname
 Common commands from the zsh helpers:
 
 ```sh
-bdump          # refresh Brewfile
+bdump          # preview local Homebrew state, then confirm Brewfile replacement
 brewcheck      # check Brewfile against installed packages
+brewtrustcheck # list Homebrew trust state and run brew doctor
 brewoutdated   # preview outdated Homebrew packages
-dotstow        # restow dotfile packages after confirmation
+dotstow        # simulate, then restow all packages after confirmation
+gmsg           # print a Codex-generated message for staged changes
+gcai           # generate with Codex, then review and commit staged changes
 reload         # reload Oh My Zsh config
 rz             # restart zsh
 rzl            # restart login zsh
@@ -172,16 +187,18 @@ Rollback options:
 
 ```sh
 stow --delete --verbose zsh tmux git starship agents
-git restore -- README.md AGENTS.md CLAUDE.md CODEX_USAGE.md
 ```
 
-Do not remove real home-directory files unless you know whether they are symlinks created by Stow or independent files you still need.
+This removes Stow-managed symlinks; it does not revert repository edits. Review `git diff` and restore individual repository files only when you intentionally want to discard those changes. Do not remove real home-directory files unless you know whether they are symlinks created by Stow or independent files you still need.
 
 ## Safety Notes
 
 - `.gitconfig` supports multiple identities with `includeIf`.
 - `gcommit` stages all changes and pushes; prefer staged workflows when reviewing changes.
+- `brewdump` generates a temporary snapshot and requires confirmation before replacing Brewfile.
+- `brewsave` refuses unrelated staged files and commits only Brewfile; `brewpush` never pushes automatically.
 - `brewup` can upgrade many tools at once.
 - Docker cleanup helpers can remove local data, especially volumes.
+- Generated `agents/.agents/skills/framer-project-*` folders can contain private project metadata and must remain local-only.
 - `macos/finder/setup-finder.sh` changes macOS preferences and should be run intentionally.
 - `.DS_Store`, swap files, `.env`, secrets, keys, tokens, and local-only files should stay out of Git.

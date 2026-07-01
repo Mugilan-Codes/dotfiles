@@ -2,6 +2,28 @@
 # Put anything here that needs logic, arguments, checks, or multiple commands.
 # Aliases are for shortcuts. Functions are for workflows.
 
+# Open files using VISUAL/EDITOR without treating a value such as
+# `code --wait` as one executable name.
+_dotfiles_edit() {
+  emulate -L zsh
+
+  local editor_spec="${VISUAL:-${EDITOR:-}}"
+  local -a editor_cmd
+
+  if [[ -n "$editor_spec" ]]; then
+    editor_cmd=(${(z)editor_spec})
+  elif command -v code >/dev/null 2>&1; then
+    editor_cmd=(code --wait)
+  elif command -v vim >/dev/null 2>&1; then
+    editor_cmd=(vim)
+  else
+    echo "No editor found. Set VISUAL or EDITOR." >&2
+    return 1
+  fi
+
+  command "${editor_cmd[@]}" "$@"
+}
+
 # ─────────────────────────────
 # ⚙️ Utility Functions
 # ─────────────────────────────
@@ -112,25 +134,55 @@ fixaudio() {
   sudo pkill coreaudiod
 }
 
-# Fix npm global permissions for the active npm prefix.
-# Useful if global installs fail due to ownership issues.
-# Warning: uses sudo chown -R on npm global install directories.
+# Fix npm global permissions only for an FNM-managed prefix under $HOME.
+# Refuses system, Homebrew, and broad user-directory prefixes.
 # Usage:
 #   fixperm
 fixperm() {
+  emulate -L zsh
+
+  command -v npm >/dev/null 2>&1 || {
+    echo "npm not found"
+    return 1
+  }
+
   local prefix
-  prefix="$(npm config get prefix)"
+  prefix="$(npm config get prefix 2>/dev/null)"
+  prefix="${prefix:A}"
 
   if [[ -z "$prefix" || ! -d "$prefix" ]]; then
     echo "Invalid npm prefix: $prefix"
     return 1
   fi
 
-  echo "Fixing npm global permissions under: $prefix"
-  sudo chown -R "$(whoami)" \
-    "$prefix/lib/node_modules" \
-    "$prefix/bin" \
-    "$prefix/share" 2>/dev/null
+  if [[ "$prefix" != "$HOME/"* || "$prefix" != *"/fnm/"* ]]; then
+    echo "Refusing unsafe npm prefix: $prefix"
+    echo "fixperm only supports an FNM-managed prefix below \$HOME."
+    return 1
+  fi
+
+  local -a targets
+  local target
+  for target in "$prefix/lib/node_modules" "$prefix/bin" "$prefix/share"; do
+    [[ -e "$target" ]] && targets+=("$target")
+  done
+
+  if (( ${#targets[@]} == 0 )); then
+    echo "No npm global directories found under: $prefix"
+    return 0
+  fi
+
+  echo "This will recursively change ownership only for:"
+  printf '  %s\n' "${targets[@]}"
+  echo
+  read "confirm?Type FIXPERM to continue: "
+
+  if [[ "$confirm" != "FIXPERM" ]]; then
+    echo "Cancelled."
+    return 1
+  fi
+
+  sudo chown -R "$(id -un):$(id -gn)" "${targets[@]}"
 }
 
 # Find files/directories using the real `fd` binary.
@@ -268,32 +320,70 @@ pathdups() {
   fi
 }
 
-# Dump current Homebrew state into the dotfiles Brewfile.
-# Shows diff only if Brewfile changed.
-# Overwrites the tracked Brewfile with the current machine's Homebrew state.
+# Refuse automated Brewfile commits while unrelated files are staged.
+_brewfile_refuse_unrelated_staged() {
+  local repo="$1"
+  local unrelated
+
+  unrelated=$(git -C "$repo" diff --cached --name-only -- . ':(exclude)Brewfile')
+  if [[ -n "$unrelated" ]]; then
+    echo "Refusing: unrelated staged files exist:"
+    print -r -- "$unrelated"
+    echo "Commit or unstage them before using brewsave/brewpush."
+    return 1
+  fi
+}
+
+# Preview current Homebrew package, tap, and trust state before replacing Brewfile.
+# Homebrew 6 serializes local `brew trust` entries as `trusted:` options.
 # Usage:
 #   brewdump
 brewdump() {
+  emulate -L zsh
+
   local repo="$HOME/dotfiles"
   local file="$repo/Brewfile"
+  local dump_file
+  local confirm
 
   command -v brew >/dev/null 2>&1 || {
     echo "brew not found"
     return 1
   }
 
-  brew bundle dump --file="$file" --force || return 1
+  [[ -f "$file" ]] || {
+    echo "Brewfile not found: $file"
+    return 1
+  }
 
-  if command -v git >/dev/null 2>&1 && [[ -d "$repo/.git" ]]; then
-    if ! git -C "$repo" diff --quiet -- "$file"; then
-      echo "Brewfile updated. Changes:"
-      git -C "$repo" --no-pager diff -- "$file"
-    else
-      echo "Brewfile unchanged."
+  dump_file=$(mktemp "${TMPDIR:-/tmp}/Brewfile.XXXXXX") || return 1
+  {
+    echo "Generating a temporary Brewfile from local Homebrew state..."
+    brew bundle dump --file="$dump_file" --force || return 1
+
+    if cmp -s "$file" "$dump_file"; then
+      echo "Brewfile already matches local Homebrew state."
+      return 0
     fi
-  else
+
+    echo
+    echo "Proposed Brewfile changes:"
+    command diff -u "$file" "$dump_file" || true
+    echo
+    echo "Review package, tap, and trusted: changes carefully."
+    read "confirm?Type REPLACE to update $file: "
+
+    if [[ "$confirm" != "REPLACE" ]]; then
+      echo "Brewfile left unchanged."
+      return 1
+    fi
+
+    command cp "$dump_file" "$file" || return 1
     echo "Updated: $file"
-  fi
+    echo "Review with: git -C \"$repo\" diff -- Brewfile"
+  } always {
+    command rm -f "$dump_file"
+  }
 }
 
 # Install a Homebrew formula, then refresh Brewfile if install succeeds.
@@ -330,62 +420,65 @@ brewuntap() {
   brew untap "$@" && brewdump
 }
 
-# Dump Brewfile and commit it if changed.
-# Changes Git history in this dotfiles repo by creating a commit.
+# Preview/update Brewfile and commit only that file after confirmation.
+# Refuses to run while unrelated files are staged.
 # Usage:
 #   brewsave
 #   brewsave "Update Brewfile after installing jq"
 brewsave() {
+  emulate -L zsh
+
   local repo="$HOME/dotfiles"
   local msg="${1:-Update Brewfile}"
+  local confirm
 
+  [[ -d "$repo/.git" ]] || { echo "Not a git repo: $repo"; return 1; }
+  _brewfile_refuse_unrelated_staged "$repo" || return 1
   brewdump || return 1
 
-  if [[ -d "$repo/.git" ]] && ! git -C "$repo" diff --quiet -- Brewfile; then
-    git -C "$repo" add Brewfile &&
-    git -C "$repo" commit -m "$msg"
-  else
+  if git -C "$repo" diff --quiet -- Brewfile &&
+     git -C "$repo" diff --cached --quiet -- Brewfile; then
     echo "No Brewfile changes to commit."
+    return 0
   fi
+
+  _brewfile_refuse_unrelated_staged "$repo" || return 1
+  echo "Commit message: $msg"
+  read "confirm?Type BREWCOMMIT to stage and commit only Brewfile: "
+
+  if [[ "$confirm" != "BREWCOMMIT" ]]; then
+    echo "Commit cancelled. Brewfile changes remain uncommitted."
+    return 1
+  fi
+
+  git -C "$repo" add -- Brewfile || return 1
+  _brewfile_refuse_unrelated_staged "$repo" || return 1
+  git -C "$repo" commit --only -m "$msg" -- Brewfile
 }
 
-# Dump current Homebrew state, commit Brewfile if changed, then push dotfiles.
-#
-# Use when:
-#   - You installed/removed Homebrew packages
-#   - You want your dotfiles Brewfile synced to git remote
-#   - You want a one-command Brewfile save + push workflow
-#
-# Notes:
-#   - Runs `brewdump` first
-#   - Commits only if Brewfile changed
-#   - Does nothing if Brewfile is unchanged
-#
+# Prepare a Brewfile-only commit, then print manual push guidance.
+# This function never pushes automatically.
 # Usage:
 #   brewpush
 #   brewpush "Update Brewfile after installing jq"
 brewpush() {
+  emulate -L zsh
+
   local repo="$HOME/dotfiles"
   local msg="${1:-Update Brewfile}"
 
-  brewdump || return 1
+  [[ -d "$repo/.git" ]] || { echo "Not a git repo: $repo"; return 1; }
+  _brewfile_refuse_unrelated_staged "$repo" || return 1
+  brewsave "$msg" || return 1
 
-  if [[ ! -d "$repo/.git" ]]; then
-    echo "Not a git repo: $repo"
-    return 1
-  fi
-
-  if git -C "$repo" diff --quiet -- Brewfile; then
-    echo "No Brewfile changes to commit or push."
-    return 0
-  fi
-
-  git -C "$repo" add Brewfile &&
-  git -C "$repo" commit -m "$msg" &&
-  git -C "$repo" push
+  echo
+  echo "No push was performed."
+  echo "Review the commit, then push manually with:"
+  echo "  git -C \"$repo\" push"
 }
 
 # Check whether installed Homebrew packages match the tracked Brewfile.
+# This checks package presence, not Homebrew tap trust warnings.
 # Use before or after setup to verify this Mac is reproducible from Brewfile.
 # Usage:
 #   brewcheck
@@ -399,7 +492,25 @@ brewcheck() {
     return 1
   fi
 
-  brew bundle check --file="$file"
+  brew bundle check --no-upgrade --file="$file"
+}
+
+# Show Homebrew tap trust state and doctor warnings without changing anything.
+# Usage:
+#   brewtrustcheck
+brewtrustcheck() {
+  command -v brew >/dev/null 2>&1 || { echo "brew not found"; return 1; }
+
+  echo "== Trusted Homebrew entries =="
+  brew trust
+
+  echo
+  echo "== Untrusted Homebrew entries =="
+  brew untrust
+
+  echo
+  echo "== Homebrew doctor =="
+  brew doctor
 }
 
 # Show outdated Homebrew formulae and casks without upgrading anything.
@@ -411,16 +522,19 @@ brewoutdated() {
   brew outdated --greedy
 }
 
-# Re-stow this dotfiles repo after confirmation.
+# Simulate and then re-stow this dotfiles repo after confirmation.
 #
 # Warning:
-#   This updates symlinks for zsh, tmux, git, and starship in your home directory.
+#   The confirmed step updates managed symlinks in your home directory.
 #
 # Usage:
 #   dotstow
 dotstow() {
+  emulate -L zsh
+
   local repo="$HOME/dotfiles"
-  local packages=(zsh tmux git starship)
+  local packages=(zsh tmux git starship agents)
+  local confirm
 
   command -v stow >/dev/null 2>&1 || { echo "stow not found"; return 1; }
 
@@ -429,10 +543,17 @@ dotstow() {
     return 1
   fi
 
-  echo "This will re-stow packages from: $repo"
+  echo "Previewing Stow changes from: $repo"
   echo "Packages: ${packages[*]}"
   echo
 
+  (cd "$repo" && stow --simulate --verbose "${packages[@]}") || {
+    echo "Stow simulation failed. Nothing was changed."
+    return 1
+  }
+
+  echo
+  echo "Simulation passed. Review the output above before continuing."
   read "confirm?Type STOW to continue: "
 
   if [[ "$confirm" != "STOW" ]]; then
@@ -440,27 +561,101 @@ dotstow() {
     return 1
   fi
 
-  (cd "$repo" && stow --restow "${packages[@]}")
+  (cd "$repo" && stow --restow --verbose "${packages[@]}")
 }
 
-# Find broken symlinks under your home directory.
-# Use after moving files or re-stowing dotfiles.
+# Check only the symlinks managed by this dotfiles repo.
+# Avoids scanning runtime/cache trees such as FNM multishell state.
 # Usage:
 #   dotlinks
 dotlinks() {
-  find "$HOME" -maxdepth 4 -type l ! -exec test -e {} \; -print 2>/dev/null
+  emulate -L zsh
+
+  local -a links=(
+    "$HOME/.zshrc"
+    "$HOME/.zprofile"
+    "$HOME/.zshenv"
+    "$HOME/.zlogin"
+    "$HOME/.oh-my-zsh/custom/aliases.zsh"
+    "$HOME/.oh-my-zsh/custom/functions.zsh"
+    "$HOME/.oh-my-zsh/custom/completions.zsh"
+    "$HOME/.tmux.conf"
+    "$HOME/.gitconfig"
+    "$HOME/.config/starship.toml"
+    "$HOME/.agents/skills"
+  )
+  local link
+  local failures=0
+
+  for link in "${links[@]}"; do
+    if [[ -L "$link" && -e "$link" ]]; then
+      echo "ok: $link -> $(readlink "$link")"
+    elif [[ -L "$link" ]]; then
+      echo "broken: $link -> $(readlink "$link")"
+      (( failures++ ))
+    elif [[ -e "$link" ]]; then
+      echo "not a symlink: $link"
+      (( failures++ ))
+    else
+      echo "missing: $link"
+      (( failures++ ))
+    fi
+  done
+
+  echo
+  if (( failures == 0 )); then
+    echo "All ${#links[@]} managed symlinks are healthy."
+    return 0
+  fi
+
+  echo "$failures managed symlink check(s) failed."
+  return 1
 }
 
-# Check core dotfiles tools and expected stowed config links.
-# Use after setup or when shell tooling behaves unexpectedly.
+# Run a fast, read-only check of core tools, managed links, and local toolchains.
+# Does not start daemons, install packages, or apply Stow changes.
 # Usage:
 #   dotdoctor
 dotdoctor() {
+  emulate -L zsh
+
   local repo="$HOME/dotfiles"
-  local missing=0
+  local -a packages=(zsh tmux git starship agents)
+  local -a links=(
+    "$HOME/.zshrc"
+    "$HOME/.zprofile"
+    "$HOME/.zshenv"
+    "$HOME/.zlogin"
+    "$HOME/.oh-my-zsh/custom/aliases.zsh"
+    "$HOME/.oh-my-zsh/custom/functions.zsh"
+    "$HOME/.oh-my-zsh/custom/completions.zsh"
+    "$HOME/.tmux.conf"
+    "$HOME/.gitconfig"
+    "$HOME/.config/starship.toml"
+    "$HOME/.agents/skills"
+  )
+  local -a expected=(
+    "$repo/zsh/.zshrc"
+    "$repo/zsh/.zprofile"
+    "$repo/zsh/.zshenv"
+    "$repo/zsh/.zlogin"
+    "$repo/zsh/.oh-my-zsh/custom/aliases.zsh"
+    "$repo/zsh/.oh-my-zsh/custom/functions.zsh"
+    "$repo/zsh/.oh-my-zsh/custom/completions.zsh"
+    "$repo/tmux/.tmux.conf"
+    "$repo/git/.gitconfig"
+    "$repo/starship/.config/starship.toml"
+    "$repo/agents/.agents/skills"
+  )
+  local failures=0
+  local warnings=0
   local cmd
+  local i
+  local link
+  local target
+  local git_status
   local required=(brew stow git zsh tmux starship fzf fd rg zoxide)
-  local optional=(fnm eza code)
+  local optional=(fnm node npm eza code fvm adb docker orb)
 
   echo "== Required commands =="
   for cmd in "${required[@]}"; do
@@ -468,7 +663,7 @@ dotdoctor() {
       echo "ok: $cmd"
     else
       echo "missing: $cmd"
-      missing=1
+      (( failures++ ))
     fi
   done
 
@@ -479,34 +674,110 @@ dotdoctor() {
       echo "ok: $cmd"
     else
       echo "optional missing: $cmd"
+      (( warnings++ ))
     fi
   done
 
   echo
-  echo "== Dotfiles repo =="
+  echo "== Repository =="
   if [[ -d "$repo/.git" ]]; then
     echo "ok: $repo"
+    git_status=$(git -C "$repo" status --short --untracked-files=all 2>/dev/null)
+    if [[ -n "$git_status" ]]; then
+      echo "warning: repository has staged or unstaged changes"
+      (( warnings++ ))
+    else
+      echo "ok: working tree clean"
+    fi
   else
     echo "missing: $repo"
-    missing=1
+    (( failures++ ))
   fi
 
   echo
-  echo "== Expected symlinks =="
-  local link
-  for link in "$HOME/.zshrc" "$HOME/.gitconfig" "$HOME/.tmux.conf" "$HOME/.config/starship.toml"; do
-    if [[ -L "$link" ]]; then
-      echo "ok: $link -> $(readlink "$link")"
+  echo "== Managed symlinks =="
+  for (( i = 1; i <= ${#links[@]}; i++ )); do
+    link="${links[$i]}"
+    target="${expected[$i]}"
+
+    if [[ -L "$link" && ! -e "$link" ]]; then
+      echo "broken: $link -> $(readlink "$link")"
+      (( failures++ ))
+    elif [[ -L "$link" && "${link:A}" == "${target:A}" ]]; then
+      echo "ok: $link"
+    elif [[ -L "$link" ]]; then
+      echo "wrong target: $link -> $(readlink "$link")"
+      (( failures++ ))
     elif [[ -e "$link" ]]; then
       echo "not symlink: $link"
-      missing=1
+      (( failures++ ))
     else
       echo "missing: $link"
-      missing=1
+      (( failures++ ))
     fi
   done
 
-  return "$missing"
+  echo
+  echo "== Stow simulation =="
+  if command -v stow >/dev/null 2>&1 && [[ -d "$repo" ]]; then
+    if (cd "$repo" && stow --simulate --verbose "${packages[@]}") >/dev/null 2>&1; then
+      echo "ok: ${packages[*]}"
+    else
+      echo "failed: run stow --simulate --verbose ${packages[*]} for details"
+      (( failures++ ))
+    fi
+  else
+    echo "skipped: stow or repository unavailable"
+    (( warnings++ ))
+  fi
+
+  echo
+  echo "== Toolchains =="
+  if command -v brew >/dev/null 2>&1; then
+    echo "Homebrew: $(command -v brew)"
+  fi
+  if command -v node >/dev/null 2>&1; then
+    echo "Node: $(node --version 2>/dev/null)"
+  fi
+  if command -v npm >/dev/null 2>&1; then
+    echo "npm: $(npm --version 2>/dev/null)"
+  fi
+
+  local fvm_default="$HOME/fvm/default"
+  if [[ -e "$fvm_default/bin/flutter" ]]; then
+    echo "ok: FVM default -> ${fvm_default:A}"
+  else
+    echo "optional missing: FVM default Flutter SDK"
+    (( warnings++ ))
+  fi
+
+  local android_home="${ANDROID_HOME:-$HOME/Library/Android/sdk}"
+  if [[ -d "$android_home" ]]; then
+    echo "ok: Android SDK at $android_home"
+  else
+    echo "optional missing: Android SDK at $android_home"
+    (( warnings++ ))
+  fi
+
+  if command -v docker >/dev/null 2>&1; then
+    local docker_context
+    docker_context=$(docker context show 2>/dev/null)
+    echo "Docker context: ${docker_context:-unavailable}"
+    if [[ "$docker_context" == "orbstack" && ! -S "$HOME/.orbstack/run/docker.sock" ]]; then
+      echo "warning: OrbStack Docker socket is not running"
+      (( warnings++ ))
+    fi
+  fi
+
+  echo
+  echo "== Summary =="
+  if (( failures == 0 )); then
+    echo "Passed with $warnings warning(s)."
+    return 0
+  fi
+
+  echo "Failed: $failures check(s), $warnings warning(s)."
+  return 1
 }
 
 # ─────────────────────────────
@@ -952,7 +1223,7 @@ fzf-open() {
   local file
   file=$(command fd --type f --hidden --exclude .git . 2>/dev/null | fzf --preview="$preview_cmd" --height=40%)
 
-  [[ -n "$file" ]] && ${EDITOR:-code} "$file"
+  [[ -n "$file" ]] && _dotfiles_edit "$file"
 }
 
 # Search file contents using ripgrep, then open a selected file.
@@ -978,7 +1249,7 @@ fzf-content() {
   local file
   file=$(rg --files-with-matches "$1" . 2>/dev/null | fzf --preview="$preview_cmd")
 
-  [[ -n "$file" ]] && ${EDITOR:-code} "$file"
+  [[ -n "$file" ]] && _dotfiles_edit "$file"
 }
 
 # Interactive live grep using ripgrep + fzf.
@@ -1032,7 +1303,7 @@ fglive() {
   if command -v code >/dev/null 2>&1; then
     code -g "$file:$line"
   else
-    ${EDITOR:-code} "$file"
+    _dotfiles_edit "$file"
   fi
 }
 
@@ -1070,7 +1341,7 @@ dailylog() {
 EOF
   fi
 
-  ${EDITOR:-code} "$today"
+  _dotfiles_edit "$today"
 }
 
 # ─────────────────────────────
@@ -1129,16 +1400,17 @@ tmuxdev() {
 
   local name
   name=$(basename "$dir")
+  local first_pane
 
   if tmux has-session -t "$name" 2>/dev/null; then
     tmux attach -t "$name"
     return
   fi
 
-  tmux new-session -d -s "$name" -c "$dir"
-  tmux split-window -h -c "$dir"
-  tmux split-window -v -c "$dir"
-  tmux select-pane -t 0
+  first_pane=$(tmux new-session -d -P -F '#{pane_id}' -s "$name" -c "$dir") || return 1
+  tmux split-window -t "$first_pane" -h -c "$dir"
+  tmux split-window -t "$first_pane" -v -c "$dir"
+  tmux select-pane -t "$first_pane"
   tmux attach -t "$name"
 }
 
@@ -1910,6 +2182,22 @@ docker-disk() {
   docker system df -v
 }
 
+_valid_tcp_port() {
+  emulate -L zsh
+  [[ "$1" == <-> ]] && (( 10#$1 >= 1 && 10#$1 <= 65535 ))
+}
+
+_local_dev_password() {
+  if command -v openssl >/dev/null 2>&1; then
+    openssl rand -hex 16
+  elif command -v uuidgen >/dev/null 2>&1; then
+    uuidgen | tr -d '-'
+  else
+    echo "Cannot generate a password: openssl and uuidgen are unavailable." >&2
+    return 1
+  fi
+}
+
 # Quick temporary PostgreSQL container for testing.
 #
 # Use when:
@@ -1921,9 +2209,10 @@ docker-disk() {
 #   Port: 5432
 #   DB: testdb
 #   User: mugilan
-#   Password: password
+#   Password: generated for each container
 #
 # Notes:
+#   - Port publishing is restricted to 127.0.0.1
 #   - Container name is fixed: pgquick
 #   - If it already exists, run pgquickrm first
 #   - Use a different port if 5432 is busy: pgquick 5433
@@ -1932,21 +2221,40 @@ docker-disk() {
 #   pgquick
 #   pgquick 5433
 pgquick() {
+  emulate -L zsh
+
   local port="${1:-5432}"
+  local password
+  local reply
+
+  command -v docker >/dev/null 2>&1 || { echo "docker not found"; return 1; }
+  _valid_tcp_port "$port" || {
+    echo "Invalid TCP port: $port"
+    return 1
+  }
+
+  read "reply?Start temporary PostgreSQL on 127.0.0.1:$port? [y/N] "
+  case "$reply" in
+    [yY]|[yY][eE][sS]) ;;
+    *) echo "Cancelled."; return 1 ;;
+  esac
+
+  password=$(_local_dev_password) || return 1
 
   docker run --name pgquick \
     -e POSTGRES_DB=testdb \
     -e POSTGRES_USER=mugilan \
-    -e POSTGRES_PASSWORD=password \
-    -p "$port:5432" \
-    -d postgres:16
+    -e POSTGRES_PASSWORD="$password" \
+    -p "127.0.0.1:$port:5432" \
+    -d postgres:16 || return 1
 
   echo "Postgres running:"
-  echo "Host: localhost"
+  echo "Host: 127.0.0.1"
   echo "Port: $port"
   echo "DB: testdb"
   echo "User: mugilan"
-  echo "Password: password"
+  echo "Password: $password"
+  echo "Save the generated password for this temporary container."
 }
 
 # Stop and remove the temporary pgquick PostgreSQL container.
@@ -1970,6 +2278,8 @@ pgquickrm() {
 #   - You want to test cache/session/queue behavior quickly
 #
 # Notes:
+#   - Port publishing is restricted to 127.0.0.1
+#   - Authentication uses a generated password
 #   - Container name is fixed: redisquick
 #   - If it already exists, run redisquickrm first
 #   - Use a different port if 6379 is busy: redisquick 6380
@@ -1978,13 +2288,33 @@ pgquickrm() {
 #   redisquick
 #   redisquick 6380
 redisquick() {
+  emulate -L zsh
+
   local port="${1:-6379}"
+  local password
+  local reply
+
+  command -v docker >/dev/null 2>&1 || { echo "docker not found"; return 1; }
+  _valid_tcp_port "$port" || {
+    echo "Invalid TCP port: $port"
+    return 1
+  }
+
+  read "reply?Start temporary Redis on 127.0.0.1:$port? [y/N] "
+  case "$reply" in
+    [yY]|[yY][eE][sS]) ;;
+    *) echo "Cancelled."; return 1 ;;
+  esac
+
+  password=$(_local_dev_password) || return 1
 
   docker run --name redisquick \
-    -p "$port:6379" \
-    -d redis:7
+    -p "127.0.0.1:$port:6379" \
+    -d redis:7 redis-server --requirepass "$password" || return 1
 
-  echo "Redis running on localhost:$port"
+  echo "Redis running on 127.0.0.1:$port"
+  echo "Password: $password"
+  echo "Connect with: redis-cli -h 127.0.0.1 -p $port -a '<password>'"
 }
 
 # Stop and remove the temporary redisquick Redis container.
