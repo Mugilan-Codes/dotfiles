@@ -94,6 +94,8 @@ Install packages from Homebrew:
 brew bundle --file=~/dotfiles/Brewfile
 ```
 
+Global npm CLIs are managed per fnm-selected Node.js version with npm, not through Brew Bundle. The Brewfile installs `fnm` itself but intentionally contains no `npm` entries.
+
 The Brewfile grants Homebrew 6 trust only to the named third-party formulae and casks it installs. Do not trust an entire tap unless every current and future item in that tap should be allowed to run.
 
 Restart the shell:
