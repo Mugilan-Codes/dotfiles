@@ -4,7 +4,7 @@ Last reviewed: 2026-07-06
 
 This guide documents the local skills installed under `$HOME/.agents/skills`. A skill is triggered by its `name` and `description` frontmatter in `SKILL.md`; the body is loaded only after Codex decides the skill applies.
 
-Audit note: the 2026-07-06 audit found 12 tracked reusable skill folders. Generated `framer-project-*` skills are local-only and excluded from Git because they may contain private project metadata.
+Audit note: the 2026-07-06 audit found 13 tracked reusable skill folders. Generated `framer-project-*` skills are local-only and excluded from Git because they may contain private project metadata.
 
 ## Installed Skills
 
@@ -20,6 +20,7 @@ Audit note: the 2026-07-06 audit found 12 tracked reusable skill folders. Genera
 | `dsa-solution-review` | General-purpose | You want a data-structures-and-algorithms solution reviewed or explained. | The problem is production application code rather than an algorithm exercise. |
 | `framer` | Integration workflow | You explicitly want to design, edit, inspect, or publish a Framer project. | The request is generic website or web-development work without clear Framer context. |
 | `framer-code-components` | Supporting reference | A Framer task requires creating or editing a code component after the base and project-scoped skills are loaded. | As a direct entry point; load it only through the required Framer workflow. |
+| `here-now` | Integration workflow | You want to publish files or a static site with here.now, manage site access, or use a private here.now Drive. | A different hosting or storage provider is requested, or the files should remain local. |
 | `loopy` | General-purpose workflow | You want to discover, find, audit, craft, run, debrief, save, adapt, or publish a bounded AI-agent loop. | The task is a one-shot workflow where fresh feedback cannot change the next action. |
 | `skills-maintainer` | General-purpose | You want to audit local skills, check broken references, or update this guide and registry. | You want to modify a project repository instead of the local skills setup. |
 
@@ -58,6 +59,12 @@ Use these phrases directly when you want to force the skill:
 - `edit my Framer site`
 - `publish my Framer project`
 - `create a Framer code component`
+- `Use here-now`
+- `publish this with here.now`
+- `host this and generate a URL`
+- `save this to my here.now Drive`
+- `share a Drive folder with another agent`
+- `password protect this here.now site`
 - `Use loopy`
 - `turn this recurring work into a bounded loop`
 - `find a published loop for this workflow`
@@ -88,6 +95,9 @@ Use these phrases directly when you want to force the skill:
 - `Use the framer skill to update the pricing section on my Framer site.`
 - `Use Framer to create a configurable code component and add it to the canvas.`
 - `Use Framer to inspect and publish my connected Framer project.`
+- `Use here-now to publish this static site and give me its live URL.`
+- `Use here-now to save this research folder to my Drive and create a scoped read-only share token.`
+- `Use here-now to restrict this site to the email addresses I provide.`
 - `Use loopy to find recurring work in these coding threads and propose one bounded loop.`
 - `Use loopy to audit this loop for weak checks, unsafe authority, and missing stop conditions.`
 - `Use loopy to run this saved project loop and return an evidence-backed receipt.`
@@ -100,6 +110,7 @@ Use these phrases directly when you want to force the skill:
 - `framer` requires explicit Framer context, CLI setup, network access, and a project session before project work begins.
 - `framer-code-components` is not a direct entry point. Load `framer`, run `session new`, load the generated project skill, and only then load it for code-component work.
 - Generated `framer-project-*` skills are session/project-specific local state. Keep them out of this public registry and refresh them with `session new`.
+- `here-now` requires network access plus `curl`, `file`, and `jq`. Read the live service documentation before capability guidance. Anonymous sites expire after 24 hours; permanent sites and private Drives require credentials. Never commit credentials or `.herenow/state.json`.
 - `loopy` routes requests through the smallest applicable workflow. Published-loop discovery and comparison require access to the live Loop Library catalog; saving project loops and external publication require explicit user requests or approval.
 - Start a fresh Codex session after adding, removing, renaming, or changing `SKILL.md` frontmatter so skill discovery metadata refreshes.
 
