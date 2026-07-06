@@ -1,102 +1,120 @@
-# CODEX_USAGE.md
+# Codex Usage
 
-How to use Codex with this dotfiles repository.
+Practical prompt patterns for working with this repository.
 
-## Baseline Workflow
+## Instruction Discovery
 
-Start most sessions with:
+Codex discovers `AGENTS.md` instructions from the repository hierarchy.
+This repository keeps canonical policy in the root `AGENTS.md`; `CLAUDE.md`
+is a relative symlink to it so Codex and Claude Code receive the same rules.
+If a nested `AGENTS.md` is added later, its narrower instructions apply within
+that subtree.
+
+Codex reads user-managed skills from `$HOME/.agents/skills`. This repository
+does not duplicate those skills under `$HOME/.codex/skills`; existing Codex
+system/plugin skills there are independently managed.
+
+## Start With Scope and Authority
+
+Audit-only prompt:
 
 ```text
-Onboard me to this dotfiles repo. Identify the Stow packages, key commands, current Git status, and any risks before changing files.
+Audit this dotfiles repository. Inspect the current Git and runtime state,
+report findings and risks, and do not modify files, links, packages, or
+external systems.
 ```
 
-Useful command to ask Codex to run:
+Implementation prompt:
 
-```sh
-git status --short --untracked-files=all
+```text
+Implement this scoped change. Preserve all pre-existing unrelated changes,
+edit only the required files, and run relevant validation. You may edit the
+repository, but do not install, Stow, stage, commit, push, or deploy unless I
+authorize those actions separately.
 ```
+
+State authority explicitly when needed:
+
+```text
+You may edit tracked files and run the real skill installer. Do not stage,
+commit, push, apply Stow, or publish externally.
+```
+
+Editing, installing, applying Stow, staging, committing, pushing, and
+deploying are separate permissions.
 
 ## Common Prompts
 
-Repo onboarding:
+Repository onboarding:
 
 ```text
-Use repo-onboarding to explain this repo's structure, Stow packages, verification commands, and maintenance risks.
+Use repo-onboarding to explain this repo's structure, Stow packages, agent
+skill ownership, verification commands, current Git state, and maintenance
+risks before changing anything.
 ```
 
-Staged diff review:
+Staged review:
 
 ```text
-Use staged-diff-review to review only my staged changes before I commit.
+Use staged-diff-review to review only my staged changes. Do not modify,
+unstage, commit, or push anything.
 ```
 
-Skills maintenance:
+Audit agent skills:
 
 ```text
-Use skills-maintainer to audit $HOME/.agents/skills, update SKILLS_GUIDE.md and SKILLS_REGISTRY.md, and report broken references.
+Use skills-maintainer and scripts/agent-skills plan/status to audit local,
+third-party, and generated skills. Do not install or update anything.
 ```
 
-Adding a new Stow package:
+Implement a local skill:
 
 ```text
-Help me add a new GNU Stow package. Inspect the target home path first, create the package structure, run a Stow simulation, and do not apply or stage changes until I ask.
+Add this dotfiles-owned skill under agents/skills, update skills.conf and the
+agent documentation, then run the authorized install and validation workflow.
+Do not stage or commit.
 ```
 
-Updating existing dotfiles:
+Update third-party skills:
 
 ```text
-Update my zsh/tmux/git/starship config for this specific change. Keep the edit scoped, preserve comments, and run the relevant syntax and Stow simulation checks.
+Run scripts/agent-skills plan first. If healthy, run its explicit update
+workflow for only the configured allowlist, report changed skills, and do not
+change the pinned CLI version.
 ```
 
-Updating Codex skills:
+Modify a Stow package:
 
 ```text
-I changed local Codex skills. Run skills-maintainer, update the guide and registry, replace hard-coded machine paths with $HOME where portable, and run Stow simulation for agents.
+Update the requested zsh/tmux/git/starship configuration. Inspect targets,
+keep the change scoped, and run Stow simulation. Do not apply real Stow,
+stage, or commit.
 ```
 
-## Stow Commands
+## Agent Skill Workflow
 
-Preview the skills package:
+Desired third-party state is in `agents/skills.conf`; local source is under
+`agents/skills`; generated Framer skills remain runtime-only.
 
 ```sh
-stow --simulate --verbose agents
+scripts/agent-skills plan
+scripts/agent-skills install
+scripts/agent-skills status
+scripts/agent-skills update
+scripts/agent-skills unlink-local
 ```
 
-Apply the skills package:
+Use `plan` and `status` for audits. `install`, `update`, and `unlink-local`
+mutate runtime state and need explicit authority. Detailed ownership,
+configuration, troubleshooting, and lifecycle guidance is in
+`agents/README.md`.
 
-```sh
-stow --verbose agents
-```
+## Good Defaults
 
-Preview all Stow packages:
-
-```sh
-stow --simulate --verbose zsh tmux git starship agents
-```
-
-Check Git state:
-
-```sh
-git status --short --untracked-files=all
-```
-
-## Recommended Skills Update Flow
-
-After changing skills under `agents/.agents/skills`:
-
-1. Run `skills-maintainer`.
-2. Update `agents/.agents/skills/SKILLS_GUIDE.md`.
-3. Update `agents/.agents/skills/SKILLS_REGISTRY.md`.
-4. Run `stow --simulate --verbose agents`.
-5. Review staged changes with `staged-diff-review` if anything is staged.
-6. Commit with a focused message after reviewing the diff.
-
-Do not include `.DS_Store`, `.env`, keys, tokens, generated junk, or machine-only files in commits.
-
-## Good Defaults For Codex
-
-- Ask Codex to inspect before editing.
-- Ask for small, package-scoped changes.
-- Ask Codex to show changed files and validation results.
-- Tell Codex whether it may stage, commit, push, or apply real Stow operations.
-- Prefer `$HOME` in reusable docs and absolute paths only for machine-specific examples.
+- Ask Codex to inspect branch, HEAD, status, targets, and symlinks first.
+- Preserve pre-existing changes and keep edits scoped.
+- Ask for a short plan on non-trivial work.
+- Require concise, copy-pasteable commands.
+- Request changed files, runtime changes, validation results, and final Git
+  status.
+- Prefer `$HOME` and repository-root-relative paths in reusable docs.

@@ -1,0 +1,1098 @@
+#!/usr/bin/env bash
+
+set -u
+set -o pipefail
+
+script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd -P)"
+repo_root="$(git -C "$script_dir/.." rev-parse --show-toplevel 2>/dev/null)" || {
+  echo "error: scripts/agent-skills must run from a Git worktree" >&2
+  exit 1
+}
+config_file="$repo_root/agents/skills.conf"
+
+if [[ ! -f "$config_file" ]]; then
+  echo "error: missing configuration: $config_file" >&2
+  exit 1
+fi
+
+# shellcheck source=../agents/skills.conf
+source "$config_file"
+
+read -r -a target_agents <<< "$SKILLS_TARGET_AGENTS"
+read -r -a matt_skills <<< "$MATT_SKILLS"
+read -r -a here_now_skills <<< "$HERE_NOW_SKILLS"
+read -r -a local_skills <<< "$LOCAL_SKILLS"
+third_party_skills=("${matt_skills[@]}" "${here_now_skills[@]}")
+
+agents_root="$HOME/.agents/skills"
+claude_root="$HOME/.claude/skills"
+codex_root="${CODEX_HOME:-$HOME/.codex}/skills"
+lock_file="${XDG_STATE_HOME:+$XDG_STATE_HOME/skills/}.skill-lock.json"
+if [[ -z "${XDG_STATE_HOME:-}" ]]; then
+  lock_file="$HOME/.agents/.skill-lock.json"
+fi
+state_file="$HOME/.agents/.dotfiles-skills-state"
+local_clone="$HOME/Development/${MATT_SOURCE%%/*}-skills"
+cli=(npx --yes "skills@$SKILLS_CLI_VERSION")
+
+fail() {
+  echo "error: $*" >&2
+  return 1
+}
+
+require_commands() {
+  local command_name
+  for command_name in git node npx find realpath shasum; do
+    command -v "$command_name" >/dev/null 2>&1 || {
+      fail "required command not found: $command_name"
+      return 1
+    }
+  done
+}
+
+check_cli_version() {
+  local available
+  available="$("${cli[@]}" --version)" || {
+    fail "could not run skills@$SKILLS_CLI_VERSION"
+    return 1
+  }
+  [[ "$available" == "$SKILLS_CLI_VERSION" ]] || {
+    fail "expected skills CLI $SKILLS_CLI_VERSION, got $available"
+    return 1
+  }
+}
+
+validate_config() {
+  local failures=0
+  local name
+  local -a all_names=("${third_party_skills[@]}" "${local_skills[@]}")
+
+  [[ "$SKILLS_SCOPE" == "global" ]] || {
+    echo "error: SKILLS_SCOPE must be global" >&2
+    failures=$((failures + 1))
+  }
+  [[ "$SKILLS_INSTALL_MODE" == "symlink" ]] || {
+    echo "error: SKILLS_INSTALL_MODE must be symlink" >&2
+    failures=$((failures + 1))
+  }
+  [[ "$MATT_LOCAL_CLONE_REQUIRED" == "false" ]] || {
+    echo "error: MATT_LOCAL_CLONE_REQUIRED must be false" >&2
+    failures=$((failures + 1))
+  }
+  [[ "$GENERATED_RUNTIME_PATTERN" == "framer-project-*" ]] || {
+    echo "error: GENERATED_RUNTIME_PATTERN must be framer-project-*" >&2
+    failures=$((failures + 1))
+  }
+  [[ " ${target_agents[*]} " == *" codex "* ]] || {
+    echo "error: codex is not configured as a target agent" >&2
+    failures=$((failures + 1))
+  }
+  [[ " ${target_agents[*]} " == *" claude-code "* ]] || {
+    echo "error: claude-code is not configured as a target agent" >&2
+    failures=$((failures + 1))
+  }
+
+  for name in "${all_names[@]}"; do
+    [[ -n "$name" ]] || {
+      echo "error: configured skill names must be non-empty" >&2
+      failures=$((failures + 1))
+      continue
+    }
+  done
+
+  local duplicates
+  duplicates="$(
+    printf '%s\n' "${all_names[@]}" |
+      LC_ALL=C sort |
+      uniq -d
+  )"
+  if [[ -n "$duplicates" ]]; then
+    echo "error: duplicate configured skill names:" >&2
+    echo "$duplicates" >&2
+    failures=$((failures + 1))
+  fi
+
+  return "$failures"
+}
+
+source_for_skill() {
+  local skill="$1"
+  local candidate
+  for candidate in "${matt_skills[@]}"; do
+    if [[ "$skill" == "$candidate" ]]; then
+      printf '%s\n' "$MATT_SOURCE"
+      return 0
+    fi
+  done
+  for candidate in "${here_now_skills[@]}"; do
+    if [[ "$skill" == "$candidate" ]]; then
+      printf '%s\n' "$HERE_NOW_SOURCE"
+      return 0
+    fi
+  done
+  return 1
+}
+
+lock_source_for() {
+  local skill="$1"
+  [[ -f "$lock_file" ]] || return 1
+  node -e '
+    const fs = require("fs");
+    const lock = JSON.parse(fs.readFileSync(process.argv[1], "utf8"));
+    const entry = lock.skills && lock.skills[process.argv[2]];
+    if (!entry || !entry.source) process.exit(1);
+    process.stdout.write(entry.source);
+  ' "$lock_file" "$skill"
+}
+
+lock_has() {
+  lock_source_for "$1" >/dev/null 2>&1
+}
+
+reconcile_local_lock_metadata() {
+  [[ -f "$lock_file" ]] || return 0
+  node - "$lock_file" "${local_skills[@]}" <<'NODE'
+const fs = require("fs");
+const path = require("path");
+const lockPath = process.argv[2];
+const localNames = new Set(process.argv.slice(3));
+const lock = JSON.parse(fs.readFileSync(lockPath, "utf8"));
+if (lock.version !== 3 || !lock.skills || typeof lock.skills !== "object") {
+  console.error(`error: unsupported skills CLI lock format: ${lockPath}`);
+  process.exit(1);
+}
+const removed = [];
+for (const name of Object.keys(lock.skills)) {
+  if (localNames.has(name)) {
+    delete lock.skills[name];
+    removed.push(name);
+  }
+}
+if (removed.length === 0) process.exit(0);
+const temporary = `${lockPath}.agent-skills.${process.pid}`;
+fs.writeFileSync(temporary, `${JSON.stringify(lock, null, 2)}\n`, { mode: 0o600 });
+fs.renameSync(temporary, lockPath);
+for (const name of removed) {
+  console.log(`reconciled stale CLI lock metadata for local skill: ${name}`);
+}
+NODE
+}
+
+resolved_link_target() {
+  local link="$1"
+  local raw
+  [[ -L "$link" ]] || return 1
+  raw="$(readlink "$link")" || return 1
+  if [[ "$raw" == /* ]]; then
+    realpath "$raw" 2>/dev/null
+  else
+    realpath "$(dirname "$link")/$raw" 2>/dev/null
+  fi
+}
+
+link_points_to() {
+  local link="$1"
+  local target="$2"
+  local resolved_link
+  local resolved_target
+  [[ -L "$link" && -e "$link" && -e "$target" ]] || return 1
+  resolved_link="$(resolved_link_target "$link")" || return 1
+  resolved_target="$(realpath "$target")" || return 1
+  [[ "$resolved_link" == "$resolved_target" ]]
+}
+
+tree_hash() {
+  local directory="$1"
+  [[ -d "$directory" ]] || return 1
+  node -e '
+    const crypto = require("crypto");
+    const fs = require("fs");
+    const path = require("path");
+    const root = fs.realpathSync(process.argv[1]);
+    const files = [];
+    const walk = (directory) => {
+      for (const entry of fs.readdirSync(directory, { withFileTypes: true })) {
+        if (entry.name === ".git" || entry.name === "node_modules") continue;
+        const full = path.join(directory, entry.name);
+        if (entry.isDirectory()) walk(full);
+        else if (entry.isFile()) files.push(full);
+      }
+    };
+    walk(root);
+    files.sort((a, b) => a.localeCompare(b));
+    const hash = crypto.createHash("sha256");
+    for (const file of files) {
+      hash.update(path.relative(root, file).split(path.sep).join("/"));
+      hash.update(fs.readFileSync(file));
+    }
+    process.stdout.write(hash.digest("hex"));
+  ' "$directory"
+}
+
+state_hash_for() {
+  local skill="$1"
+  [[ -f "$state_file" ]] || return 1
+  awk -F '	' -v skill="$skill" '$1 == skill { print $3; found = 1; exit } END { if (!found) exit 1 }' "$state_file"
+}
+
+write_managed_state() {
+  local temporary
+  local skill
+  local source
+  local hash
+
+  mkdir -p "$(dirname "$state_file")" || return 1
+  temporary="$(mktemp "$HOME/.agents/.dotfiles-skills-state.XXXXXX")" || return 1
+  : > "$temporary"
+  for skill in "${third_party_skills[@]}"; do
+    source="$(source_for_skill "$skill")" || {
+      rm -f "$temporary"
+      return 1
+    }
+    hash="$(tree_hash "$agents_root/$skill")" || {
+      rm -f "$temporary"
+      return 1
+    }
+    printf '%s\t%s\t%s\n' "$skill" "$source" "$hash" >> "$temporary"
+  done
+  mv "$temporary" "$state_file"
+}
+
+inventory_has() {
+  local inventory="$1"
+  local skill="$2"
+  local expected_path="$3"
+  node -e '
+    const fs = require("fs");
+    const rows = JSON.parse(fs.readFileSync(process.argv[1], "utf8"));
+    const found = rows.some((row) =>
+      row.name === process.argv[2] &&
+      row.scope === "global" &&
+      row.path === process.argv[3]
+    );
+    process.exit(found ? 0 : 1);
+  ' "$inventory" "$skill" "$expected_path"
+}
+
+validate_skill_paths() {
+  node - "$@" <<'NODE'
+const fs = require("fs");
+const path = require("path");
+
+let failures = 0;
+const report = (message) => {
+  console.error(`invalid: ${message}`);
+  failures += 1;
+};
+
+const markdownFiles = (root) => {
+  const files = [];
+  const walk = (directory) => {
+    for (const entry of fs.readdirSync(directory, { withFileTypes: true })) {
+      if (entry.name === ".git" || entry.name === "node_modules") continue;
+      const full = path.join(directory, entry.name);
+      if (entry.isDirectory()) walk(full);
+      else if (entry.isFile() && entry.name.endsWith(".md")) files.push(full);
+    }
+  };
+  walk(root);
+  return files;
+};
+
+for (const configuredPath of process.argv.slice(2)) {
+  if (!fs.existsSync(configuredPath)) {
+    report(`missing skill directory: ${configuredPath}`);
+    continue;
+  }
+  const root = fs.realpathSync(configuredPath);
+  const skillFile = path.join(root, "SKILL.md");
+  if (!fs.existsSync(skillFile)) {
+    report(`missing SKILL.md: ${configuredPath}`);
+    continue;
+  }
+
+  const contents = fs.readFileSync(skillFile, "utf8");
+  const frontmatter = contents.match(/^---\r?\n([\s\S]*?)\r?\n---(?:\r?\n|$)/);
+  if (!frontmatter) {
+    report(`missing YAML frontmatter: ${skillFile}`);
+    continue;
+  }
+  const body = frontmatter[1];
+  const nameMatch = body.match(/^name:\s*(.+?)\s*$/m);
+  const descriptionMatch = body.match(/^description:\s*(.*?)\s*$/m);
+  const name = nameMatch && nameMatch[1].replace(/^['"]|['"]$/g, "").trim();
+  if (!name) report(`empty name: ${skillFile}`);
+  if (name && name !== path.basename(root)) {
+    report(`directory/name mismatch: ${configuredPath} declares ${name}`);
+  }
+  if (!descriptionMatch) {
+    report(`missing description: ${skillFile}`);
+  } else {
+    const value = descriptionMatch[1].trim();
+    if (!value) report(`empty description: ${skillFile}`);
+    if ((value === ">" || value === "|") && !body.match(/^description:\s*[>|]\s*\r?\n[ \t]+\S/m)) {
+      report(`empty block description: ${skillFile}`);
+    }
+  }
+
+  for (const markdownFile of markdownFiles(root)) {
+    const markdown = fs.readFileSync(markdownFile, "utf8");
+    const markdownForLinks = markdown
+      .replace(/```[\s\S]*?```/g, "")
+      .replace(/~~~[\s\S]*?~~~/g, "");
+    const linkPattern = /!?\[[^\]]*\]\(([^)]+)\)/g;
+    let match;
+    while ((match = linkPattern.exec(markdownForLinks)) !== null) {
+      let target = match[1].trim();
+      if (target.startsWith("<") && target.endsWith(">")) target = target.slice(1, -1);
+      else target = target.split(/\s+["']/)[0];
+      if (!target ||
+          target.startsWith("#") ||
+          target.startsWith("/") ||
+          target.startsWith("$") ||
+          /^[a-z][a-z0-9+.-]*:/i.test(target)) continue;
+      target = target.split("#")[0].split("?")[0];
+      if (!target) continue;
+      try {
+        target = decodeURIComponent(target);
+      } catch {}
+      const resolved = path.resolve(path.dirname(markdownFile), target);
+      if (!fs.existsSync(resolved)) {
+        report(`broken Markdown reference: ${markdownFile} -> ${target}`);
+      }
+    }
+  }
+}
+
+process.exit(failures === 0 ? 0 : 1);
+NODE
+}
+
+detect_duplicate_frontmatter_names() {
+  local root="$1"
+  [[ -d "$root" ]] || return 0
+  node - "$root" <<'NODE'
+const fs = require("fs");
+const path = require("path");
+const root = process.argv[2];
+const names = new Map();
+let failures = 0;
+for (const entry of fs.readdirSync(root, { withFileTypes: true })) {
+  const candidate = path.join(root, entry.name);
+  let stat;
+  try {
+    stat = fs.statSync(candidate);
+  } catch {
+    continue;
+  }
+  if (!stat.isDirectory()) continue;
+  const skillFile = path.join(candidate, "SKILL.md");
+  if (!fs.existsSync(skillFile)) continue;
+  const match = fs.readFileSync(skillFile, "utf8").match(/^---\r?\n([\s\S]*?)\r?\n---/);
+  const nameMatch = match && match[1].match(/^name:\s*(.+?)\s*$/m);
+  if (!nameMatch) continue;
+  const name = nameMatch[1].replace(/^['"]|['"]$/g, "").trim();
+  if (names.has(name)) {
+    console.error(`duplicate skill name in ${root}: ${name} (${names.get(name)}, ${entry.name})`);
+    failures += 1;
+  } else {
+    names.set(name, entry.name);
+  }
+}
+process.exit(failures === 0 ? 0 : 1);
+NODE
+}
+
+name_is_configured() {
+  local needle="$1"
+  local candidate
+  for candidate in "${third_party_skills[@]}" "${local_skills[@]}"; do
+    [[ "$needle" == "$candidate" ]] && return 0
+  done
+  [[ "$needle" == framer-project-* ]]
+}
+
+report_unexpected_runtime_entries() {
+  local root="$1"
+  local path
+  local name
+  local failures=0
+  [[ -d "$root" ]] || return 0
+  while IFS= read -r path; do
+    name="$(basename "$path")"
+    if ! name_is_configured "$name"; then
+      echo "unexpected unmanaged runtime entry: $path"
+      failures=$((failures + 1))
+    fi
+  done < <(find "$root" -mindepth 1 -maxdepth 1 -print | LC_ALL=C sort)
+  return "$failures"
+}
+
+report_link_state() {
+  local label="$1"
+  local link="$2"
+  local expected="$3"
+  if link_points_to "$link" "$expected"; then
+    echo "ok: $label: $link -> $(readlink "$link")"
+    return 0
+  fi
+  if [[ -L "$link" ]]; then
+    if [[ -e "$link" ]]; then
+      echo "stale link: $label: $link -> $(readlink "$link")"
+    else
+      echo "broken link: $label: $link -> $(readlink "$link")"
+    fi
+  elif [[ -e "$link" ]]; then
+    echo "unexpected real entry: $label: $link"
+  else
+    echo "missing: $label: $link"
+  fi
+  return 1
+}
+
+check_clone_links() {
+  local root
+  local link
+  local resolved
+  local found=0
+  for root in "$agents_root" "$claude_root"; do
+    [[ -d "$root" ]] || continue
+    while IFS= read -r link; do
+      resolved="$(resolved_link_target "$link" 2>/dev/null || true)"
+      if [[ "$resolved" == "$local_clone" || "$resolved" == "$local_clone/"* ]]; then
+        echo "local clone reference: $link -> $(readlink "$link")"
+        found=1
+      fi
+    done < <(find "$root" -type l -print)
+  done
+  return "$found"
+}
+
+preflight_install() {
+  local failures=0
+  local skill
+  local source
+  local path
+  local expected_hash
+  local actual_hash
+
+  if [[ -L "$agents_root" ]]; then
+    echo "error: refusing to install while $agents_root is a symlink" >&2
+    return 1
+  fi
+  if [[ -e "$agents_root" && ! -d "$agents_root" ]]; then
+    echo "error: refusing non-directory runtime root: $agents_root" >&2
+    return 1
+  fi
+  if [[ -e "$claude_root" && ! -d "$claude_root" ]]; then
+    echo "error: refusing non-directory Claude root: $claude_root" >&2
+    return 1
+  fi
+
+  for skill in "${local_skills[@]}"; do
+    if lock_has "$skill"; then
+      echo "reconcile: remove stale CLI lock metadata for local skill: $skill"
+    fi
+    path="$agents_root/$skill"
+    if [[ -L "$path" ]]; then
+      link_points_to "$path" "$repo_root/agents/skills/$skill" || {
+        echo "error: unexpected local-skill symlink: $path -> $(readlink "$path")" >&2
+        failures=$((failures + 1))
+      }
+    elif [[ -e "$path" ]]; then
+      echo "error: refusing to overwrite real local-skill entry: $path" >&2
+      failures=$((failures + 1))
+    fi
+    path="$claude_root/$skill"
+    if [[ -L "$path" ]]; then
+      link_points_to "$path" "$agents_root/$skill" || {
+        echo "error: unexpected Claude local-skill symlink: $path -> $(readlink "$path")" >&2
+        failures=$((failures + 1))
+      }
+    elif [[ -e "$path" ]]; then
+      echo "error: refusing to overwrite real Claude local-skill entry: $path" >&2
+      failures=$((failures + 1))
+    fi
+  done
+
+  for skill in "${third_party_skills[@]}"; do
+    source="$(source_for_skill "$skill")"
+    path="$agents_root/$skill"
+    if [[ -L "$path" ]]; then
+      echo "error: CLI canonical path must not be a symlink: $path" >&2
+      failures=$((failures + 1))
+    elif [[ -e "$path" ]]; then
+      if [[ ! -d "$path" ]]; then
+        echo "error: refusing non-directory third-party entry: $path" >&2
+        failures=$((failures + 1))
+      elif [[ "$(lock_source_for "$skill" 2>/dev/null || true)" != "$source" ]]; then
+        echo "error: unproven third-party directory collision: $path" >&2
+        failures=$((failures + 1))
+      else
+        expected_hash="$(state_hash_for "$skill" 2>/dev/null || true)"
+        if [[ -z "$expected_hash" ]]; then
+          echo "error: no wrapper state proves existing third-party contents: $path" >&2
+          failures=$((failures + 1))
+        else
+          actual_hash="$(tree_hash "$path" 2>/dev/null || true)"
+          if [[ "$actual_hash" != "$expected_hash" ]]; then
+            echo "error: locally modified third-party skill; refusing overwrite: $path" >&2
+            failures=$((failures + 1))
+          fi
+        fi
+      fi
+    fi
+    path="$claude_root/$skill"
+    if [[ -L "$path" ]]; then
+      if [[ -e "$agents_root/$skill" ]]; then
+        link_points_to "$path" "$agents_root/$skill" || {
+          echo "error: unexpected Claude third-party symlink: $path -> $(readlink "$path")" >&2
+          failures=$((failures + 1))
+        }
+      fi
+    elif [[ -e "$path" ]]; then
+      echo "error: refusing to overwrite real Claude third-party entry: $path" >&2
+      failures=$((failures + 1))
+    fi
+  done
+
+  if check_clone_links >/dev/null; then
+    :
+  else
+    echo "error: managed link points into removable local clone: $local_clone" >&2
+    failures=$((failures + 1))
+  fi
+
+  return "$failures"
+}
+
+safe_link() {
+  local target="$1"
+  local link="$2"
+  local label="$3"
+
+  [[ -d "$target" && -f "$target/SKILL.md" ]] || {
+    fail "cannot link missing or invalid $label source: $target"
+    return 1
+  }
+  if link_points_to "$link" "$target"; then
+    return 0
+  fi
+  if [[ -L "$link" ]]; then
+    fail "refusing to replace unexpected symlink: $link -> $(readlink "$link")"
+    return 1
+  fi
+  if [[ -e "$link" ]]; then
+    fail "refusing to replace real entry: $link"
+    return 1
+  fi
+  ln -s "$target" "$link"
+}
+
+run_plan() {
+  local failures=0
+  local available
+  local inventory
+  local skill
+  local source
+  local path
+  local canonical
+  local -a missing_matt=()
+  local -a missing_here=()
+
+  require_commands || return 1
+  validate_config || return 1
+
+  echo "== Configuration =="
+  echo "Repository: $repo_root"
+  echo "Required CLI: skills@$SKILLS_CLI_VERSION"
+  available="$("${cli[@]}" --version 2>/dev/null)" || available="unavailable"
+  echo "Available CLI: $available"
+  [[ "$available" == "$SKILLS_CLI_VERSION" ]] || failures=$((failures + 1))
+  echo "Scope: $SKILLS_SCOPE"
+  echo "Mode: $SKILLS_INSTALL_MODE"
+  echo "Agents: ${target_agents[*]}"
+  echo "Matt source: $MATT_SOURCE"
+  echo "Matt skills: ${matt_skills[*]}"
+  echo "here-now source: $HERE_NOW_SOURCE"
+  echo "here-now skills: ${here_now_skills[*]}"
+  echo "Local clone required: $MATT_LOCAL_CLONE_REQUIRED"
+
+  echo
+  echo "== Current CLI inventory =="
+  inventory="$(mktemp "${TMPDIR:-/tmp}/agent-skills-inventory.XXXXXX")" || return 1
+  if "${cli[@]}" list --global --json > "$inventory"; then
+    node -e '
+      const fs = require("fs");
+      const rows = JSON.parse(fs.readFileSync(process.argv[1], "utf8"));
+      for (const row of rows) console.log(`${row.name}: ${row.path}`);
+    ' "$inventory"
+  else
+    echo "error: pinned CLI global list failed" >&2
+    failures=$((failures + 1))
+  fi
+  rm -f "$inventory"
+
+  echo
+  echo "== Third-party desired state =="
+  for skill in "${third_party_skills[@]}"; do
+    source="$(source_for_skill "$skill")"
+    canonical="$agents_root/$skill"
+    echo "$skill"
+    echo "  source: $source"
+    echo "  canonical: $canonical"
+    echo "  Claude: $claude_root/$skill"
+    if [[ ! -e "$canonical" && ! -L "$canonical" ]]; then
+      echo "  change: install from $source"
+      if [[ "$source" == "$MATT_SOURCE" ]]; then
+        missing_matt+=("$skill")
+      else
+        missing_here+=("$skill")
+      fi
+    elif [[ -L "$canonical" ]]; then
+      echo "  collision: canonical path is a symlink"
+      failures=$((failures + 1))
+    elif [[ ! -d "$canonical" ]]; then
+      echo "  collision: canonical path is not a directory"
+      failures=$((failures + 1))
+    elif [[ "$(lock_source_for "$skill" 2>/dev/null || true)" != "$source" ]]; then
+      echo "  collision: CLI lock source does not match"
+      failures=$((failures + 1))
+    else
+      echo "  installed: source lock matches"
+    fi
+    if ! report_link_state "Claude compatibility" "$claude_root/$skill" "$canonical"; then
+      if [[ ! -e "$claude_root/$skill" && ! -L "$claude_root/$skill" ]]; then
+        echo "  change: create Claude compatibility link"
+      else
+        failures=$((failures + 1))
+      fi
+    fi
+  done
+
+  echo
+  echo "== Local desired state =="
+  for skill in "${local_skills[@]}"; do
+    path="$repo_root/agents/skills/$skill"
+    canonical="$agents_root/$skill"
+    echo "$skill"
+    echo "  source: $path"
+    echo "  canonical: $canonical"
+    echo "  Claude: $claude_root/$skill"
+    if [[ ! -d "$path" || ! -f "$path/SKILL.md" ]]; then
+      echo "  missing local source"
+      failures=$((failures + 1))
+    fi
+    if ! report_link_state "Codex/local" "$canonical" "$path"; then
+      if [[ ! -e "$canonical" && ! -L "$canonical" ]]; then
+        echo "  change: create local runtime link"
+      else
+        failures=$((failures + 1))
+      fi
+    fi
+    if ! report_link_state "Claude/local" "$claude_root/$skill" "$canonical"; then
+      if [[ ! -e "$claude_root/$skill" && ! -L "$claude_root/$skill" ]]; then
+        echo "  change: create Claude local link"
+      else
+        failures=$((failures + 1))
+      fi
+    fi
+    if lock_has "$skill"; then
+      echo "  change: remove stale CLI lock metadata for local ownership"
+    fi
+  done
+
+  echo
+  echo "== Generated runtime skills =="
+  shopt -s nullglob
+  local generated=("$agents_root"/framer-project-*)
+  shopt -u nullglob
+  if [[ "${#generated[@]}" -eq 0 ]]; then
+    echo "none"
+  fi
+  for path in "${generated[@]}"; do
+    skill="$(basename "$path")"
+    echo "$skill: $path"
+    if [[ -L "$path" || ! -d "$path" ]]; then
+      echo "  unexpected generated canonical entry type"
+      failures=$((failures + 1))
+    fi
+    if ! report_link_state "Claude/generated" "$claude_root/$skill" "$path"; then
+      if [[ ! -e "$claude_root/$skill" && ! -L "$claude_root/$skill" ]]; then
+        echo "  change: create generated compatibility link"
+      else
+        failures=$((failures + 1))
+      fi
+    fi
+  done
+
+  echo
+  echo "== Link and collision checks =="
+  if check_clone_links; then
+    echo "Local Matt clone referenced by managed links: no"
+  else
+    echo "Local Matt clone referenced by managed links: yes"
+    failures=$((failures + 1))
+  fi
+  if [[ -d "$codex_root" ]]; then
+    for skill in "${third_party_skills[@]}" "${local_skills[@]}"; do
+      if [[ -e "$codex_root/$skill" || -L "$codex_root/$skill" ]]; then
+        echo "name collision with independent Codex skill: $codex_root/$skill"
+        failures=$((failures + 1))
+      fi
+    done
+  fi
+  detect_duplicate_frontmatter_names "$agents_root" || failures=$((failures + 1))
+  detect_duplicate_frontmatter_names "$claude_root" || failures=$((failures + 1))
+  report_unexpected_runtime_entries "$agents_root" || failures=$((failures + 1))
+  report_unexpected_runtime_entries "$claude_root" || failures=$((failures + 1))
+  while IFS= read -r path; do
+    echo "broken link: $path -> $(readlink "$path")"
+    failures=$((failures + 1))
+  done < <(find "$agents_root" "$claude_root" -type l ! -exec test -e {} \; -print 2>/dev/null)
+
+  echo
+  echo "== Install summary =="
+  if [[ "${#missing_matt[@]}" -gt 0 ]]; then
+    echo "Matt install: ${missing_matt[*]}"
+  else
+    echo "Matt install: no missing skills"
+  fi
+  if [[ "${#missing_here[@]}" -gt 0 ]]; then
+    echo "here-now install: ${missing_here[*]}"
+  else
+    echo "here-now install: no missing skills"
+  fi
+  if [[ "$failures" -eq 0 ]]; then
+    echo "Plan is collision-safe."
+    return 0
+  fi
+  echo "Plan found $failures blocking issue(s)." >&2
+  return 1
+}
+
+run_install() {
+  local skill
+  local source
+  local -a missing_matt=()
+  local -a missing_here=()
+
+  require_commands || return 1
+  check_cli_version || return 1
+  validate_config || return 1
+  preflight_install || return 1
+
+  mkdir -p "$agents_root" "$claude_root" || return 1
+  reconcile_local_lock_metadata || return 1
+
+  for skill in "${matt_skills[@]}"; do
+    [[ -e "$agents_root/$skill" ]] || missing_matt+=("$skill")
+  done
+  for skill in "${here_now_skills[@]}"; do
+    [[ -e "$agents_root/$skill" ]] || missing_here+=("$skill")
+  done
+
+  if [[ "${#missing_matt[@]}" -gt 0 ]]; then
+    echo "Installing from $MATT_SOURCE: ${missing_matt[*]}"
+    "${cli[@]}" add "$MATT_SOURCE" \
+      --global \
+      --agent "${target_agents[@]}" \
+      --skill "${missing_matt[@]}" \
+      --yes || return 1
+  fi
+
+  if [[ "${#missing_here[@]}" -gt 0 ]]; then
+    echo "Installing from $HERE_NOW_SOURCE: ${missing_here[*]}"
+    "${cli[@]}" add "$HERE_NOW_SOURCE" \
+      --global \
+      --agent "${target_agents[@]}" \
+      --skill "${missing_here[@]}" \
+      --yes || return 1
+  fi
+
+  for skill in "${third_party_skills[@]}"; do
+    source="$(source_for_skill "$skill")"
+    [[ -d "$agents_root/$skill" && -f "$agents_root/$skill/SKILL.md" ]] || {
+      fail "CLI did not install $skill at $agents_root/$skill"
+      return 1
+    }
+    [[ "$(lock_source_for "$skill" 2>/dev/null || true)" == "$source" ]] || {
+      fail "CLI lock source mismatch for $skill"
+      return 1
+    }
+    safe_link "$agents_root/$skill" "$claude_root/$skill" "third-party skill" || return 1
+  done
+
+  for skill in "${local_skills[@]}"; do
+    safe_link "$repo_root/agents/skills/$skill" "$agents_root/$skill" "local skill" || return 1
+    safe_link "$agents_root/$skill" "$claude_root/$skill" "Claude local skill" || return 1
+  done
+
+  shopt -s nullglob
+  local generated=("$agents_root"/framer-project-*)
+  shopt -u nullglob
+  local path
+  for path in "${generated[@]}"; do
+    [[ -L "$path" ]] && {
+      fail "generated runtime skill must be a real directory: $path"
+      return 1
+    }
+    safe_link "$path" "$claude_root/$(basename "$path")" "generated runtime skill" || return 1
+  done
+
+  write_managed_state || {
+    fail "could not record third-party managed hashes"
+    return 1
+  }
+  run_status
+}
+
+run_status() {
+  local failures=0
+  local inventory
+  local skill
+  local source
+  local recorded_hash
+  local actual_hash
+  local path
+  local -a canonical_paths=()
+
+  require_commands || return 1
+  check_cli_version || return 1
+  validate_config || return 1
+
+  echo "== Pinned CLI global list =="
+  inventory="$(mktemp "${TMPDIR:-/tmp}/agent-skills-inventory.XXXXXX")" || return 1
+  if "${cli[@]}" list --global --json > "$inventory"; then
+    echo "ok: skills@$SKILLS_CLI_VERSION list --global --json"
+  else
+    echo "failed: pinned CLI global list" >&2
+    rm -f "$inventory"
+    return 1
+  fi
+
+  echo
+  echo "== Third-party skills =="
+  for skill in "${third_party_skills[@]}"; do
+    source="$(source_for_skill "$skill")"
+    path="$agents_root/$skill"
+    canonical_paths+=("$path")
+    if [[ -L "$path" ]]; then
+      echo "unexpected canonical symlink: $path"
+      failures=$((failures + 1))
+    elif [[ ! -d "$path" || ! -f "$path/SKILL.md" ]]; then
+      echo "missing: $skill at $path"
+      failures=$((failures + 1))
+    else
+      echo "ok: $skill at $path"
+    fi
+    if [[ "$(lock_source_for "$skill" 2>/dev/null || true)" != "$source" ]]; then
+      echo "source mismatch: $skill expected $source"
+      failures=$((failures + 1))
+    else
+      echo "ok: source $source"
+    fi
+    if ! inventory_has "$inventory" "$skill" "$path"; then
+      echo "missing from pinned CLI global inventory: $skill"
+      failures=$((failures + 1))
+    fi
+    if ! report_link_state "Claude/third-party" "$claude_root/$skill" "$path"; then
+      failures=$((failures + 1))
+    fi
+    recorded_hash="$(state_hash_for "$skill" 2>/dev/null || true)"
+    actual_hash="$(tree_hash "$path" 2>/dev/null || true)"
+    if [[ -z "$recorded_hash" || "$recorded_hash" != "$actual_hash" ]]; then
+      echo "local drift: $skill differs from the wrapper-managed installation state"
+      failures=$((failures + 1))
+    else
+      echo "ok: managed content hash"
+    fi
+  done
+
+  echo
+  echo "== Local skills =="
+  for skill in "${local_skills[@]}"; do
+    path="$agents_root/$skill"
+    canonical_paths+=("$path")
+    if ! report_link_state "Codex/local" "$path" "$repo_root/agents/skills/$skill"; then
+      failures=$((failures + 1))
+    fi
+    if ! report_link_state "Claude/local" "$claude_root/$skill" "$path"; then
+      failures=$((failures + 1))
+    fi
+    if lock_has "$skill"; then
+      echo "name collision: local skill is recorded in CLI lock: $skill"
+      failures=$((failures + 1))
+    fi
+  done
+
+  echo
+  echo "== Generated runtime skills =="
+  shopt -s nullglob
+  local generated=("$agents_root"/framer-project-*)
+  shopt -u nullglob
+  for path in "${generated[@]}"; do
+    canonical_paths+=("$path")
+    if [[ -L "$path" || ! -d "$path" || ! -f "$path/SKILL.md" ]]; then
+      echo "invalid generated runtime skill: $path"
+      failures=$((failures + 1))
+    else
+      echo "ok: $path"
+    fi
+    if ! report_link_state "Claude/generated" "$claude_root/$(basename "$path")" "$path"; then
+      failures=$((failures + 1))
+    fi
+  done
+
+  echo
+  echo "== Skill validity and collisions =="
+  validate_skill_paths "${canonical_paths[@]}" || failures=$((failures + 1))
+  detect_duplicate_frontmatter_names "$agents_root" || failures=$((failures + 1))
+  detect_duplicate_frontmatter_names "$claude_root" || failures=$((failures + 1))
+  report_unexpected_runtime_entries "$agents_root" || failures=$((failures + 1))
+  report_unexpected_runtime_entries "$claude_root" || failures=$((failures + 1))
+  while IFS= read -r path; do
+    echo "broken link: $path -> $(readlink "$path")"
+    failures=$((failures + 1))
+  done < <(find "$agents_root" "$claude_root" -type l ! -exec test -e {} \; -print 2>/dev/null)
+  if ! check_clone_links; then
+    failures=$((failures + 1))
+  else
+    echo "ok: no managed link points into $local_clone"
+  fi
+  if [[ -d "$codex_root" ]]; then
+    for skill in "${third_party_skills[@]}" "${local_skills[@]}"; do
+      if [[ -e "$codex_root/$skill" || -L "$codex_root/$skill" ]]; then
+        echo "name collision with independent Codex skill: $codex_root/$skill"
+        failures=$((failures + 1))
+      fi
+    done
+  fi
+
+  rm -f "$inventory"
+  echo
+  if [[ "$failures" -eq 0 ]]; then
+    echo "Skill state is healthy."
+    return 0
+  fi
+  echo "Skill state has $failures failure(s)." >&2
+  return 1
+}
+
+run_update() {
+  local skill
+  local path
+  local index=0
+  local -a before_hashes=()
+  local after_hash
+
+  require_commands || return 1
+  check_cli_version || return 1
+  validate_config || return 1
+  preflight_install || return 1
+  run_status || {
+    fail "refusing update because current skill state is unhealthy"
+    return 1
+  }
+
+  for skill in "${third_party_skills[@]}"; do
+    before_hashes+=("$(tree_hash "$agents_root/$skill")")
+  done
+
+  echo "Updating only configured third-party skills with skills@$SKILLS_CLI_VERSION."
+  "${cli[@]}" update \
+    --global \
+    --yes \
+    "${third_party_skills[@]}" || return 1
+
+  echo
+  echo "== Update results =="
+  for skill in "${third_party_skills[@]}"; do
+    path="$agents_root/$skill"
+    after_hash="$(tree_hash "$path")" || return 1
+    if [[ "${before_hashes[$index]}" == "$after_hash" ]]; then
+      echo "unchanged: $skill"
+    else
+      echo "changed: $skill"
+    fi
+    index=$((index + 1))
+  done
+
+  write_managed_state || return 1
+  run_status
+}
+
+run_unlink_local() {
+  local failures=0
+  local skill
+  local link
+  local target
+
+  validate_config || return 1
+  for skill in "${local_skills[@]}"; do
+    link="$claude_root/$skill"
+    target="$agents_root/$skill"
+    if link_points_to "$link" "$target"; then
+      rm "$link"
+      echo "unlinked: $link"
+    elif [[ -L "$link" ]]; then
+      echo "refused unexpected symlink: $link -> $(readlink "$link")" >&2
+      failures=$((failures + 1))
+    elif [[ -e "$link" ]]; then
+      echo "refused real entry: $link" >&2
+      failures=$((failures + 1))
+    fi
+
+    link="$agents_root/$skill"
+    target="$repo_root/agents/skills/$skill"
+    if link_points_to "$link" "$target"; then
+      rm "$link"
+      echo "unlinked: $link"
+    elif [[ -L "$link" ]]; then
+      echo "refused unexpected symlink: $link -> $(readlink "$link")" >&2
+      failures=$((failures + 1))
+    elif [[ -e "$link" ]]; then
+      echo "refused real entry: $link" >&2
+      failures=$((failures + 1))
+    fi
+  done
+  return "$failures"
+}
+
+usage() {
+  cat <<'EOF'
+Usage: scripts/agent-skills <command>
+
+Commands:
+  plan          Show desired state, collisions, and proposed install actions
+  install       Reconcile the explicit third-party allowlist and local links
+  status        Validate CLI, sources, links, manifests, and references
+  update        Update only configured third-party skills, then validate
+  unlink-local  Remove only manifest-owned local skill symlinks
+EOF
+}
+
+case "${1:-}" in
+  plan)
+    run_plan
+    ;;
+  install)
+    run_install
+    ;;
+  status)
+    run_status
+    ;;
+  update)
+    run_update
+    ;;
+  unlink-local)
+    run_unlink_local
+    ;;
+  -h|--help|help)
+    usage
+    ;;
+  *)
+    usage >&2
+    exit 2
+    ;;
+esac

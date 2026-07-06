@@ -533,7 +533,7 @@ dotstow() {
   emulate -L zsh
 
   local repo="$HOME/dotfiles"
-  local packages=(zsh tmux git starship agents)
+  local packages=(zsh tmux git starship)
   local confirm
 
   command -v stow >/dev/null 2>&1 || { echo "stow not found"; return 1; }
@@ -582,7 +582,6 @@ dotlinks() {
     "$HOME/.tmux.conf"
     "$HOME/.gitconfig"
     "$HOME/.config/starship.toml"
-    "$HOME/.agents/skills"
   )
   local link
   local failures=0
@@ -620,7 +619,7 @@ dotdoctor() {
   emulate -L zsh
 
   local repo="$HOME/dotfiles"
-  local -a packages=(zsh tmux git starship agents)
+  local -a packages=(zsh tmux git starship)
   local -a links=(
     "$HOME/.zshrc"
     "$HOME/.zprofile"
@@ -632,7 +631,6 @@ dotdoctor() {
     "$HOME/.tmux.conf"
     "$HOME/.gitconfig"
     "$HOME/.config/starship.toml"
-    "$HOME/.agents/skills"
   )
   local -a expected=(
     "$repo/zsh/.zshrc"
@@ -645,7 +643,6 @@ dotdoctor() {
     "$repo/tmux/.tmux.conf"
     "$repo/git/.gitconfig"
     "$repo/starship/.config/starship.toml"
-    "$repo/agents/.agents/skills"
   )
   local failures=0
   local warnings=0
@@ -729,6 +726,20 @@ dotdoctor() {
   else
     echo "skipped: stow or repository unavailable"
     (( warnings++ ))
+  fi
+
+  echo
+  echo "== Agent skills =="
+  if [[ -x "$repo/scripts/agent-skills" ]]; then
+    if "$repo/scripts/agent-skills" status; then
+      echo "ok: agent skills"
+    else
+      echo "failed: run $repo/scripts/agent-skills status for details"
+      (( failures++ ))
+    fi
+  else
+    echo "missing: $repo/scripts/agent-skills"
+    (( failures++ ))
   fi
 
   echo

@@ -1,4 +1,8 @@
 .DS_Store
+.AppleDouble
+._*
+.Spotlight-V100
+.Trashes
 *.swp
 *.swo
 *.bak
@@ -7,3 +11,6 @@
 .env.*
 .secret
 secrets/
+
+# Generated Framer project skills are private machine-local runtime state.
+/agents/skills/framer-project-*/
