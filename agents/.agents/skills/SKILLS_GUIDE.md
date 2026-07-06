@@ -4,7 +4,7 @@ Last reviewed: 2026-07-06
 
 This guide documents the local skills installed under `$HOME/.agents/skills`. A skill is triggered by its `name` and `description` frontmatter in `SKILL.md`; the body is loaded only after Codex decides the skill applies.
 
-Audit note: the 2026-07-06 audit found 13 tracked reusable skill folders. Generated `framer-project-*` skills are local-only and excluded from Git because they may contain private project metadata.
+Audit note: the 2026-07-06 audit found 18 tracked reusable skill folders. Generated `framer-project-*` skills are local-only and excluded from Git because they may contain private project metadata.
 
 ## Installed Skills
 
@@ -12,9 +12,14 @@ Audit note: the 2026-07-06 audit found 13 tracked reusable skill folders. Genera
 | --- | --- | --- | --- |
 | `tdd` | General-purpose | You want test-first feature work, bug fixes, integration tests, or a red-green-refactor loop. | You only want a quick explanation, a spike, or throwaway code without tests. |
 | `teach` | General-purpose, workspace-based | You want a stateful learning path with missions, lessons, resources, and learning records. | You only want a short answer or one-off explanation. |
-| `grill-with-docs` | Project-specific | You want to stress-test a plan against project vocabulary, `CONTEXT.md`, and ADRs. | You want implementation without a design conversation. |
-| `improve-codebase-architecture` | Project-specific | You want architecture review, refactoring candidates, deeper modules, or better testability. | You already know the exact change to make, or the repo has no meaningful codebase to inspect. |
+| `grill-with-docs` | Project-specific command | You explicitly want a relentless plan or design interview that updates domain documentation as decisions crystallize. | You want implementation without a design conversation. |
+| `improve-codebase-architecture` | Project-specific command | You explicitly want a visual codebase scan for deepening opportunities followed by a design interview. | You already know the exact change to make, or the repo has no meaningful codebase to inspect. |
 | `bug-triage` | General-purpose | You want to reproduce, isolate, fix, and verify a bug. | You are asking for a broad feature build or purely speculative debugging. |
+| `code-review` | General-purpose | You want changes since a fixed point reviewed separately against repository standards and the originating spec. | You want only staged changes reviewed, or you have no branch or commit range to compare. |
+| `codebase-design` | General-purpose reference | You want to design a deep module, place a seam, compare interfaces, or improve testability through interface design. | You want a broad codebase scan rather than focused design work. |
+| `domain-modeling` | Project-specific | You want to sharpen domain terminology, update `CONTEXT.md`, or record a justified ADR. | You only need to read existing domain vocabulary without changing the model. |
+| `handoff` | General-purpose command | You want a compact, redacted handoff document for another agent or session. | You want a full transcript or already have an adequate plan, issue, or PRD. |
+| `setup-matt-pocock-skills` | Project setup | You want to configure issue-tracker, triage-label, and domain-document conventions for the engineering skills. | The repository is already configured and those conventions are unchanged. |
 | `staged-diff-review` | General-purpose | You want only staged Git changes reviewed before commit. | You want unstaged work, a branch diff, or a whole repository reviewed. |
 | `repo-onboarding` | General-purpose | You want a fast orientation to an unfamiliar repo: structure, commands, architecture, risks. | You already gave a narrow coding task. |
 | `dsa-solution-review` | General-purpose | You want a data-structures-and-algorithms solution reviewed or explained. | The problem is production application code rather than an algorithm exercise. |
@@ -46,6 +51,19 @@ Use these phrases directly when you want to force the skill:
 - `Use bug-triage`
 - `triage this bug`
 - `reproduce, isolate, fix, and verify this bug`
+- `Use code-review`
+- `review since main`
+- `review this branch against its spec`
+- `Use codebase-design`
+- `design this as a deep module`
+- `decide where this seam belongs`
+- `Use domain-modeling`
+- `sharpen this project's domain language`
+- `record this architectural decision`
+- `Use handoff`
+- `create a handoff for the next session`
+- `Use setup-matt-pocock-skills`
+- `configure the engineering skills for this repo`
 - `Use staged-diff-review`
 - `review only staged changes`
 - `summarize my git add changes`
@@ -88,6 +106,11 @@ Use these phrases directly when you want to force the skill:
 - `Use grill-with-docs to stress-test this checkout redesign against CONTEXT.md and ADRs.`
 - `Use improve-codebase-architecture to find refactoring opportunities in this repo.`
 - `Use bug-triage to reproduce, isolate, fix, and verify this crash.`
+- `Use code-review to review this branch since main against the linked issue and repository standards.`
+- `Use codebase-design to compare three interface designs for this module and recommend the deepest one.`
+- `Use domain-modeling to resolve the difference between Customer, Account, and User in this codebase.`
+- `Use handoff to prepare the next agent to continue this migration.`
+- `Use setup-matt-pocock-skills to configure this repository before using the engineering workflow skills.`
 - `Use staged-diff-review to review only my staged Git changes before commit.`
 - `Use repo-onboarding to explain this repo's structure, commands, and main risks.`
 - `Use dsa-solution-review to review my Java solution and compare against TUF+ notes.`
@@ -105,7 +128,10 @@ Use these phrases directly when you want to force the skill:
 
 ## Usage Notes
 
-- `grill-with-docs` has valid frontmatter and required files. Its `CONTEXT-FORMAT.md` multi-context paths are illustrative examples, not required files.
+- `grill-with-docs` and `improve-codebase-architecture` are explicit commands and currently reference a missing `/grilling` skill. They are marked `fix` in the registry until that dependency is installed or the reference is corrected.
+- `code-review` requires a fixed comparison point. It runs Standards and Spec reviews independently; the Spec axis is skipped when no source spec exists.
+- `codebase-design` owns the deep-module vocabulary and interface-design patterns. `domain-modeling` owns active glossary and ADR updates.
+- `setup-matt-pocock-skills` is a one-time repository configurator. Its seed documents still reference uninstalled workflow skills, recorded as a known issue in the registry.
 - `teach` is intentionally marked optional in the registry because it is a stateful teaching workflow and is too heavy for one-off explanations.
 - `framer` requires explicit Framer context, CLI setup, network access, and a project session before project work begins.
 - `framer-code-components` is not a direct entry point. Load `framer`, run `session new`, load the generated project skill, and only then load it for code-component work.

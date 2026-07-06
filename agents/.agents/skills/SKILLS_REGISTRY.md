@@ -2,15 +2,20 @@
 
 Last reviewed: 2026-07-06
 
-Audit scope: `$HOME/.agents/skills`. The 2026-07-06 audit found 13 tracked reusable skill folders with valid `SKILL.md` frontmatter. Generated `framer-project-*` folders are local-only and intentionally excluded from this public registry.
+Audit scope: `$HOME/.agents/skills`. The 2026-07-06 audit found 18 tracked reusable skill folders with valid `SKILL.md` frontmatter. Generated `framer-project-*` folders are local-only and intentionally excluded from this public registry.
 
 | Skill | Path | Purpose | Status | Important Files | Known Issues |
 | --- | --- | --- | --- | --- | --- |
-| `tdd` | `$HOME/.agents/skills/tdd` | Test-first implementation using red-green-refactor and behavior-focused tests. | keep | `SKILL.md`, `tests.md`, `mocking.md`, `interface-design.md`, `deep-modules.md`, `refactoring.md` | Planning section asks for user approval before coding; useful but may slow autonomous sessions. |
-| `teach` | `$HOME/.agents/skills/teach` | Stateful teaching workspace with mission, resources, lessons, references, and learning records. | optional | `SKILL.md`, `MISSION-FORMAT.md`, `RESOURCES-FORMAT.md`, `LEARNING-RECORD-FORMAT.md`, `GLOSSARY-FORMAT.md` | Best for intentional learning sessions; overkill for one-off explanations. |
-| `grill-with-docs` | `$HOME/.agents/skills/grill-with-docs` | Stress-test plans against project vocabulary and ADRs while updating docs inline. | keep | `SKILL.md`, `CONTEXT-FORMAT.md`, `ADR-FORMAT.md` | Project-documentation heavy; not useful for simple implementation tasks. |
-| `improve-codebase-architecture` | `$HOME/.agents/skills/improve-codebase-architecture` | Find architecture friction and refactoring candidates that improve testability and AI navigation. | keep | `SKILL.md`, `LANGUAGE.md`, `HTML-REPORT.md`, `INTERFACE-DESIGN.md`, `DEEPENING.md`, `CONTEXT-FORMAT.md`, `ADR-FORMAT.md` | References were made local on 2026-06-08; still assumes the repo can be meaningfully inspected. |
+| `tdd` | `$HOME/.agents/skills/tdd` | Test-first implementation using behavior-focused red-green cycles at user-approved seams. | keep | `SKILL.md`, `tests.md`, `mocking.md` | Requires agreement on the seams under test before writing tests; three older support files remain installed but are no longer referenced by `SKILL.md`. |
+| `teach` | `$HOME/.agents/skills/teach` | Stateful teaching workspace with missions, cited HTML lessons, reusable assets, references, and learning records. | optional | `SKILL.md`, `MISSION-FORMAT.md`, `RESOURCES-FORMAT.md`, `LEARNING-RECORD-FORMAT.md` | Best for intentional learning sessions; overkill for one-off explanations. |
+| `grill-with-docs` | `$HOME/.agents/skills/grill-with-docs` | Run a focused plan or design interview while maintaining domain terminology and ADRs. | fix | `SKILL.md` | Directly invokes `/grilling`, which is not installed; legacy local domain templates remain but are no longer referenced. |
+| `improve-codebase-architecture` | `$HOME/.agents/skills/improve-codebase-architecture` | Scan for deepening opportunities, present a visual HTML report, and interview the user about a selected candidate. | fix | `SKILL.md`, `HTML-REPORT.md` | Directly invokes missing `/grilling`; `/codebase-design` and `/domain-modeling` are installed, but several older local design references are no longer used. |
 | `bug-triage` | `$HOME/.agents/skills/bug-triage` | Reproduce, isolate, fix, and verify bugs with focused changes. | keep | `SKILL.md` | New skill; no field history yet. |
+| `code-review` | `$HOME/.agents/skills/code-review` | Review a branch or commit range independently against repository standards and an originating spec. | keep | `SKILL.md` | Requires a resolvable fixed point; the Spec axis cannot run without a discoverable or user-supplied spec. |
+| `codebase-design` | `$HOME/.agents/skills/codebase-design` | Supply deep-module vocabulary, dependency strategies, seam discipline, and design-it-twice interface exploration. | keep | `SKILL.md`, `DEEPENING.md`, `DESIGN-IT-TWICE.md` | Terminology-heavy reference intended for focused design work rather than broad repository review. |
+| `domain-modeling` | `$HOME/.agents/skills/domain-modeling` | Maintain domain terminology and record durable architectural decisions as they are resolved. | keep | `SKILL.md`, `CONTEXT-FORMAT.md`, `ADR-FORMAT.md` | Writes domain documentation inline; should not be invoked merely to read existing vocabulary. |
+| `handoff` | `$HOME/.agents/skills/handoff` | Produce a compact, redacted conversation handoff in the OS temporary directory. | optional | `SKILL.md` | Explicit-only command; references existing artifacts instead of embedding them, so the handoff is not standalone without repository access. |
+| `setup-matt-pocock-skills` | `$HOME/.agents/skills/setup-matt-pocock-skills` | Configure repository issue-tracker, triage-label, and domain-document conventions for engineering workflow skills. | fix | `SKILL.md`, `issue-tracker-github.md`, `issue-tracker-gitlab.md`, `issue-tracker-local.md`, `triage-labels.md`, `domain.md` | References uninstalled skills: `to-issues`, `triage`, `to-prd`, `qa`, `diagnosing-bugs`, and `wayfinder`. |
 | `staged-diff-review` | `$HOME/.agents/skills/staged-diff-review` | Review only staged Git changes before commit. | keep | `SKILL.md` | New skill; overlaps with built-in staged-change review behavior but uses your local wording. |
 | `repo-onboarding` | `$HOME/.agents/skills/repo-onboarding` | Quickly orient Codex and the user to repo structure, commands, architecture, and risks. | keep | `SKILL.md` | New skill; should stay read-only unless user asks for changes. |
 | `dsa-solution-review` | `$HOME/.agents/skills/dsa-solution-review` | Review DSA solutions with brute, better, optimal progression and Java-first final code. | keep | `SKILL.md` | New skill; assumes algorithm interview context. |
@@ -22,14 +27,17 @@ Audit scope: `$HOME/.agents/skills`. The 2026-07-06 audit found 13 tracked reusa
 
 ## Audit Findings
 
-- Tracked reusable skill folders: `bug-triage`, `dsa-solution-review`, `framer`, `framer-code-components`, `grill-with-docs`, `here-now`, `improve-codebase-architecture`, `loopy`, `repo-onboarding`, `skills-maintainer`, `staged-diff-review`, `tdd`, `teach`.
-- Newly documented reusable skills: `here-now`.
+- Tracked reusable skill folders: `bug-triage`, `code-review`, `codebase-design`, `domain-modeling`, `dsa-solution-review`, `framer`, `framer-code-components`, `grill-with-docs`, `handoff`, `here-now`, `improve-codebase-architecture`, `loopy`, `repo-onboarding`, `setup-matt-pocock-skills`, `skills-maintainer`, `staged-diff-review`, `tdd`, `teach`.
+- Newly documented reusable skills: `code-review`, `codebase-design`, `domain-modeling`, `handoff`, `setup-matt-pocock-skills`.
+- Materially changed skills reconciled: `grill-with-docs`, `improve-codebase-architecture`, `tdd`, `teach`.
 - Generated `framer-project-*` folders remain local, untracked, and excluded from Git.
-- Frontmatter check: all 13 tracked reusable skills and the generated Framer project skill have non-empty `name` and `description` fields matching their folder names.
+- Ignored local junk: `$HOME/.agents/skills/.DS_Store`; two additional ignored `.DS_Store` files under the `agents` package currently make the Stow simulation conflict.
+- Frontmatter check: all 18 tracked reusable skills and the generated Framer project skill have non-empty `name` and `description` fields matching their folder names.
 - Missing `SKILL.md` files: none.
-- Relative Markdown references checked: 32 across 38 Markdown files.
+- Relative Markdown references checked: 33 across 52 Markdown files.
 - Broken relative references: none.
-- Status summary: 9 `keep`, 4 `optional`, 0 `fix`, 0 `remove`.
+- Unresolved cross-skill references: `/grilling`; `to-issues`, `triage`, `to-prd`, `qa`, `diagnosing-bugs`, and `wayfinder`.
+- Status summary: 10 `keep`, 5 `optional`, 3 `fix`, 0 `remove`.
 
 ## Status Meanings
 
