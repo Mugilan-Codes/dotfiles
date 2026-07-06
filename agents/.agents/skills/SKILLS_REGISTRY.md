@@ -1,8 +1,8 @@
 # Codex Skills Registry
 
-Last reviewed: 2026-07-01
+Last reviewed: 2026-07-06
 
-Audit scope: `$HOME/.agents/skills`. The 2026-07-01 audit found 11 tracked reusable skill folders with valid `SKILL.md` frontmatter. Generated `framer-project-*` folders are local-only and intentionally excluded from this public registry.
+Audit scope: `$HOME/.agents/skills`. The 2026-07-06 audit found 12 tracked reusable skill folders with valid `SKILL.md` frontmatter. Generated `framer-project-*` folders are local-only and intentionally excluded from this public registry.
 
 | Skill | Path | Purpose | Status | Important Files | Known Issues |
 | --- | --- | --- | --- | --- | --- |
@@ -16,16 +16,19 @@ Audit scope: `$HOME/.agents/skills`. The 2026-07-01 audit found 11 tracked reusa
 | `dsa-solution-review` | `$HOME/.agents/skills/dsa-solution-review` | Review DSA solutions with brute, better, optimal progression and Java-first final code. | keep | `SKILL.md` | New skill; assumes algorithm interview context. |
 | `framer` | `$HOME/.agents/skills/framer` | Orchestrate explicitly requested Framer project setup, sessions, canvas and CMS edits, code components, assets, localization, and publishing. | optional | `SKILL.md` | Requires networked CLI setup and a generated local project-scoped skill; generic website requests no longer trigger it. |
 | `framer-code-components` | `$HOME/.agents/skills/framer-code-components` | Provide Framer code-component constraints, property-control references, patterns, and examples. | optional | `SKILL.md` | Supporting skill only and intentionally large; direct invocation bypasses the required base and project-scoped Framer workflow. |
+| `loopy` | `$HOME/.agents/skills/loopy` | Discover, find, audit, craft, run, debrief, save, adapt, and publish bounded AI-agent loops. | keep | `SKILL.md`, `agents/openai.yaml`, `references/discover.md`, `references/audit.md`, `references/run.md`, `references/debrief.md`, `references/publish.md` | Broad workflow surface requires careful request routing; live Loop Library lookup depends on network access. |
 | `skills-maintainer` | `$HOME/.agents/skills/skills-maintainer` | Audit and maintain the local skills folder, guide, and registry. | keep | `SKILL.md` | New skill; recommend a fresh Codex session after frontmatter changes so discovery metadata refreshes. |
 
 ## Audit Findings
 
-- Tracked reusable skill folders: `bug-triage`, `dsa-solution-review`, `framer`, `framer-code-components`, `grill-with-docs`, `improve-codebase-architecture`, `repo-onboarding`, `skills-maintainer`, `staged-diff-review`, `tdd`, `teach`.
-- Newly documented reusable skills: `framer`, `framer-code-components`.
+- Tracked reusable skill folders: `bug-triage`, `dsa-solution-review`, `framer`, `framer-code-components`, `grill-with-docs`, `improve-codebase-architecture`, `loopy`, `repo-onboarding`, `skills-maintainer`, `staged-diff-review`, `tdd`, `teach`.
+- Newly documented reusable skills: `loopy`.
 - Generated `framer-project-*` folders remain local, untracked, and excluded from Git.
-- Frontmatter check: all tracked reusable `SKILL.md` files have non-empty `name` and `description` fields.
+- Frontmatter check: all 12 tracked reusable skills and the generated Framer project skill have non-empty `name` and `description` fields matching their folder names.
 - Missing `SKILL.md` files: none.
+- Relative Markdown references checked: 32 across 37 Markdown files.
 - Broken relative references: none.
+- Status summary: 9 `keep`, 3 `optional`, 0 `fix`, 0 `remove`.
 
 ## Status Meanings
 
