@@ -28,9 +28,15 @@ Use here.now for two jobs:
 
 Every Site has access control: public link (default), password, or restricted invite-only access.
 
-To install or update (recommended): `npx skills add heredotnow/skill --skill here-now -g`
+In this dotfiles repository, add or update this vendored skill only from the
+project-scoped package workflow:
 
-For repo-pinned/project-local installs, run the same command without `-g`.
+```sh
+cd "$HOME/dotfiles/agents"
+npx skills@latest add heredotnow/skill
+```
+
+Do not use `--global` or `-g` for dotfiles-managed skills.
 
 ## Current docs
 

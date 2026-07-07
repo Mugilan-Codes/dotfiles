@@ -71,9 +71,13 @@ application-managed state distinct. Never import `framer-project-*` or broad
 8. Preserve the documented caveat that upstream declares MIT in its README
    but lacks a top-level licence file, unless verified upstream evidence has
    changed. Do not invent a licence copy.
-9. Verify source, content hash, targets, static Claude link, upstream revision
+9. Verify the vendored `SKILL.md` install note remains project-scoped and does
+   not recommend `--global` or `-g`. If an installer reintroduces upstream
+   global-install wording, replace only that note with this repository's
+   project-scoped workflow and update the lock/provenance records.
+10. Verify source, content hash, targets, static Claude link, upstream revision
    when verifiable, lock record, dependencies, and provenance.
-10. Run `scripts/agent-skills post-install`, then make exact documentation
+11. Run `scripts/agent-skills post-install`, then make exact documentation
     updates. Do not apply Stow.
 
 ## Validation
@@ -113,6 +117,7 @@ script_review:
 executable_modes_preserved:
 lock_review:
 license_caveat:
+install_policy_note:
 validation:
   passed: []
   failed: []

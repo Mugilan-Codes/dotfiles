@@ -165,9 +165,9 @@ zsh -n zsh/.zshrc zsh/.zprofile zsh/.zshenv zsh/.zlogin \
   zsh/.oh-my-zsh/custom/completions.zsh
 scripts/agent-skills status
 scripts/agent-skills audit
-stow --target="$HOME" --simulate --no-folding --verbose \
-  zsh tmux git starship agents
-brew bundle check --file=./Brewfile
+stow --target="$HOME" --simulate --verbose zsh tmux git starship
+stow --target="$HOME" --simulate --no-folding --verbose agents
+brew bundle check --no-upgrade --file=./Brewfile
 ```
 
 For Stow changes, always run simulation before recommending or applying the

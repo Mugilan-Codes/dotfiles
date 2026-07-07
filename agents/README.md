@@ -24,8 +24,7 @@ agents/
 ```
 
 Stow ignores the package documentation, configuration, lock, licenses, and
-prompt/migration metadata. It deploys only `.agents/skills` and
-`.claude/skills`.
+temporary metadata. It deploys only `.agents/skills` and `.claude/skills`.
 
 ## Ownership categories
 
@@ -195,15 +194,12 @@ If Stow reports a conflict:
 If a generated Framer entry is affected, stop. It is not an approved package
 target.
 
-For rollback, keep the migration/update backup until the next phase or commit
-is validated. Unstow only the `agents` package with the same `--no-folding`
-mode, then restore scoped runtime entries from the backup if required. GNU
-Stow may retain empty skill directories after removing their managed links;
-do not broadly delete them. A later restow safely reuses them.
-
-The current migration backup must remain in place through Phase 4 final diff,
-commit, and runtime review. Removal is a separate cleanup decision after those
-checks.
+For rollback, keep any scoped backup from an add/update operation until its
+diff, validation, commit, and runtime review are complete. Unstow only the
+`agents` package with the same `--no-folding` mode, then restore scoped runtime
+entries from the backup if required. GNU Stow may retain empty skill
+directories after removing their managed links; do not broadly delete them. A
+later restow safely reuses them.
 
 ## Everyday workflow prompts
 

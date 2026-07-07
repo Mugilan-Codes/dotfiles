@@ -1,6 +1,6 @@
 # Third-party skills and attribution
 
-Audited: 2026-07-06
+Audited: 2026-07-07
 
 Approved third-party skill contents are vendored under
 `agents/.agents/skills`. Future installer results must remain project-scoped,
@@ -19,7 +19,7 @@ Resolved installer version: `1.5.14`
 - Update: project-scoped `npx skills@latest add mattpocock/skills` from
   `dotfiles/agents`
 - Targets: Codex and Claude Code
-- Observed upstream HEAD after the Phase 2 install:
+- Observed upstream HEAD after the last project-scoped install:
   `16a2a5cd00b4416f673f4ff38c7971a04dd708e7`
 
 Approved names:
@@ -47,8 +47,8 @@ installation window, not a claim that the CLI pinned that commit.
 ### Baseline comparison
 
 The imported runtime baseline matched the prior Git snapshot where one
-existed, except for snapshot-only support files already documented in Phase
-1:
+existed, except for snapshot-only support files already retired before the
+current steady-state package:
 
 - `grill-with-docs`: `ADR-FORMAT.md`, `CONTEXT-FORMAT.md`
 - `improve-codebase-architecture`: `ADR-FORMAT.md`, `CONTEXT-FORMAT.md`,
@@ -56,32 +56,32 @@ existed, except for snapshot-only support files already documented in Phase
 - `tdd`: `deep-modules.md`, `interface-design.md`, `refactoring.md`
 
 Those retired files were upstream snapshot material, not local extensions.
-The Phase 2 project-scoped installer produced contents byte-equal to the
-imported baseline for all ten selected skills.
+The project-scoped installer produced contents byte-equal to the imported
+baseline for all ten selected skills.
 
-During required CLI help inspection, `skills update --help` behaved as an
-update rather than help and changed the existing global runtime copy of
-`grilling` before the backup. The backup preserves the pre-update wrapper
-hash and the post-update contents. The real project install later matched
-that imported post-update baseline. No other selected Matt skill changed
-beyond its imported baseline.
+Known CLI caveat: `skills update --help` behaved as an update rather than help
+during audit. Do not use it for help inspection; use an isolated fixture. The
+reviewed project install matched the imported `grilling` baseline. No other
+selected Matt skill changed beyond its imported baseline.
 
 ## `heredotnow/skill`
 
 - Source: <https://github.com/heredotnow/skill>
 - Selected name: `here-now`
-- Ownership here: exact reviewed vendored copy
+- Ownership here: reviewed vendored copy with a local installation-policy note
 - Update: project-scoped `npx skills@latest add heredotnow/skill` from
   `dotfiles/agents`
 - Targets: Codex and Claude Code
-- Observed upstream HEAD after the Phase 2 install:
+- Observed upstream HEAD after the last project-scoped install:
   `f6e7ddb92f51bed76ff4dc8f99457c14b83577e6`
 
 The repository README declares MIT, but the audited source still lacks a top-level
 license file. Retain this caveat until upstream publishes the license text.
 The installer result includes upstream `scripts/publish.sh` and
-`scripts/drive.sh`; both remain executable. The Phase 2 project install was
-byte-equal to the imported runtime baseline.
+`scripts/drive.sh`; both remain executable. The only local content correction
+is the `SKILL.md` install note, which replaces upstream global-install wording
+with this repository's project-scoped workflow. Reapply that policy note after
+future installer updates if upstream still recommends `--global` or `-g`.
 
 The observed HEAD is not an immutable installer pin because
 `skills-lock.json` records content hashes without a revision.
@@ -117,7 +117,7 @@ third-party installer.
 - Copyright notice: Copyright (c) 2026 Forward Future
 - Ownership here: intentional local fork
 - Update: manual upstream review only
-- Upstream HEAD observed during Phase 2 provenance review:
+- Upstream HEAD observed during provenance review:
   `b88213d0d8252bb46a43f8cb7889ae40ed1c1187`
 
 The observed HEAD is not claimed as the fork base. The tracked fork includes
