@@ -1,22 +1,28 @@
-# Third-party Skills and Attribution
+# Third-party skills and attribution
 
 Audited: 2026-07-06
 
-This file records provenance for CLI-managed skills and tracked intentional
-forks. Installed CLI-managed contents under `$HOME/.agents/skills` are runtime
-artifacts and are not tracked in dotfiles.
+Approved third-party skill contents are vendored under
+`agents/.agents/skills`. Future installer results must remain project-scoped,
+produce a visible Git diff, and record the resolved `skills@latest` version
+in the maintenance report.
+
+Resolved installer version: `1.5.14`
 
 ## `mattpocock/skills`
 
 - Source: <https://github.com/mattpocock/skills>
 - License: MIT
-- Copyright notice observed: Copyright (c) 2026 Matt Pocock
-- Installation: pinned `skills@1.5.14`, global scope, symlink mode
+- License copy: `licenses/mattpocock-skills-LICENSE.txt`
+- Copyright notice: Copyright (c) 2026 Matt Pocock
+- Ownership here: exact reviewed vendored copies
+- Update: project-scoped `npx skills@latest add mattpocock/skills` from
+  `dotfiles/agents`
 - Targets: Codex and Claude Code
-- Update: `scripts/agent-skills update`
-- Local clone required: no
+- Observed upstream HEAD after the Phase 2 install:
+  `16a2a5cd00b4416f673f4ff38c7971a04dd708e7`
 
-Selected names:
+Approved names:
 
 - `code-review`
 - `codebase-design`
@@ -29,83 +35,98 @@ Selected names:
 - `tdd`
 - `teach`
 
-The exact names were verified with the pinned CLI list operation on the audit
-date. `grilling` is retained because `grill-with-docs` invokes it.
+`grilling` is required by `grill-with-docs` and architecture workflows.
+`grill-with-docs` also uses `domain-modeling`.
+`improve-codebase-architecture` uses `codebase-design`, `domain-modeling`,
+and `grilling`.
 
-### Retired vendored snapshot
+The project lock records per-skill content hashes but does not record an
+immutable source revision. The observed HEAD is provenance evidence from the
+installation window, not a claim that the CLI pinned that commit.
 
-Before this migration, dotfiles tracked copies of the selected Matt skills.
-A comparison with the installed CLI-managed replacements and the clean local
-upstream clone at `66f92b61f5b1434a1c7422f6fbd8efc5ee0c0214` found the skill contents
-equal except for these snapshot-only files:
+### Baseline comparison
+
+The imported runtime baseline matched the prior Git snapshot where one
+existed, except for snapshot-only support files already documented in Phase
+1:
 
 - `grill-with-docs`: `ADR-FORMAT.md`, `CONTEXT-FORMAT.md`
 - `improve-codebase-architecture`: `ADR-FORMAT.md`, `CONTEXT-FORMAT.md`,
   `DEEPENING.md`, `INTERFACE-DESIGN.md`, `LANGUAGE.md`
 - `tdd`: `deep-modules.md`, `interface-design.md`, `refactoring.md`
 
-Other support files that still exist upstream remain available in the
-CLI-managed runtime installation. The snapshot-only files were not independent
-local work and were removed after the pinned CLI installation supplied and
-validated the current upstream skill directories.
+Those retired files were upstream snapshot material, not local extensions.
+The Phase 2 project-scoped installer produced contents byte-equal to the
+imported baseline for all ten selected skills.
+
+During required CLI help inspection, `skills update --help` behaved as an
+update rather than help and changed the existing global runtime copy of
+`grilling` before the backup. The backup preserves the pre-update wrapper
+hash and the post-update contents. The real project install later matched
+that imported post-update baseline. No other selected Matt skill changed
+beyond its imported baseline.
 
 ## `heredotnow/skill`
 
 - Source: <https://github.com/heredotnow/skill>
 - Selected name: `here-now`
-- License: repository README declares MIT
-- Installation: pinned `skills@1.5.14`, global scope, symlink mode
+- Ownership here: exact reviewed vendored copy
+- Update: project-scoped `npx skills@latest add heredotnow/skill` from
+  `dotfiles/agents`
 - Targets: Codex and Claude Code
-- Update: `scripts/agent-skills update`
+- Observed upstream HEAD after the Phase 2 install:
+  `f6e7ddb92f51bed76ff4dc8f99457c14b83577e6`
 
-The selectable name and README license declaration were verified on the audit
-date. The repository did not expose a top-level `LICENSE` file at the audited
-`main` URL, so retain this README-based license note until upstream publishes
-the complete license text.
+The repository README declares MIT, but the audited source still lacks a top-level
+license file. Retain this caveat until upstream publishes the license text.
+The installer result includes upstream `scripts/publish.sh` and
+`scripts/drive.sh`; both remain executable. The Phase 2 project install was
+byte-equal to the imported runtime baseline.
 
-The retired vendored copy included `scripts/publish.sh` and
-`scripts/drive.sh`. They are upstream support files, not local extensions, so
-they are removed only after the CLI-managed `here-now` installation is
-present and its support files validate.
+The observed HEAD is not an immutable installer pin because
+`skills-lock.json` records content hashes without a revision.
 
 ## Framer-derived local forks
 
 The tracked `framer` and `framer-code-components` skills are intentional local
-forks of Framer agent-generated skill material. Their original generated
-copies did not include a license or stable source-revision record. Keep this
-provenance limitation visible and do not redistribute them as upstream
-Framer-owned artifacts without confirming the applicable terms.
+forks of Framer agent-generated material. Their original generated copies did
+not include a license or stable source revision. Keep that provenance
+limitation visible and do not redistribute them as upstream Framer artifacts
+without confirming applicable terms.
 
 Known local changes:
 
 - `framer`
   - narrows triggering to explicit Framer context
-  - removes an unconditional pre-load setup requirement
+  - removes unconditional pre-load setup
   - requires normal environment permission handling
-  - states that setup does not authorize publishing or deletion
+  - does not treat setup as publishing/deletion authority
   - marks generated project metadata as private runtime-only state
 - `framer-code-components`
   - corrects the TypeScript interfaces table-of-contents anchor to
     `framer-property-control-types`
 
-These dotfiles versions are authoritative. Do not replace them with older
-copies from `$HOME/.claude/skills`.
+These tracked versions are authoritative and must never be overwritten by a
+third-party installer.
 
 ## `Forward-Future/loopy`
 
 - Source: <https://github.com/Forward-Future/loopy>
 - License: MIT
+- License copy: `licenses/loopy-LICENSE.txt`
+- Copyright notice: Copyright (c) 2026 Forward Future
 - Ownership here: intentional local fork
-- Local source: `agents/skills/loopy`
-- Installation: individual dotfiles-owned links, not the third-party CLI
-- Update: manual upstream review
+- Update: manual upstream review only
+- Upstream HEAD observed during Phase 2 provenance review:
+  `b88213d0d8252bb46a43f8cb7889ae40ed1c1187`
 
-The local skill includes tracked OpenAI metadata and workflow references.
-Automatic third-party update is intentionally disabled so local ownership
-cannot be overwritten.
+The observed HEAD is not claimed as the fork base. The tracked fork includes
+OpenAI metadata and workflow references and is excluded from automatic
+third-party updates.
 
 ## Generated Framer project skills
 
 `framer-project-*` directories are generated machine-local state, not
-redistributed third-party source. They remain outside Git under
-`$HOME/.agents/skills` and may contain private project metadata.
+redistributed third-party source. They remain real directories outside Git
+under `$HOME/.agents/skills` and may contain private project metadata. Their
+Claude links remain runtime-only.

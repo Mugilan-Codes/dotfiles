@@ -3,40 +3,39 @@
 Canonical instructions for Codex, Claude Code, and other AI agents working in
 this dotfiles repository.
 
-## Repository Purpose
+## Repository purpose
 
 This personal macOS/Linux dotfiles repository tracks:
 
 - shell startup files and Oh My Zsh customizations
 - tmux, global Git, and Starship configuration
 - Homebrew package state in `Brewfile`
-- dotfiles-owned agent skills and declarative third-party skill configuration
+- Git-vendored local, forked, and approved third-party agent skills
 - optional macOS preference automation
 
-GNU Stow manages the `zsh`, `tmux`, `git`, and `starship` packages. The
-`agents` directory is not a Stow package; `scripts/agent-skills` manages skill
-runtime links.
+GNU Stow manages the `zsh`, `tmux`, `git`, `starship`, and `agents` packages.
+The `agents` package always requires `--no-folding`.
 
 New-machine setup and detailed commands belong in `README.md` and
 `agents/README.md`.
 
-## Working Rules
+## Working rules
 
-- Inspect the repository structure, relevant files, and
+- Inspect repository structure, relevant files, and
   `git status --short --untracked-files=all` before modifying anything.
-- For non-trivial changes, state a short plan before editing.
+- State a short plan before non-trivial changes.
 - Preserve all pre-existing unrelated changes.
 - Keep changes small, scoped, and reviewable.
 - Keep commands concise and copy-pasteable.
-- Do not overwrite a real home-directory file or directory. Inspect the entry
-  type and resolved symlink target first.
+- Inspect a real home-directory entry and its resolved target before
+  replacing it.
 - Do not run broad, destructive, or cleanup commands unless explicitly
   requested.
-- Do not commit secrets, keys, tokens, credentials, `.env` files,
-  `.DS_Store`, swap files, temporary files, generated Framer state, or
-  machine-only configuration.
+- Never commit secrets, keys, tokens, credentials, `.env` files, databases,
+  logs, caches, `.DS_Store`, generated Framer state, or machine-only
+  configuration.
 
-## Authority Boundaries
+## Authority boundaries
 
 Treat these as separate permissions:
 
@@ -44,76 +43,70 @@ Treat these as separate permissions:
 - edit tracked repository files
 - run an installer or updater
 - apply or remove Stow links
-- stage changes
-- commit changes
-- push changes
+- stage
+- commit
+- push
 - deploy or publish externally
 
 An audit-only request authorizes read-only inspection, not implementation.
-Editing does not authorize installation, Stow changes, staging, committing,
-pushing, deployment, or external updates. Obtain explicit authority for each
-mutating operation that is outside the requested scope.
+Editing does not authorize installation, Stow, staging, committing, pushing,
+deployment, or external updates.
 
-## Stow Packages
+## Stow packages
 
 - `zsh`: shell startup and Oh My Zsh custom files
 - `tmux`: `$HOME/.tmux.conf`
 - `git`: `$HOME/.gitconfig`
 - `starship`: `$HOME/.config/starship.toml`
+- `agents`: tracked skills and static Claude compatibility links
 
-`macos/finder` is optional preference automation, not a Stow package. Always
-simulate relevant Stow operations before applying them. Never use `--adopt`
-without explicit intent to import existing home-directory contents.
+Always simulate before applying. Use `stow --no-folding` for `agents` so
+`$HOME/.agents/skills` and `$HOME/.claude/skills` remain real directories.
+Do not use `--adopt` without explicit intent to import existing home contents.
 
-## Skill Ownership
+`macos/finder` is optional preference automation, not a Stow package. Do not
+run it unless explicitly requested.
 
-### Dotfiles-owned local skills and forks
+## Skill ownership
 
-Sources live under `agents/skills/<name>`. The wrapper links each skill
-individually into `$HOME/.agents/skills/<name>` and then into
-`$HOME/.claude/skills/<name>`.
+### Tracked local skills and forks
 
-Edit only the repository source. Intentional forks must have attribution,
-upstream provenance, and local-change notes in `agents/THIRD_PARTY.md` and
+Canonical source lives under `agents/.agents/skills/<name>`. Edit only this
+repository source. Intentional forks require provenance, license information,
+and local-change notes in `agents/THIRD_PARTY.md` and
 `agents/SKILLS_REGISTRY.md`.
 
-### CLI-managed third-party skills
+### Vendored approved third-party skills
 
-Desired state lives in `agents/skills.conf`. Install and update only the
-explicit allowlist with the pinned `skills` CLI through
-`scripts/agent-skills`.
+Approved third-party contents are also tracked under
+`agents/.agents/skills/<name>`. Their sources and explicit allowlists live in
+`agents/skills.conf`; `agents/skills-lock.json` records project installer
+metadata.
 
-Installed contents under `$HOME/.agents/skills` are runtime artifacts, not
-editable local source. Claude Code compatibility entries under
-`$HOME/.claude/skills` must resolve to the same canonical runtime skill.
-Codex reads `$HOME/.agents/skills`; do not create duplicate user-managed
-copies under `$HOME/.codex/skills`, and do not alter Codex system/plugin
-skills there.
+Add or update them only from `dotfiles/agents` with project-scoped
+`npx skills@latest add <source>`. Never use `--global`, `-g`, or `--all`.
+Select only approved names and review every resulting Git change before
+updating documentation or committing. Record the resolved CLI version in the
+update report; committed contents are the reproducible artifact.
 
-Managed executable commands must use the configured pinned CLI version. Do
-not use `@latest`, `--all`, an upstream development linker, a local upstream
-clone, submodules, subtrees, or copied upstream snapshots.
+Do not silently overwrite local skills or forks. Installer removal may leave
+stale project-lock entries, which must be reconciled explicitly.
+
+### Claude and Codex
+
+Tracked relative links under `agents/.claude/skills` expose intended skills to
+Claude Code without duplicating contents. Codex reads `$HOME/.agents/skills`.
+Keep `$HOME/.codex` application-managed and do not vendor system/plugin
+skills or create a broad Codex Stow package.
 
 ### Generated runtime skills
 
-Generated Framer project skills are machine-local real directories matching
-`$HOME/.agents/skills/framer-project-*`. They remain outside Git. Claude Code
-may receive individual compatibility links to those directories.
+Real directories matching `$HOME/.agents/skills/framer-project-*` remain
+outside Git and may contain private project metadata. Their Claude
+compatibility links are runtime-only. Never copy, move, delete, or track
+generated project skills during ordinary dotfiles maintenance.
 
-### Collision and installer safety
-
-- `$HOME/.agents/skills` must be a real directory, never a whole-directory
-  symlink into this repository.
-- Verify every target and resolved link before writing.
-- Refuse real directories, regular files, unexpected symlinks, duplicate
-  names, source mismatches, and locally modified CLI-managed contents.
-- Preserve a temporary backup outside the repository before reconciling
-  ambiguous runtime state.
-- `unlink-local` may remove only manifest-owned local symlinks.
-- Third-party license and attribution changes must be reviewed when sources
-  or selected skills change.
-
-## Editing Conventions
+## Editing conventions
 
 - Preserve comments, grouping, and warning text unless wrong or stale.
 - Keep direct shortcuts in `zsh/.oh-my-zsh/custom/aliases.zsh`.
@@ -123,25 +116,26 @@ may receive individual compatibility links to those directories.
 - Keep universal environment variables minimal in `zsh/.zshenv`.
 - Keep login-shell PATH/toolchain setup in `zsh/.zprofile`.
 - Keep interactive shell setup in `zsh/.zshrc`.
-- Prefer `$HOME` to hard-coded user paths in reusable documentation.
+- Prefer `$HOME` over hard-coded user paths in reusable documentation.
 
-## Package Notes
+## Package notes
 
 ### `agents`
 
-- Every local skill needs `SKILL.md` with non-empty `name` and `description`.
-- Keep `agents/README.md`, `agents/SKILLS_REGISTRY.md`, and
-  `agents/THIRD_PARTY.md` current when skills change.
-- Use `scripts/agent-skills plan` for read-only inspection.
-- Run `scripts/agent-skills install` or `update` only with implementation or
-  update authority.
-- Never edit third-party runtime contents as though they were tracked source.
+- Every tracked skill needs `SKILL.md` with non-empty, matching `name` and
+  `description`.
+- Keep `agents/README.md`, `agents/SKILLS_REGISTRY.md`,
+  `agents/THIRD_PARTY.md`, licenses, and `skills.conf` current.
+- Use `scripts/agent-skills status` and `audit` for read-only inspection.
+- Run `pre-install` before, and `post-install` after, a separately authorized
+  third-party installer operation.
+- Keep generated/private patterns outside the package.
 
 ### `zsh`
 
 - Before adding a helper name, use `namecheck <name>` when available.
-- Before removing or renaming an established shortcut, use
-  `usedcount <name>` when available.
+- Before removing or renaming a shortcut, use `usedcount <name>` when
+  available.
 - Treat cleanup helpers, Docker volume removal, branch deletion, and
   `git add .` workflows as risky.
 
@@ -164,18 +158,20 @@ Run checks matching the files touched:
 git status --short --untracked-files=all
 git diff --check
 git diff --cached --check
+bash -n scripts/agent-skills
 zsh -n zsh/.zshrc zsh/.zprofile zsh/.zshenv zsh/.zlogin \
   zsh/.oh-my-zsh/custom/aliases.zsh \
   zsh/.oh-my-zsh/custom/functions.zsh \
   zsh/.oh-my-zsh/custom/completions.zsh
-stow --simulate --verbose zsh tmux git starship
-scripts/agent-skills plan
 scripts/agent-skills status
+scripts/agent-skills audit
+stow --target="$HOME" --simulate --no-folding --verbose \
+  zsh tmux git starship agents
 brew bundle check --file=./Brewfile
 ```
 
-For Stow changes, always run the simulation before recommending or applying
-the real operation.
+For Stow changes, always run simulation before recommending or applying the
+real operation.
 
 ## Reporting
 

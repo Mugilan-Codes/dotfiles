@@ -534,6 +534,7 @@ dotstow() {
 
   local repo="$HOME/dotfiles"
   local packages=(zsh tmux git starship)
+  local agent_package=agents
   local confirm
 
   command -v stow >/dev/null 2>&1 || { echo "stow not found"; return 1; }
@@ -544,11 +545,15 @@ dotstow() {
   fi
 
   echo "Previewing Stow changes from: $repo"
-  echo "Packages: ${packages[*]}"
+  echo "Packages: ${packages[*]} $agent_package"
   echo
 
   (cd "$repo" && stow --simulate --verbose "${packages[@]}") || {
     echo "Stow simulation failed. Nothing was changed."
+    return 1
+  }
+  (cd "$repo" && stow --simulate --no-folding --verbose "$agent_package") || {
+    echo "Agent-package Stow simulation failed. Nothing was changed."
     return 1
   }
 
@@ -561,7 +566,8 @@ dotstow() {
     return 1
   fi
 
-  (cd "$repo" && stow --restow --verbose "${packages[@]}")
+  (cd "$repo" && stow --restow --verbose "${packages[@]}") &&
+    (cd "$repo" && stow --restow --no-folding --verbose "$agent_package")
 }
 
 # Check only the symlinks managed by this dotfiles repo.
@@ -620,6 +626,7 @@ dotdoctor() {
 
   local repo="$HOME/dotfiles"
   local -a packages=(zsh tmux git starship)
+  local agent_package=agents
   local -a links=(
     "$HOME/.zshrc"
     "$HOME/.zprofile"
@@ -717,10 +724,12 @@ dotdoctor() {
   echo
   echo "== Stow simulation =="
   if command -v stow >/dev/null 2>&1 && [[ -d "$repo" ]]; then
-    if (cd "$repo" && stow --simulate --verbose "${packages[@]}") >/dev/null 2>&1; then
-      echo "ok: ${packages[*]}"
+    if (cd "$repo" &&
+      stow --simulate --verbose "${packages[@]}" >/dev/null 2>&1 &&
+      stow --simulate --no-folding --verbose "$agent_package" >/dev/null 2>&1); then
+      echo "ok: ${packages[*]} $agent_package (--no-folding)"
     else
-      echo "failed: run stow --simulate --verbose ${packages[*]} for details"
+      echo "failed: simulate ${packages[*]} and $agent_package with --no-folding"
       (( failures++ ))
     fi
   else

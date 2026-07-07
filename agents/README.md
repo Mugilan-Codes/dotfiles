@@ -1,150 +1,238 @@
-# Agent Skills
+# Agent skills Stow package
 
-This directory declares skill ownership and desired state. Runtime
-installation is managed by `scripts/agent-skills`; `agents` is not a GNU Stow
-package.
+The `agents` directory is a GNU Stow package and the source of truth for
+locally owned, intentionally forked, and approved vendored third-party
+skills.
 
-## Ownership Categories
+## Package tree
 
-| Category | Source of truth | Runtime |
-| --- | --- | --- |
-| Dotfiles-owned local skill | `agents/skills/<name>` | Individual link at `$HOME/.agents/skills/<name>` |
-| Intentional local fork | `agents/skills/<name>` plus attribution | Individual link at `$HOME/.agents/skills/<name>` |
-| CLI-managed third-party skill | Source and allowlist in `agents/skills.conf` | CLI-managed directory at `$HOME/.agents/skills/<name>` |
-| Generated Framer project skill | Machine-local generated state | Real directory at `$HOME/.agents/skills/framer-project-*` |
-
-Claude Code receives individual links under `$HOME/.claude/skills`. Codex
-reads the canonical `$HOME/.agents/skills` view. No duplicate user-managed
-copy is created under `$HOME/.codex/skills`.
-
-Third-party installed contents are not committed because upstream owns them
-and the pinned CLI can reproduce the explicit selection. This avoids stale
-vendored snapshots while retaining reviewable desired state.
-
-## Configuration
-
-`agents/skills.conf` is shell-quoted data sourced by the Bash wrapper. It
-declares:
-
-- `SKILLS_CLI_VERSION`
-- global installation scope
-- symlink installation mode
-- target agent IDs
-- each GitHub source and explicit skill allowlist
-- local skill names
-- the generated runtime pattern
-- that a local Matt Pocock clone is not required
-
-Values must remain data-only. Do not add commands or machine-specific absolute
-paths.
-
-## Commands
-
-Run from any directory inside the repository:
-
-```sh
-scripts/agent-skills plan
-scripts/agent-skills install
-scripts/agent-skills status
-scripts/agent-skills update
-scripts/agent-skills unlink-local
+```text
+agents/
+├── .agents/
+│   └── skills/
+│       └── <tracked-skill>/
+├── .claude/
+│   └── skills/
+│       └── <tracked relative symlink>
+├── licenses/
+├── .stow-local-ignore
+├── README.md
+├── SKILLS_REGISTRY.md
+├── THIRD_PARTY.md
+├── skills-lock.json
+└── skills.conf
 ```
 
-### `plan`
+Stow ignores the package documentation, configuration, lock, licenses, and
+prompt/migration metadata. It deploys only `.agents/skills` and
+`.claude/skills`.
 
-Read-only. Reports the required/available CLI version, configured sources and
-skills, expected targets, missing entries, stale/broken links, real-directory
-collisions, duplicate names, local source paths, local-clone references, and
-the changes `install` would make.
+## Ownership categories
 
-### `install`
+| Category | Source of truth | Update method |
+| --- | --- | --- |
+| Local | `agents/.agents/skills/<name>` | Edit locally |
+| Intentional fork | Tracked skill plus registry/provenance/license records | Manual upstream review |
+| Approved third-party | Tracked skill plus `skills.conf` and `skills-lock.json` | Project-scoped `skills@latest add` |
+| Codex-only local | Tracked canonical skill with no static Claude link | Edit locally |
+| Generated Framer | Real `$HOME/.agents/skills/framer-project-*` directory | Regenerate through an authorized Framer workflow |
 
-Installs only missing third-party allowlist entries with the pinned CLI,
-global scope, Codex and Claude Code targets, and default symlink mode. It then
-creates individual local and generated compatibility links.
+Both local and approved third-party contents are committed. A new machine
+reconstructs the reviewed baseline from Git and Stow without contacting an
+upstream installer.
 
-It refuses a whole-directory `$HOME/.agents/skills` symlink, real-directory
-collisions, unexpected symlinks, source mismatches, and local drift in
-CLI-managed contents.
+## New-machine bootstrap
 
-CLI 1.5.14 cannot remove a stale lock record after its runtime directory is
-already absent. During `install`, the wrapper atomically removes lock entries
-only for names explicitly owned by `LOCAL_SKILLS`, only after collision
-preflight, and only for the supported lock-file format. It does not remove
-runtime contents in that reconciliation.
+After cloning the repository, create no per-skill runtime state manually.
+Simulate first, then apply:
 
-### `status`
+```sh
+stow --target="$HOME" --simulate --verbose zsh tmux git starship
+stow --target="$HOME" --simulate --no-folding --verbose agents
+stow --target="$HOME" --verbose zsh tmux git starship
+stow --target="$HOME" --no-folding --verbose agents
+scripts/agent-skills status
+scripts/agent-skills audit
+```
 
-Runs the pinned CLI global list and validates:
+Committed skills require no Node, npm, network, upstream clone, skills CLI, or
+global skills metadata. Codex/Claude application state is not restored, and
+generated Framer project skills are regenerated separately.
 
-- every configured third-party source and runtime directory
-- local and Claude Code links
-- generated compatibility links
-- `SKILL.md` frontmatter and directory/name agreement
-- relative Markdown references
-- duplicate names and independent Codex collisions
-- broken links, unexpected copies, and links into a removable local clone
-- wrapper-recorded content hashes for CLI-managed skills
+## Stow behavior
 
-It exits non-zero for unhealthy state.
+The runtime parents must be real directories:
 
-### `update`
+```text
+$HOME/.agents/skills
+$HOME/.claude/skills
+```
 
-Updates only names in the configured third-party allowlists, reports which
-content hashes changed, records the reconciled state, and runs full status
-validation. It never updates dotfiles-owned local skills or changes the pinned
-CLI version.
+Always use:
 
-### `unlink-local`
+```sh
+stow --target="$HOME" --simulate --no-folding --verbose agents
+stow --target="$HOME" --no-folding --verbose agents
+```
 
-Removes only exact symlinks owned by `LOCAL_SKILLS`. It refuses real
-directories and unexpected links. It does not touch third-party or generated
-contents, or Codex system/plugin skills.
+With GNU Stow 2.4.1, `--no-folding` creates real runtime skill directories
+and links their files individually into the tracked package. Static Claude
+entries are themselves tracked relative symlinks. Do not use `--adopt`, and
+do not replace either runtime parent with a whole-directory link.
 
-## Local Skill Lifecycle
+Generated Framer directories and their Claude runtime links coexist with the
+Stow package and must survive every restow.
 
-1. Create or edit `agents/skills/<name>`.
-2. Ensure `SKILL.md` has non-empty `name` and `description` frontmatter.
-3. Add the name to `LOCAL_SKILLS`.
-4. Update `SKILLS_REGISTRY.md`.
-5. For a fork, update `THIRD_PARTY.md` with provenance and local changes.
-6. Run `plan`; run `install` only when runtime mutation is authorized.
-7. Start a fresh agent session after discovery-affecting changes.
+## Configuration and validation
 
-Do not point the skills CLI at a source inside `$HOME/.agents/skills`.
+`skills.conf` is data-only shell configuration. It declares:
 
-## Third-party Skill Lifecycle
+- `skills@latest`
+- package and tracked roots
+- required Stow mode
+- installer targets
+- explicit Matt Pocock and here-now allowlists
+- local, forked, and Codex-only names
+- executable paths
+- the generated runtime exclusion
 
-1. Review the source, license, and current selectable names.
-2. Add only the intended names to the relevant allowlist.
-3. Update `SKILLS_REGISTRY.md` and `THIRD_PARTY.md`.
-4. Run `plan`, then an authorized `install`.
-5. Use the wrapper's `update` command for future upstream changes.
+The wrapper is read-only:
 
-Never use `--all`, a blind `@latest` command, the upstream development linker,
-a copied snapshot, a submodule, or a local upstream clone as managed state.
+```sh
+scripts/agent-skills status
+scripts/agent-skills audit
+scripts/agent-skills pre-install
+scripts/agent-skills post-install
+```
 
-## Generated Skills
+`status` requires no Node, npm, or network. It validates configured
+directories, frontmatter, references, executable modes, static Claude links,
+private-state exclusions, registry consistency, deployed Stow file targets,
+generated state, and independent Codex collisions.
 
-Framer may generate `framer-project-*` directories containing project
-metadata. Keep them as real machine-local directories under
-`$HOME/.agents/skills`, outside Git. The wrapper links them into Claude Code
-without moving them into tracked source.
+`audit` adds project-lock hashes/sources, licenses, provenance, and deeper
+runtime observation. Before cutover it can validate repository state while
+reporting that runtime deployment is pending.
 
-## Troubleshooting
+`pre-install` prints the exact package directory, sources, selections, targets,
+worktree state, and backup guidance. `post-install` reports Git-visible
+changes and validates the resulting package without rewriting it.
 
-If the wrapper reports a collision:
+## Third-party add/update lifecycle
 
-1. Inspect with `ls -ld`, `readlink`, and `realpath`.
-2. Compare contents and source records.
-3. Back up ambiguous state outside the repository.
-4. Remove or relocate only proven obsolete state.
-5. Rerun `plan` before `install`.
+1. Audit the source, selected names, dependencies, license, and upstream
+   revision.
+2. Create an external backup when existing state is ambiguous.
+3. Run `scripts/agent-skills pre-install`.
+4. Change to the package directory:
 
-If a third-party directory was edited directly, preserve the change and
-decide whether to discard it or promote it to an attributed local fork. The
-wrapper intentionally refuses to overwrite that drift.
+   ```sh
+   cd "$HOME/dotfiles/agents"
+   ```
 
-If Claude Code cannot discover a skill, confirm its entry is a live symlink
-to the corresponding canonical runtime path. If Codex cannot discover it,
-check `$HOME/.agents/skills` and start a fresh session.
+5. Run the official source flow:
+
+   ```sh
+   npx skills@latest add mattpocock/skills
+   npx skills@latest add heredotnow/skill
+   ```
+
+6. Select project scope, only the configured allowlist, Codex, and Claude
+   Code. Never use `--global`, `-g`, or `--all`.
+7. After each source, inspect status, added/deleted files, mode changes,
+   relative Claude links, and `skills-lock.json`.
+8. Run `scripts/agent-skills post-install` and `audit`.
+9. Update registry, provenance, and licenses. Record the resolved CLI version
+   and the observed upstream revision without claiming an unverified
+   immutable pin.
+10. Simulate Stow before applying runtime changes.
+
+The CLI recreates installed directories, so upstream deletions become visible
+as Git deletions. Its remove operation may leave stale project-lock entries;
+review and reconcile those entries explicitly.
+
+Do not run `skills update --help` merely to inspect help. The audited CLI
+handled that command as an update. Use an isolated fixture for CLI inspection.
+
+## Local and fork protection
+
+Third-party selections must never overlap `LOCAL_SKILLS` or
+`LOCAL_FORK_SKILLS`. Do not use the installer to manage a local name. A fork
+requires attribution and a record of local changes before it is treated as
+authoritative repository source.
+
+`staged-change-reviewer` is Codex-only because its package includes
+Codex-specific OpenAI interface metadata. It intentionally has no tracked
+Claude compatibility link.
+
+## Generated and application-managed exclusions
+
+Never copy or track:
+
+- `framer-project-*`
+- `$HOME/.agents/plugins`
+- `$HOME/.agents/.skill-lock.json`
+- `$HOME/.agents/.dotfiles-skills-state`
+- `$HOME/.claude` settings, plugins, sessions, caches, or backups
+- `$HOME/.codex` credentials, databases, sessions, logs, caches, system
+  skills, or plugin skills
+
+The only normal runtime paths managed by this package are the approved skill
+views under `.agents/skills` and `.claude/skills`.
+
+## Troubleshooting and recovery
+
+If Stow reports a conflict:
+
+1. Stop before applying.
+2. Inspect the entry with `stat`, `readlink`, and `realpath`.
+3. Compare it with the repository and `skills-lock.json`.
+4. Preserve ambiguous state under `/private/tmp` outside the repository.
+5. Remove only a proven obsolete approved entry; never clear an entire
+   runtime parent.
+6. Repeat simulation.
+
+If a generated Framer entry is affected, stop. It is not an approved package
+target.
+
+For rollback, keep the migration/update backup until the next phase or commit
+is validated. Unstow only the `agents` package with the same `--no-folding`
+mode, then restore scoped runtime entries from the backup if required. GNU
+Stow may retain empty skill directories after removing their managed links;
+do not broadly delete them. A later restow safely reuses them.
+
+The current migration backup must remain in place through Phase 4 final diff,
+commit, and runtime review. Removal is a separate cleanup decision after those
+checks.
+
+## Everyday workflow prompts
+
+Complete prompts live under
+[`prompts/agent-config`](../prompts/agent-config/README.md). Paste a prompt's
+full contents into a disconnected Codex session.
+
+| Workflow | Prompt |
+| --- | --- |
+| Read-only status/topology audit | [01 — audit configuration](../prompts/agent-config/01-audit-agent-configuration.md) |
+| Install selected third-party skills | [02 — install selected skills](../prompts/agent-config/02-install-third-party-skills.md) |
+| Update the configured Matt allowlist | [03 — update Matt skills](../prompts/agent-config/03-update-matt-pocock-skills.md) |
+| Update `here-now` and review scripts/modes | [04 — update here-now](../prompts/agent-config/04-update-here-now.md) |
+| Add a locally authored skill | [05 — add local skill](../prompts/agent-config/05-add-local-skill.md) |
+| Record and protect an intentional fork | [06 — fork a skill](../prompts/agent-config/06-fork-third-party-skill.md) |
+| Remove a skill and stale lock references | [07 — remove safely](../prompts/agent-config/07-remove-skill-safely.md) |
+| Reconcile registry, provenance, licence, links, and modes | [08 — maintain skills and docs](../prompts/agent-config/08-maintain-skills-and-docs.md) |
+| Recover from an installer failure | [12 — recover failed install](../prompts/agent-config/12-recover-failed-install.md) |
+
+For a runtime restow, always simulate the exact package first, preserve real
+parent directories and generated entries, then apply only with separate
+runtime authority:
+
+```sh
+stow --target="$HOME" --simulate --no-folding --verbose agents
+stow --target="$HOME" --no-folding --verbose agents
+scripts/agent-skills status
+```
+
+Only [prompt 11](../prompts/agent-config/11-review-and-commit.md) authorizes
+routine staging and one commit. No lifecycle prompt authorizes an automatic
+push.

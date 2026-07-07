@@ -1,120 +1,187 @@
-# Codex Usage
+# Codex usage
 
-Practical prompt patterns for working with this repository.
+Practical guidance and the primary index for reusable agent-configuration
+prompts in this repository.
 
-## Instruction Discovery
+## Instruction and skill discovery
 
-Codex discovers `AGENTS.md` instructions from the repository hierarchy.
-This repository keeps canonical policy in the root `AGENTS.md`; `CLAUDE.md`
-is a relative symlink to it so Codex and Claude Code receive the same rules.
-If a nested `AGENTS.md` is added later, its narrower instructions apply within
-that subtree.
+`AGENTS.md` is canonical repository policy. `CLAUDE.md` is a relative symlink
+to it so Codex and Claude Code receive the same durable repository-level
+instructions. Codex discovers applicable `AGENTS.md` files from the repository
+hierarchy; always read the one governing the paths being changed.
 
-Codex reads user-managed skills from `$HOME/.agents/skills`. This repository
-does not duplicate those skills under `$HOME/.codex/skills`; existing Codex
-system/plugin skills there are independently managed.
+All repository-owned and approved third-party skill contents are Git-tracked
+under `agents/.agents/skills`. GNU Stow exposes them under
+`$HOME/.agents/skills`; static relative links under
+`agents/.claude/skills` expose the intended subset to Claude Code.
 
-## Start With Scope and Authority
+Do not duplicate these skills under `$HOME/.codex/skills`. `$HOME/.codex`
+remains application-managed except when a specifically reviewed local skill
+is being migrated into the canonical Stow package.
 
-Audit-only prompt:
+The `agents` package must use `stow --no-folding`. This keeps
+`$HOME/.agents/skills` and `$HOME/.claude/skills` as real directories while
+Stow exposes tracked content through file-level links. Generated
+`framer-project-*` entries remain private runtime-only state.
 
-```text
-Audit this dotfiles repository. Inspect the current Git and runtime state,
-report findings and risks, and do not modify files, links, packages, or
-external systems.
-```
+## Authority boundaries
 
-Implementation prompt:
+Treat these as independent permissions:
 
-```text
-Implement this scoped change. Preserve all pre-existing unrelated changes,
-edit only the required files, and run relevant validation. You may edit the
-repository, but do not install, Stow, stage, commit, push, or deploy unless I
-authorize those actions separately.
-```
+- audit or report
+- edit repository files
+- run a third-party installer
+- apply or remove Stow links
+- stage
+- commit
+- push
+- deploy or publish
 
-State authority explicitly when needed:
+Editing files does not authorize installation, Stow, staging, commits, or
+external publication. Preserve unrelated worktree changes.
 
-```text
-You may edit tracked files and run the real skill installer. Do not stage,
-commit, push, apply Stow, or publish externally.
-```
+## Start a new session safely
 
-Editing, installing, applying Stow, staging, committing, pushing, and
-deploying are separate permissions.
+1. Begin in the repository and let Codex read `AGENTS.md`.
+2. Inspect branch, HEAD, upstream, and
+   `git status --short --untracked-files=all`.
+3. State whether the request is audit-only, permits repository edits, permits
+   an installer, permits runtime/Stow changes, or permits staging/commit.
+4. Paste the complete task prompt from
+   [`prompts/agent-config`](prompts/agent-config/README.md). A disconnected
+   session may not have enough context if only a filename is referenced.
+5. Supply a valid YAML handoff when continuing work so completed audits are
+   not repeated.
 
-## Common Prompts
+## Agent-skill audit
 
-Repository onboarding:
-
-```text
-Use repo-onboarding to explain this repo's structure, Stow packages, agent
-skill ownership, verification commands, current Git state, and maintenance
-risks before changing anything.
-```
-
-Staged review:
-
-```text
-Use staged-diff-review to review only my staged changes. Do not modify,
-unstage, commit, or push anything.
-```
-
-Audit agent skills:
-
-```text
-Use skills-maintainer and scripts/agent-skills plan/status to audit local,
-third-party, and generated skills. Do not install or update anything.
-```
-
-Implement a local skill:
-
-```text
-Add this dotfiles-owned skill under agents/skills, update skills.conf and the
-agent documentation, then run the authorized install and validation workflow.
-Do not stage or commit.
-```
-
-Update third-party skills:
-
-```text
-Run scripts/agent-skills plan first. If healthy, run its explicit update
-workflow for only the configured allowlist, report changed skills, and do not
-change the pinned CLI version.
-```
-
-Modify a Stow package:
-
-```text
-Update the requested zsh/tmux/git/starship configuration. Inspect targets,
-keep the change scoped, and run Stow simulation. Do not apply real Stow,
-stage, or commit.
-```
-
-## Agent Skill Workflow
-
-Desired third-party state is in `agents/skills.conf`; local source is under
-`agents/skills`; generated Framer skills remain runtime-only.
+Use the read-only validator:
 
 ```sh
-scripts/agent-skills plan
-scripts/agent-skills install
 scripts/agent-skills status
-scripts/agent-skills update
-scripts/agent-skills unlink-local
+scripts/agent-skills audit
 ```
 
-Use `plan` and `status` for audits. `install`, `update`, and `unlink-local`
-mutate runtime state and need explicit authority. Detailed ownership,
-configuration, troubleshooting, and lifecycle guidance is in
-`agents/README.md`.
+`status` validates repository ownership and the deployed Stow runtime without
+Node, npm, or network access. `audit` adds project-lock, license, provenance,
+and deeper consistency checks.
 
-## Good Defaults
+## Local skill changes
 
-- Ask Codex to inspect branch, HEAD, status, targets, and symlinks first.
-- Preserve pre-existing changes and keep edits scoped.
-- Ask for a short plan on non-trivial work.
-- Require concise, copy-pasteable commands.
-- Request changed files, runtime changes, validation results, and final Git
-  status.
-- Prefer `$HOME` and repository-root-relative paths in reusable docs.
+Add or edit local source only under:
+
+```text
+agents/.agents/skills/<name>
+```
+
+Update `agents/skills.conf`, `agents/SKILLS_REGISTRY.md`, and, for a fork,
+`agents/THIRD_PARTY.md` plus the relevant license record. Create a relative
+Claude link only when the skill is intentionally Claude-compatible.
+
+Run repository validation and Stow simulation before applying runtime
+changes:
+
+```sh
+scripts/agent-skills audit
+stow --target="$HOME" --simulate --no-folding --verbose agents
+```
+
+## Third-party add or update
+
+First inspect the current worktree and preflight:
+
+```sh
+scripts/agent-skills pre-install
+```
+
+Then run the official installer from exactly the package directory:
+
+```sh
+cd "$HOME/dotfiles/agents"
+npx skills@latest add mattpocock/skills
+npx skills@latest add heredotnow/skill
+```
+
+Requirements:
+
+- use project scope
+- never use `--global` or `-g`
+- select only names allowlisted in `skills.conf`
+- select Codex and Claude Code
+- do not select all skills
+- protect local/forked names from overwrite
+- record the resolved CLI version in the update report
+
+Do not run `skills update --help`; the audited CLI treated it as an update.
+Inspect CLI behavior in an isolated fixture and use `skills@latest` only for
+an authorized add/update from `dotfiles/agents`.
+
+Committed skill contents and `skills-lock.json`, not the mutable
+`skills@latest` resolution, are the reproducible artifacts.
+
+After each source:
+
+```sh
+git status --short --untracked-files=all
+git diff --summary
+scripts/agent-skills post-install
+scripts/agent-skills audit
+```
+
+Review additions, deletions, mode changes, lock changes, relative references,
+source metadata, attribution, and licenses. The installer may recreate an
+existing vendored directory. Its remove command may leave a stale project
+lock entry, which must be reviewed and reconciled explicitly.
+
+## Runtime cutover or restow
+
+The real parent directories must remain in place. Generated
+`framer-project-*` directories and their runtime Claude links are not Stow
+package contents.
+
+```sh
+stow --target="$HOME" --simulate --no-folding --verbose agents
+stow --target="$HOME" --no-folding --verbose agents
+scripts/agent-skills status
+```
+
+With GNU Stow 2.4.1 and `--no-folding`, runtime skill directories are real
+directories containing file-level links into the repository. Never use
+`--adopt`.
+
+## Copy-paste prompt index
+
+| Task | Prompt |
+| --- | --- |
+| Audit tracked and runtime agent configuration | [01 — audit agent configuration](prompts/agent-config/01-audit-agent-configuration.md) |
+| Install selected third-party skills | [02 — install third-party skills](prompts/agent-config/02-install-third-party-skills.md) |
+| Update the configured Matt Pocock allowlist | [03 — update Matt Pocock skills](prompts/agent-config/03-update-matt-pocock-skills.md) |
+| Update `here-now` | [04 — update here-now](prompts/agent-config/04-update-here-now.md) |
+| Add a locally authored skill | [05 — add a local skill](prompts/agent-config/05-add-local-skill.md) |
+| Make a deliberate local fork | [06 — fork a third-party skill](prompts/agent-config/06-fork-third-party-skill.md) |
+| Remove one skill and reconcile references | [07 — remove a skill safely](prompts/agent-config/07-remove-skill-safely.md) |
+| Reconcile skills, metadata, and docs | [08 — maintain skills and docs](prompts/agent-config/08-maintain-skills-and-docs.md) |
+| Reassess safely trackable `.codex` config | [09 — audit Codex trackable config](prompts/agent-config/09-audit-codex-trackable-config.md) |
+| Test a disposable clean-machine bootstrap | [10 — validate a new machine](prompts/agent-config/10-validate-new-machine.md) |
+| Perform final review, staging, and one commit | [11 — review and commit](prompts/agent-config/11-review-and-commit.md) |
+| Diagnose a failed installer without destructive rollback | [12 — recover a failed install](prompts/agent-config/12-recover-failed-install.md) |
+
+Common choices:
+
+- Add an upstream skill with prompt 02.
+- Update Matt skills with prompt 03.
+- Track a skill you wrote with prompt 05.
+- Diagnose a failed update with prompt 12.
+- Stage and commit only with prompt 11.
+
+## Recommended workflow
+
+1. Audit or preflight with prompt 01 and the wrapper.
+2. Make one scoped change with prompts 02–07.
+3. Reconcile metadata and docs with prompt 08.
+4. Validate clean-machine reproduction with prompt 10 when topology changes.
+5. Use prompt 11 for the final diff review and separately authorized commit.
+
+No prompt authorizes an automatic push. Never install globally, run the
+installer outside `dotfiles/agents`, track generated Framer state, or Stow all
+of `.codex`.

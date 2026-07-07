@@ -1,0 +1,9 @@
+(^|/)(README[.]md|SKILLS_REGISTRY[.]md|THIRD_PARTY[.]md|skills[.]conf|skills-lock[.]json)$
+(^|/)licenses(/|$)
+(^|/)prompts(/|$)
+(^|/)([.]git|[.]hg|[.]svn)(/|$)
+(^|/)[.]DS_Store$
+(^|/)[.](env|secret)([.]|$)
+(^|/).*[.](bak|swp|swo|tmp)$
+(^|/).*~$
+(^|/).*migration.*$

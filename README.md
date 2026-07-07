@@ -1,27 +1,26 @@
 # Dotfiles
 
-Personal Apple Silicon macOS developer setup managed with GNU Stow plus a
-separate agent-skill manager.
+Personal Apple Silicon macOS developer setup managed with GNU Stow. Homebrew
+startup also supports common Intel macOS and Linuxbrew locations.
 
-The shell and application configuration is primarily macOS-oriented.
-Homebrew startup also detects common Intel macOS and Linuxbrew locations.
+## Stow packages
 
-## Stow Packages
-
-| Package | Installs To | Purpose |
+| Package | Installs to | Purpose |
 | --- | --- | --- |
-| `zsh` | `$HOME/.zshrc`, `$HOME/.zprofile`, `$HOME/.zshenv`, `$HOME/.zlogin`, `$HOME/.oh-my-zsh/custom/*` | Shell, PATH, aliases, functions, completions |
+| `zsh` | `$HOME/.zsh*`, `$HOME/.oh-my-zsh/custom/*` | Shell, PATH, aliases, functions, completions |
 | `tmux` | `$HOME/.tmux.conf` | tmux configuration |
 | `git` | `$HOME/.gitconfig` | Global Git configuration |
 | `starship` | `$HOME/.config/starship.toml` | Prompt configuration |
+| `agents` | `$HOME/.agents/skills`, `$HOME/.claude/skills` | Git-vendored local and approved third-party skills |
 
-`agents` is not a Stow package. Local skills, third-party skill declarations,
-and their manager live in `agents/` and `scripts/agent-skills`.
+The `agents` package must always be stowed with `--no-folding`. This keeps
+`$HOME/.agents/skills` and `$HOME/.claude/skills` as real directories so
+generated and application-owned entries can coexist with Stow-managed files.
 
-`macos/finder` is optional preference automation. It is not a Stow package
-and should run only when Finder defaults are intentionally being changed.
+`macos/finder` is optional preference automation, not a Stow package. Run it
+only when Finder defaults are intentionally being changed.
 
-## Repository Layout
+## Repository layout
 
 ```text
 dotfiles/
@@ -30,13 +29,16 @@ dotfiles/
 ├── CODEX_USAGE.md
 ├── Brewfile
 ├── agents/
+│   ├── .agents/skills/
+│   ├── .claude/skills/
+│   ├── licenses/
+│   ├── .stow-local-ignore
 │   ├── README.md
 │   ├── SKILLS_REGISTRY.md
 │   ├── THIRD_PARTY.md
-│   ├── skills.conf
-│   └── skills/
-├── scripts/
-│   └── agent-skills
+│   ├── skills-lock.json
+│   └── skills.conf
+├── scripts/agent-skills
 ├── git/
 ├── macos/finder/
 ├── starship/
@@ -44,17 +46,14 @@ dotfiles/
 └── zsh/
 ```
 
-## New Machine Setup
+## New-machine setup
 
-Install Homebrew, Git, GNU Stow, and Node.js/npm. The `skills` CLI runs
-through pinned `npx`; it is not globally installed.
+Install Homebrew, Git, and GNU Stow:
 
 ```sh
 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
 eval "$(/opt/homebrew/bin/brew shellenv)"
-brew install git stow fnm
-fnm install --lts
-fnm default lts-latest
+brew install git stow
 ```
 
 Clone the repository:
@@ -64,8 +63,7 @@ git clone git@github.com:Mugilan-Codes/dotfiles.git "$HOME/dotfiles"
 cd "$HOME/dotfiles"
 ```
 
-Install Oh My Zsh and the plugins enabled by `.zshrc` if they are not already
-present:
+Install Oh My Zsh and the plugins enabled by `.zshrc` if needed:
 
 ```sh
 sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
@@ -78,12 +76,21 @@ ZSH_CUSTOM="${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}"
     "$ZSH_CUSTOM/plugins/zsh-syntax-highlighting"
 ```
 
-Back up any existing real shell/config files, then preview and apply Stow:
+Back up conflicting real home-directory entries, then simulate and apply:
 
 ```sh
-stow --simulate --verbose zsh tmux git starship
-stow --verbose zsh tmux git starship
+stow --target="$HOME" --simulate --verbose zsh tmux git starship
+stow --target="$HOME" --simulate --no-folding --verbose agents
+
+stow --target="$HOME" --verbose zsh tmux git starship
+stow --target="$HOME" --no-folding --verbose agents
 ```
+
+Approved skills are reconstructed directly from the committed repository.
+Node, npm, the skills CLI, upstream clones, global skill metadata, and network
+access are not needed to deploy those committed skills. Node/npm and
+project-scoped `skills@latest` are needed only for a future authorized
+third-party add or update.
 
 Install Homebrew packages:
 
@@ -91,114 +98,57 @@ Install Homebrew packages:
 brew bundle --file="$HOME/dotfiles/Brewfile"
 ```
 
-Install agent skills only after reviewing the read-only plan:
+Validate and start fresh agent sessions:
 
 ```sh
-scripts/agent-skills plan
-scripts/agent-skills install
 scripts/agent-skills status
-```
-
-A local clone of `mattpocock/skills` is not required. Restart the shell and
-start fresh Codex/Claude Code sessions after the initial skill installation:
-
-```sh
+scripts/agent-skills audit
 exec zsh
 ```
 
-## Agent Skill Management
+## Agent skill maintenance
 
-The manager pins `skills@1.5.14`, uses global scope and symlink mode, and
-targets Codex plus Claude Code. It installs only the allowlists in
-`agents/skills.conf`.
+Canonical local, forked, and approved third-party contents live under
+`agents/.agents/skills`. Relative links under `agents/.claude/skills` expose
+the intended subset to Claude Code. Codex reads the Stow-managed
+`$HOME/.agents/skills` view; `$HOME/.codex` remains application-managed.
+
+The maintenance wrapper is read-only:
 
 ```sh
-scripts/agent-skills plan
-scripts/agent-skills install
 scripts/agent-skills status
-scripts/agent-skills update
-scripts/agent-skills unlink-local
+scripts/agent-skills audit
+scripts/agent-skills pre-install
+scripts/agent-skills post-install
 ```
 
-- `plan` is read-only and shows missing items, collisions, stale/broken links,
-  and proposed changes.
-- `install` reconciles missing allowlisted third-party skills and individual
-  local links without overwriting collisions.
-- `status` validates CLI source records, content hashes, frontmatter,
-  references, links, and discovery paths.
-- `update` explicitly updates only configured third-party names.
-- `unlink-local` removes only manifest-owned local symlinks.
-
-Do not use `@latest` or `--all` in repository-managed commands.
-
-### Add a local skill
-
-1. Create `agents/skills/<name>/SKILL.md`.
-2. Add the name to `LOCAL_SKILLS` in `agents/skills.conf`.
-3. Record ownership and provenance in `agents/SKILLS_REGISTRY.md`; add
-   attribution to `agents/THIRD_PARTY.md` if it is a fork.
-4. Run `scripts/agent-skills plan`, then `install` when authorized.
-
-### Add a third-party skill
-
-1. Verify the repository license and selectable skill name with the pinned
-   CLI's `add <source> --list` operation.
-2. Add the source and explicit name to `agents/skills.conf`.
-3. Update `agents/SKILLS_REGISTRY.md` and `agents/THIRD_PARTY.md`.
-4. Run `plan`, then `install`. Never replace an explicit allowlist with
-   `--all`.
-
-### Update third-party skills
+To update third-party contents, first run `pre-install`, then work from the
+package directory:
 
 ```sh
-scripts/agent-skills update
+cd "$HOME/dotfiles/agents"
+npx skills@latest add mattpocock/skills
+npx skills@latest add heredotnow/skill
 ```
 
-The wrapper protects local skills and checks for locally modified CLI-managed
-contents before update.
+Select project scope, only the allowlisted names in `skills.conf`, Codex, and
+Claude Code. Never use `--global` or `--all`. Review every resulting Git diff,
+run `post-install` and `audit`, update provenance/licenses when needed, then
+simulate Stow before changing runtime links.
 
-### Resolve collisions
+Do not run `skills update --help` to inspect help: the audited CLI handled
+that command as an update. Use the task-specific prompt and an isolated
+fixture for CLI inspection.
 
-If `plan` reports a real directory, regular file, unexpected symlink, or
-source mismatch:
+Generated `framer-project-*` skills remain private machine-local real
+directories and are never committed. Credentials, sessions, caches,
+databases, plugins, and broad Codex/Claude application state are also
+excluded.
 
-1. Stop; do not force installation.
-2. Inspect the entry type, resolved target, source record, and contents.
-3. Preserve ambiguous state outside the repository.
-4. Remove or relocate only the proven obsolete entry.
-5. Rerun `plan`.
-
-### Generated Framer project skills
-
-Generated `framer-project-*` skills are private machine-local runtime
-directories under `$HOME/.agents/skills`. They are never committed. The
-wrapper creates Claude Code compatibility links when needed.
-
-### Bump the pinned CLI deliberately
-
-1. Review the target CLI release and help for `add`, `list`, `remove`, and
-   `update`.
-2. Change only `SKILLS_CLI_VERSION` in `agents/skills.conf`.
-3. Run `scripts/agent-skills plan` and the full validation suite.
-4. Update docs if flags or behavior changed.
-
-## Stow Usage
-
-Run Stow from the repository root:
-
-```sh
-stow --simulate --verbose zsh tmux git starship
-stow --restow --verbose zsh tmux git starship
-```
-
-For rollback:
-
-```sh
-stow --delete --verbose zsh tmux git starship
-```
-
-Stow does not manage agent skills. Do not use `--adopt` unless existing
-home-directory files are intentionally being imported into this repository.
+See [agents/README.md](agents/README.md) for the full lifecycle and recovery
+model. Start agent-configuration work from the reusable
+[prompt library](prompts/agent-config/README.md) or its human-facing index in
+[CODEX_USAGE.md](CODEX_USAGE.md).
 
 ## Verification
 
@@ -206,41 +156,18 @@ home-directory files are intentionally being imported into this repository.
 git status --short --untracked-files=all
 git diff --check
 git diff --cached --check
+bash -n scripts/agent-skills
 zsh -n zsh/.zshrc zsh/.zprofile zsh/.zshenv zsh/.zlogin \
   zsh/.oh-my-zsh/custom/aliases.zsh \
   zsh/.oh-my-zsh/custom/functions.zsh \
   zsh/.oh-my-zsh/custom/completions.zsh
-stow --simulate --verbose zsh tmux git starship
-scripts/agent-skills plan
 scripts/agent-skills status
+scripts/agent-skills audit
+stow --target="$HOME" --simulate --verbose zsh tmux git starship
+stow --target="$HOME" --simulate --no-folding --verbose agents
 brew bundle check --no-upgrade --file=./Brewfile
 ```
 
-Useful loaded-shell diagnostics:
-
-```sh
-dotdoctor
-dotlinks
-namecheck newname
-usedcount existingname
-```
-
-## Daily Maintenance and Safety
-
-```sh
-bdump
-brewcheck
-brewtrustcheck
-brewoutdated
-dotstow
-gmsg
-gcai
-reload
-rz
-rzl
-```
-
 `brewup`, cleanup helpers, Docker volume removal, Git staging/commit helpers,
-Stow changes, skill installs/updates, and Finder automation are mutating
-operations. Run them intentionally. Keep `.DS_Store`, `.env`, keys, tokens,
-temporary files, and machine-only state out of Git.
+Stow changes, third-party installer runs, and Finder automation are mutating
+operations. Run them intentionally.

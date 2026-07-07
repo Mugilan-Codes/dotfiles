@@ -1,0 +1,4 @@
+interface:
+  display_name: "Staged Change Reviewer"
+  short_description: "Review only staged git changes clearly"
+  default_prompt: "Use $staged-change-reviewer to review the current staged changes only."

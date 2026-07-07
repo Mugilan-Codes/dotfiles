@@ -13,4 +13,15 @@
 secrets/
 
 # Generated Framer project skills are private machine-local runtime state.
-/agents/skills/framer-project-*/
+/agents/.agents/skills/framer-project-*/
+/agents/.claude/skills/framer-project-*
+
+# Runtime/application state must not be copied into the agents Stow package.
+/agents/.agents/.skill-lock.json
+/agents/.agents/.dotfiles-skills-state
+/agents/.agents/plugins/
+/agents/.claude/settings.json
+/agents/.claude/plugins/
+/agents/.claude/projects/
+/agents/.claude/session*
+/agents/.codex/
