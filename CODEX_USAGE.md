@@ -155,7 +155,7 @@ directories containing file-level links into the repository. Never use
 | --- | --- |
 | Audit tracked and runtime agent configuration | [01 — audit agent configuration](prompts/agent-config/01-audit-agent-configuration.md) |
 | Install selected third-party skills | [02 — install third-party skills](prompts/agent-config/02-install-third-party-skills.md) |
-| Update the configured Matt Pocock allowlist | [03 — update Matt Pocock skills](prompts/agent-config/03-update-matt-pocock-skills.md) |
+| Audit and update the configured Matt Pocock suite | [03 — update Matt Pocock skills](prompts/agent-config/03-update-matt-pocock-skills.md) |
 | Update `here-now` | [04 — update here-now](prompts/agent-config/04-update-here-now.md) |
 | Add a locally authored skill | [05 — add a local skill](prompts/agent-config/05-add-local-skill.md) |
 | Make a deliberate local fork | [06 — fork a third-party skill](prompts/agent-config/06-fork-third-party-skill.md) |
@@ -169,7 +169,7 @@ directories containing file-level links into the repository. Never use
 Common choices:
 
 - Add an upstream skill with prompt 02.
-- Update Matt skills with prompt 03.
+- Audit upstream changes, selection, and update the Matt suite with prompt 03.
 - Track a skill you wrote with prompt 05.
 - Diagnose a failed update with prompt 12.
 - Stage and commit only with prompt 11.

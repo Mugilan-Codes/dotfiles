@@ -1,13 +1,13 @@
 # Third-party skills and attribution
 
-Audited: 2026-07-07
+Audited: 2026-07-10
 
 Approved third-party skill contents are vendored under
 `agents/.agents/skills`. Future installer results must remain project-scoped,
 produce a visible Git diff, and record the resolved `skills@latest` version
 in the maintenance report.
 
-Resolved installer version: `1.5.14`
+Resolved installer version: `1.5.15`
 
 ## `mattpocock/skills`
 
@@ -20,25 +20,42 @@ Resolved installer version: `1.5.14`
   `dotfiles/agents`
 - Targets: Codex and Claude Code
 - Observed upstream HEAD after the last project-scoped install:
-  `16a2a5cd00b4416f673f4ff38c7971a04dd708e7`
+  `d574778f94cf620fcc8ce741584093bc650a61d3`
 
 Approved names:
 
+- `ask-matt`
 - `code-review`
 - `codebase-design`
+- `diagnosing-bugs`
 - `domain-modeling`
+- `grill-me`
 - `grill-with-docs`
 - `grilling`
 - `handoff`
+- `implement`
 - `improve-codebase-architecture`
+- `prototype`
+- `research`
 - `setup-matt-pocock-skills`
 - `tdd`
 - `teach`
+- `to-spec`
+- `to-tickets`
+- `triage`
+- `wayfinder`
+- `writing-great-skills`
 
 `grilling` is required by `grill-with-docs` and architecture workflows.
 `grill-with-docs` also uses `domain-modeling`.
 `improve-codebase-architecture` uses `codebase-design`, `domain-modeling`,
 and `grilling`.
+
+Release `v1.1.0` consolidates the planning flow around `to-spec` and
+`to-tickets`; the superseded upstream names `to-prd`, `to-plan`, and
+`to-issues` were not previously vendored here. `ask-matt` routes across the
+selected suite. The user-invoked orchestration skills rely on the
+model-invoked primitives documented in `SKILLS_REGISTRY.md`.
 
 The project lock records per-skill content hashes but does not record an
 immutable source revision. The observed HEAD is provenance evidence from the
@@ -60,9 +77,12 @@ The project-scoped installer produced contents byte-equal to the imported
 baseline for all ten selected skills.
 
 Known CLI caveat: `skills update --help` behaved as an update rather than help
-during audit. Do not use it for help inspection; use an isolated fixture. The
-reviewed project install matched the imported `grilling` baseline. No other
-selected Matt skill changed beyond its imported baseline.
+during audit. Do not use it for help inspection; use an isolated fixture.
+
+The 2026-07-10 update changed the vendored `handoff` terminology from PRDs to
+specs and updated `setup-matt-pocock-skills` to name `to-spec` and
+`to-tickets`. The other eight previously selected skill trees already matched
+the `v1.1.0` upstream contents at the observed revision.
 
 ## `heredotnow/skill`
 

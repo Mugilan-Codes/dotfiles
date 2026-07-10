@@ -618,11 +618,11 @@ run_audit() {
   echo
   echo "== Licenses and provenance =="
   validate_licenses || failures=$((failures + 1))
-  grep -q 'Resolved installer version: `1.5.14`' "$third_party_file" || {
+  grep -q 'Resolved installer version: `1.5.15`' "$third_party_file" || {
     echo "invalid: resolved installer version is not recorded"
     failures=$((failures + 1))
   }
-  grep -q '16a2a5cd00b4416f673f4ff38c7971a04dd708e7' "$third_party_file" || {
+  grep -q 'd574778f94cf620fcc8ce741584093bc650a61d3' "$third_party_file" || {
     echo "invalid: verified Matt revision is not recorded"
     failures=$((failures + 1))
   }

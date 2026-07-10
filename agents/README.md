@@ -150,6 +150,22 @@ The CLI recreates installed directories, so upstream deletions become visible
 as Git deletions. Its remove operation may leave stale project-lock entries;
 review and reconcile those entries explicitly.
 
+The approved Matt suite includes user-invoked orchestration (`ask-matt`,
+`grill-me`, `grill-with-docs`, `handoff`, `implement`,
+`improve-codebase-architecture`, `setup-matt-pocock-skills`, `teach`,
+`to-spec`, `to-tickets`, `triage`, `wayfinder`, and
+`writing-great-skills`) plus model-invoked disciplines (`code-review`,
+`codebase-design`, `diagnosing-bugs`, `domain-modeling`, `grilling`,
+`prototype`, `research`, and `tdd`). The authoritative operational list is
+always `MATT_SKILLS` in `skills.conf`.
+
+Run `setup-matt-pocock-skills` once per application repository that will use
+the issue-tracker planning flow. It may create `docs/agents/issue-tracker.md`,
+`docs/agents/triage-labels.md`, and `docs/agents/domain.md`, and update an
+existing `AGENTS.md` or `CLAUDE.md` with pointers. Review that proposed edit
+carefully in policy-heavy repositories; installing the suite does not
+authorize running setup.
+
 Do not run `skills update --help` merely to inspect help. The audited CLI
 handled that command as an update. Use an isolated fixture for CLI inspection.
 

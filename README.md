@@ -136,6 +136,11 @@ Claude Code. Never use `--global` or `--all`. Review every resulting Git diff,
 run `post-install` and `audit`, update provenance/licenses when needed, then
 simulate Stow before changing runtime links.
 
+The Matt allowlist is a reviewed suite, not an upstream “install all” mirror.
+Its setup skill is run separately per application repository when the
+issue-tracker/spec/ticket workflow is wanted; it is not part of dotfiles
+deployment.
+
 Do not run `skills update --help` to inspect help: the audited CLI handled
 that command as an update. Use the task-specific prompt and an isolated
 fixture for CLI inspection.

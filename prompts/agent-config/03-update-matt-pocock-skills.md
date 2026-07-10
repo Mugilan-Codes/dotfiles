@@ -2,9 +2,11 @@
 
 ## Objective
 
-Update exactly the Matt Pocock skill allowlist configured in
-`agents/skills.conf` from `mattpocock/skills`, preserving the vendored Stow
-architecture and every local skill/fork.
+Audit the latest Matt Pocock release, then update exactly the approved skill
+allowlist configured in `agents/skills.conf` from `mattpocock/skills`,
+preserving the vendored Stow architecture and every local skill/fork. Treat
+`MATT_SKILLS` as the final suite selection; do not revive obsolete planning
+names such as `to-prd`, `to-plan`, or `to-issues`.
 
 If a valid prior YAML handoff is supplied, continue from it and reconfirm only
 mutable safety-critical state. Do not repeat an already completed audit.
@@ -39,6 +41,13 @@ not maintain a second hardcoded list. Canonical source is
 `stow --no-folding`. Distinguish local, local fork, vendored third party,
 generated runtime, and application-managed content. Protect local/fork names,
 generated `framer-project-*`, and broad `.codex` state.
+
+Before installation, compare the allowlist with current upstream names and
+dependencies. Record the release/version, upstream commit, invocation class,
+renames, removals, and additions. When the approved selection changes, pass
+that exact set to the installer and immediately reconcile `MATT_SKILLS`, the
+registry, and provenance so the wrapper remains the sole durable source of
+truth.
 
 ## Workflow
 
