@@ -17,16 +17,13 @@ link is intended.
 | `framer` | Local fork | Framer agent-generated base | Codex, Claude | `framer-code-components`, generated `framer-project-*` | Manual upstream review | Intentional fork; generated project state excluded |
 | `framer-code-components` | Local fork | Framer agent-generated base | Codex, Claude | `framer`, generated `framer-project-*` | Manual upstream review | Intentional fork; generated project state excluded |
 | `loopy` | Local fork | `Forward-Future/loopy` | Codex, Claude | None | Manual upstream review | Intentional fork; manual upstream review |
-| `ask-matt` | Vendored third-party | `mattpocock/skills` | Codex, Claude | Selected Matt suite | Project-scoped installer | User-invoked router |
 | `code-review` | Vendored third-party | `mattpocock/skills` | Codex, Claude | None required | Project-scoped `skills@latest add` | Lock hash validated |
 | `codebase-design` | Vendored third-party | `mattpocock/skills` | Codex, Claude | None | Project-scoped installer | Lock hash validated |
 | `diagnosing-bugs` | Vendored third-party | `mattpocock/skills` | Codex, Claude | None | Project-scoped installer | Model-invoked debugging discipline |
 | `domain-modeling` | Vendored third-party | `mattpocock/skills` | Codex, Claude | None | Project-scoped installer | Lock hash validated |
-| `grill-me` | Vendored third-party | `mattpocock/skills` | Codex, Claude | `grilling` | Project-scoped installer | User-invoked standalone interview |
 | `grill-with-docs` | Vendored third-party | `mattpocock/skills` | Codex, Claude | `grilling`, `domain-modeling` | Project-scoped installer | Lock hash validated; `grilling` retained |
 | `grilling` | Vendored third-party | `mattpocock/skills` | Codex, Claude | None | Project-scoped installer | Lock hash validated; retained dependency |
 | `handoff` | Vendored third-party | `mattpocock/skills` | Codex, Claude | None | Project-scoped installer | Lock hash validated |
-| `implement` | Vendored third-party | `mattpocock/skills` | Codex, Claude | `tdd`, `code-review` | Project-scoped installer | User-invoked ticket implementation |
 | `improve-codebase-architecture` | Vendored third-party | `mattpocock/skills` | Codex, Claude | `codebase-design`, `domain-modeling`, `grilling` | Project-scoped installer | Lock hash validated |
 | `prototype` | Vendored third-party | `mattpocock/skills` | Codex, Claude | None | Project-scoped installer | Model-invoked throwaway exploration |
 | `research` | Vendored third-party | `mattpocock/skills` | Codex, Claude | Background-agent capability | Project-scoped installer | Model-invoked primary-source research |
@@ -34,9 +31,7 @@ link is intended.
 | `tdd` | Vendored third-party | `mattpocock/skills` | Codex, Claude | `codebase-design` vocabulary where used | Project-scoped installer | Lock hash validated |
 | `teach` | Vendored third-party | `mattpocock/skills` | Codex, Claude | None | Project-scoped installer | Lock hash validated |
 | `to-spec` | Vendored third-party | `mattpocock/skills` | Codex, Claude | Setup-provided tracker/domain docs | Project-scoped installer | User-invoked spec publication |
-| `to-tickets` | Vendored third-party | `mattpocock/skills` | Codex, Claude | Setup-provided tracker; `prototype`, `implement` workflow | Project-scoped installer | User-invoked tracer-ticket planning |
-| `triage` | Vendored third-party | `mattpocock/skills` | Codex, Claude | `setup-matt-pocock-skills`, `grilling`, `domain-modeling` | Project-scoped installer | User-invoked issue/PR triage |
-| `wayfinder` | Vendored third-party | `mattpocock/skills` | Codex, Claude | Setup-provided tracker; `grilling`, `domain-modeling`, `prototype`, `research` | Project-scoped installer | User-invoked multi-session decision map |
+| `to-tickets` | Vendored third-party | `mattpocock/skills` | Codex, Claude | Setup-provided tracker; optional `prototype`; ordinary Codex implementation | Project-scoped installer plus documented local integration note | User-invoked tracer-ticket planning; `/implement` handoff replaced locally |
 | `writing-great-skills` | Vendored third-party | `mattpocock/skills` | Codex, Claude | None | Project-scoped installer | User-invoked skill-writing reference |
 | `here-now` | Vendored third-party | `heredotnow/skill` | Codex, Claude | Upstream network/tools | Project-scoped `skills@latest add` | Lock hash validated; install-policy note patched; scripts executable |
 

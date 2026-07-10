@@ -150,14 +150,18 @@ The CLI recreates installed directories, so upstream deletions become visible
 as Git deletions. Its remove operation may leave stale project-lock entries;
 review and reconcile those entries explicitly.
 
-The approved Matt suite includes user-invoked orchestration (`ask-matt`,
-`grill-me`, `grill-with-docs`, `handoff`, `implement`,
-`improve-codebase-architecture`, `setup-matt-pocock-skills`, `teach`,
-`to-spec`, `to-tickets`, `triage`, `wayfinder`, and
+The approved Matt suite includes user-invoked orchestration
+(`grill-with-docs`, `handoff`, `improve-codebase-architecture`,
+`setup-matt-pocock-skills`, `teach`, `to-spec`, `to-tickets`, and
 `writing-great-skills`) plus model-invoked disciplines (`code-review`,
 `codebase-design`, `diagnosing-bugs`, `domain-modeling`, `grilling`,
 `prototype`, `research`, and `tdd`). The authoritative operational list is
 always `MATT_SKILLS` in `skills.conf`.
+
+This is intentionally a practical subset. It omits the full-suite router,
+standalone grilling alias, commit-driving implementation wrapper, issue/PR
+triage state machine, and large-project wayfinding map. Use ordinary Codex
+tasks to implement tickets produced by `to-tickets`.
 
 Run `setup-matt-pocock-skills` once per application repository that will use
 the issue-tracker planning flow. It may create `docs/agents/issue-tracker.md`,

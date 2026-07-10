@@ -24,16 +24,13 @@ Resolved installer version: `1.5.15`
 
 Approved names:
 
-- `ask-matt`
 - `code-review`
 - `codebase-design`
 - `diagnosing-bugs`
 - `domain-modeling`
-- `grill-me`
 - `grill-with-docs`
 - `grilling`
 - `handoff`
-- `implement`
 - `improve-codebase-architecture`
 - `prototype`
 - `research`
@@ -42,8 +39,6 @@ Approved names:
 - `teach`
 - `to-spec`
 - `to-tickets`
-- `triage`
-- `wayfinder`
 - `writing-great-skills`
 
 `grilling` is required by `grill-with-docs` and architecture workflows.
@@ -53,9 +48,22 @@ and `grilling`.
 
 Release `v1.1.0` consolidates the planning flow around `to-spec` and
 `to-tickets`; the superseded upstream names `to-prd`, `to-plan`, and
-`to-issues` were not previously vendored here. `ask-matt` routes across the
-selected suite. The user-invoked orchestration skills rely on the
-model-invoked primitives documented in `SKILLS_REGISTRY.md`.
+`to-issues` were not previously vendored here. This repository intentionally
+keeps a practical subset rather than the full upstream workflow: ordinary
+Codex tasks implement the output of `to-tickets`, while the issue-queue router,
+triage, and large-project decision-map layers are omitted.
+
+Local integration adaptation:
+
+- `to-tickets`: the final `/implement` handoff is replaced with a fresh Codex
+  task that uses the retained `tdd` and `code-review` skills and treats commit
+  authority separately. Reapply this one-line workflow adaptation after a
+  future project-scoped upstream update.
+
+The retained upstream `setup-matt-pocock-skills` templates still describe
+optional triage and wayfinding configuration. Those sections do not imply the
+corresponding skills are installed; the practical planning pair consumes only
+the tracker, label, and domain-document configuration.
 
 The project lock records per-skill content hashes but does not record an
 immutable source revision. The observed HEAD is provenance evidence from the
