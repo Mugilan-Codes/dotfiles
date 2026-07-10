@@ -1,4 +1,4 @@
-# Agent skill and plugin troubleshooting
+# Tracked skill troubleshooting
 
 ## A tracked skill is not discovered
 
@@ -56,13 +56,22 @@ and unavailable agent features should not be treated as repository failure.
 Set up only the chosen project/host requirement, then re-run its exact verify
 command without printing secrets.
 
-## Plugin not visible or command unavailable
+## Codex-only skill unexpectedly shown in Claude
 
-Run `codex plugin list` or `claude plugin list`. Use the exact host commands in
-[PLUGINS_GUIDE.md](PLUGINS_GUIDE.md); Codex does not currently implement
-`plugin update/enable/disable`. Do not copy or edit caches. Restart the host
-(mandatory after Claude update) and open a fresh task. Connector login and
-permissions require the application’s interactive account UI.
+Check whether a tracked link was added under `agents/.claude/skills` and
+compare it with `CODEX_ONLY_SKILLS` in `agents/skills.conf`.
+`staged-change-reviewer` must remain Codex-only. Remove or restow a link only
+with the corresponding repository or runtime authority.
+
+## Project-specific setup is missing
+
+Do not classify a missing test command, tracker document, `CONTEXT.md`, or ADR
+directory as a broken global installation. Follow [REQUIREMENTS.md](REQUIREMENTS.md)
+and run `setup-matt-pocock-skills` only when the application repository wants
+the spec/ticket workflow and the user authorizes its writes.
+
+Plugin and application-managed skill troubleshooting belongs to the host
+application and is intentionally outside this repository.
 
 ## Generated Framer state
 
@@ -77,3 +86,7 @@ Use [prompt 12](../prompts/agent-config/12-recover-failed-install.md) to
 inventory the partial result. Restore only proven affected paths, re-run
 `audit`, and simulate Stow. An interrupted mutation does not authorize another
 installer run, runtime cleanup, staging, or commit.
+
+If a local adaptation was overwritten, compare only the affected skill with
+Git and `THIRD_PARTY.md`, restore the documented adaptation, then re-run
+`post-install` and `audit`. Never use a broad reset or delete runtime parents.

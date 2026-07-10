@@ -1,4 +1,4 @@
-(^|/)(README[.]md|SKILLS_GUIDE[.]md|PLUGINS_GUIDE[.]md|REQUIREMENTS[.]md|SKILLS_REGISTRY[.]md|THIRD_PARTY[.]md|TROUBLESHOOTING[.]md|skills[.]conf|skills-lock[.]json)$
+(^|/)(README[.]md|SKILLS_GUIDE[.]md|REQUIREMENTS[.]md|SKILLS_REGISTRY[.]md|THIRD_PARTY[.]md|TROUBLESHOOTING[.]md|skills[.]conf|skills-lock[.]json)$
 (^|/)licenses(/|$)
 (^|/)prompts(/|$)
 (^|/)([.]git|[.]hg|[.]svn)(/|$)

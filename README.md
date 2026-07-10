@@ -147,13 +147,15 @@ fixture for CLI inspection.
 
 Generated `framer-project-*` skills remain private machine-local real
 directories and are never committed. Credentials, sessions, caches,
-databases, plugins, and broad Codex/Claude application state are also
-excluded.
+databases, and broad Codex/Claude application state are also excluded.
+
+Plugins and application-managed skills are intentionally outside dotfiles
+ownership. Install and manage them through Codex or Claude Code. This
+repository does not inventory, reproduce, or configure their state.
 
 See [agents/README.md](agents/README.md) for the canonical operating-guide
 index, including the [skill decision guide](agents/SKILLS_GUIDE.md),
-[requirements](agents/REQUIREMENTS.md),
-[application-managed plugins](agents/PLUGINS_GUIDE.md), and
+[requirements](agents/REQUIREMENTS.md), and
 [troubleshooting](agents/TROUBLESHOOTING.md). Start agent-configuration work
 from the reusable
 [prompt library](prompts/agent-config/README.md) or its human-facing index in

@@ -22,7 +22,7 @@ Git.
 | Fork a third-party skill | [06](06-fork-third-party-skill.md) | Make a reviewed local fork authoritative | Yes | No | No | Upstream, reason, and licence/provenance evidence |
 | Remove a skill safely | [07](07-remove-skill-safely.md) | Remove one tracked skill and references | Yes | No | No | Skill name, reason, recovery path |
 | Maintain skills and docs | [08](08-maintain-skills-and-docs.md) | Reconcile metadata after a skill change | Yes | No | No | Existing skill diff |
-| Audit trackable Codex config | [09](09-audit-codex-trackable-config.md) | Reassess safe `.codex` portability | No | No | No | Metadata-only access by default |
+| Audit a portable skill candidate | [09](09-audit-codex-trackable-config.md) | Decide whether one identified custom skill belongs in dotfiles | No | No | No | Exact candidate path and provenance |
 | Validate a new machine | [10](10-validate-new-machine.md) | Test bootstrap in a disposable HOME | Temporary fixture only | No | Temporary fixture only | GNU Stow, Git, temporary disk space |
 | Review and commit | [11](11-review-and-commit.md) | Perform the final full review and one commit | Index and commit | No | Yes | Explicit commit authority; validated intended diff |
 | Recover a failed install | [12](12-recover-failed-install.md) | Diagnose and plan scoped recovery | Temporary evidence only by default | No | No | Failed command/output and any backup path |

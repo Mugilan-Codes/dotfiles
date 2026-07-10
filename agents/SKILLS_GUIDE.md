@@ -9,6 +9,14 @@ User-invoked skills must be named explicitly. All skills are available to
 Codex through `$HOME/.agents/skills`; all except `staged-change-reviewer` have
 a tracked Claude compatibility link.
 
+The inventory below is definitive for the 26 tracked skills. “Light” setup
+means no durable project setup, “moderate” means project files or a toolchain
+may be needed, and “heavy” means account, network, external publication, or
+multi-artifact setup may be involved. Requirement states are `SATISFIED`,
+`OPTIONAL`, `PROJECT-SPECIFIC`, `ACCOUNT-SPECIFIC`,
+`AGENT-CAPABILITY-SPECIFIC`, `MISSING`, or `UNKNOWN`. Every skill is available
+to Codex and Claude Code except the explicitly Codex-only staged reviewer.
+
 ## Inventory and selection
 
 | Skill | Type / invocation | Invoke when | Avoid when | Requirements and current state | Outputs, writes, risk | Update source |
@@ -43,6 +51,14 @@ a tracked Claude compatibility link.
 No skill grants install, commit, push, publish, issue-creation, or remote-write
 authority by itself. Those remain separate user permissions.
 
+The type/invocation column also records setup burden. Skills marked medium or
+high may create or edit the artifacts named in their row, but none may commit
+without separate authority. User-invoked skills are `grill-with-docs`,
+`handoff`, `improve-codebase-architecture`, `setup-matt-pocock-skills`,
+`teach`, `to-spec`, `to-tickets`, and `writing-great-skills`;
+`skills-maintainer` is maintenance-oriented and the remaining skills are
+model-invoked.
+
 ## Fast decision guide
 
 - New repository: `repo-onboarding`.
@@ -63,6 +79,42 @@ authority by itself. Those remain separate user permissions.
   authorized quick hosting: `here-now`.
 - Long-running work nearing a context boundary: `handoff`; repeatable agent
   procedure: `loopy`.
+
+## Important overlaps
+
+- `bug-triage` is the short reproduce–fix–verify path;
+  `diagnosing-bugs` builds a feedback harness for hard, flaky, slow, or poorly
+  isolated failures.
+- `staged-diff-review` is the portable findings-first staged review;
+  `staged-change-reviewer` is the Codex-only staged summary interface.
+- `grilling` is conversation-only pressure-testing; `grill-with-docs` also
+  maintains glossary and ADR artifacts.
+- `prototype` is disposable uncertainty reduction; normal implementation is
+  for a known production path and needs production-quality verification.
+- `to-spec` creates a durable tracker-ready specification; a small task
+  description should stay in the task. `to-tickets` publishes dependency-aware
+  slices; a normal plan is enough without tracker artifacts or coordination.
+- `skills-maintainer` owns this repository's inventory, links, locks, and
+  lifecycle; `writing-great-skills` improves the design of one skill.
+- `code-review` compares a branch with a fixed point, standards, and a spec;
+  the local staged reviewers inspect only the Git index.
+
+## Practical examples
+
+- Node.js/TypeScript: `repo-onboarding`, then `tdd` for an API behavior change;
+  use `prototype` first only if the state model is uncertain.
+- Flutter: `diagnosing-bugs` for a flaky widget/navigation failure and
+  `codebase-design` for a testable seam.
+- Java/Spring Boot: `domain-modeling` for Order/Invoice vocabulary and `tdd`
+  for a vertical controller-to-repository slice.
+- DSA: `dsa-solution-review` for Java correctness, dry run, edge cases, and
+  brute/better/optimal comparison.
+- System design: `grill-with-docs` for decisions that should update context or
+  ADRs; use plain `grilling` when no files should change.
+- Freelance websites: use the ordinary web workflow; choose `framer` only for
+  an explicit Framer project and `here-now` only with publication authority.
+- Dotfiles: `skills-maintainer` for this package and `staged-diff-review`
+  before an authorized commit.
 
 ## Project setup boundary
 

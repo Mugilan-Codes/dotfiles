@@ -48,7 +48,7 @@ context.
   third party, generated runtime, and application managed.
 - Generated `framer-project-*` directories and their runtime-only Claude links
   remain outside Git. Application credentials, databases, sessions, logs,
-  caches, system/plugin skills, and broad `.codex` state remain outside Git.
+  caches, application-managed skills, and broad host state remain outside Git.
 
 ## Audit
 

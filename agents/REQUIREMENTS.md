@@ -1,4 +1,4 @@
-# Skill and plugin requirements
+# Tracked skill requirements
 
 Snapshot audited on 2026-07-10. States describe this machine without printing
 credential values. Re-run the commands rather than treating this snapshot as
@@ -15,7 +15,6 @@ permanent.
 | GitLab CLI | GitLab tracker workflows only | MISSING / OPTIONAL | `command -v glab` | `brew install glab`, then interactive login |
 | curl/file/jq | `here-now` scripts | SATISFIED | `command -v curl file jq` | Install the missing binary with the OS package manager |
 | Bash/Zsh | Validators and shell package | SATISFIED | `bash --version; zsh --version` | OS/package-manager specific |
-| Java, Flutter, Dart, Python | User application workflows, not tracked-skill discovery | SATISFIED | `java -version; flutter --version; dart --version; python3 --version` | Use the existing SDK managers |
 
 `npx skills@latest` needs network access and resolves a mutable CLI version.
 It is needed only during an explicitly authorized third-party add/update. The
@@ -29,8 +28,9 @@ reproducible artifact. Never run `skills update --help` on live state.
 | here.now account key | Permanent publishing/account operations | OPTIONAL, not set | `test -n "${HERENOW_API_KEY:-}"` or inspect `~/.herenow/credentials` without printing it; follow the skill’s interactive authorization flow |
 | here.now Drive token | Scoped Drive sharing | OPTIONAL, not set | `test -n "${HERENOW_DRIVE_TOKEN:-}"`; obtain a narrowly scoped, short-lived token when needed |
 | Browser/Playwright | UI reproduction and previews | OPTIONAL; agent capability available, project package varies | `command -v playwright` and inspect the project package manifest |
-| Network | Research, Framer, here.now, remote trackers/plugins | REQUIRED AT USE | Perform a harmless host-specific status/list request when authorized |
-| Service login/permissions | GitHub, GitLab, Framer, Vercel, Google, Gmail | PROJECT/ACCOUNT-SPECIFIC | Use each first-party CLI/app status screen; never document token values |
+| Network | `research`, `framer`, `framer-code-components`, `here-now`, remote tracker flows | REQUIRED AT USE | Perform a harmless service-specific status request when authorized |
+| Framer account/project permission | `framer`, `framer-code-components` | ACCOUNT/PROJECT-SPECIFIC | Use the Framer CLI's authenticated project listing when authorized; sign in through Framer |
+| GitHub/GitLab authentication | `setup-matt-pocock-skills`, `to-spec`, `to-tickets` remote tracker flows | ACCOUNT-SPECIFIC | `gh auth status` or `glab auth status`; use interactive CLI login |
 
 ## Project-specific requirements
 
@@ -65,6 +65,8 @@ command -v git gh glab node npm npx curl file jq stow
 stow --target="$HOME" --simulate --no-folding --verbose agents
 ```
 
-The validator intentionally does not fail for optional credentials,
-project-specific files, external services, or agent features. That keeps it
-offline, portable, and truthful.
+Absence of optional, project-specific, account-specific, or agent-capability
+requirements does not block general tracked-skill validation. The validator
+intentionally does not fail for optional credentials, project-specific files,
+external services, or agent features. That keeps it offline, portable, and
+truthful.

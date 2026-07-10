@@ -96,8 +96,8 @@ stale project-lock entries, which must be reconciled explicitly.
 
 Tracked relative links under `agents/.claude/skills` expose intended skills to
 Claude Code without duplicating contents. Codex reads `$HOME/.agents/skills`.
-Keep `$HOME/.codex` application-managed and do not vendor system/plugin
-skills or create a broad Codex Stow package.
+Keep host-managed skills outside this repository and do not create a broad
+Codex Stow package.
 
 ### Generated runtime skills
 

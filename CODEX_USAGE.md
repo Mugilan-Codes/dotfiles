@@ -6,8 +6,9 @@ prompts in this repository.
 Detailed operations live in [agents/README.md](agents/README.md): use
 [SKILLS_GUIDE.md](agents/SKILLS_GUIDE.md) to choose a skill,
 [REQUIREMENTS.md](agents/REQUIREMENTS.md) to verify prerequisites,
-[PLUGINS_GUIDE.md](agents/PLUGINS_GUIDE.md) for host-supported plugin
-management, and [TROUBLESHOOTING.md](agents/TROUBLESHOOTING.md) for recovery.
+and [TROUBLESHOOTING.md](agents/TROUBLESHOOTING.md) for recovery. Exact
+inventory and provenance live in [SKILLS_REGISTRY.md](agents/SKILLS_REGISTRY.md)
+and [THIRD_PARTY.md](agents/THIRD_PARTY.md).
 
 ## Instruction and skill discovery
 
@@ -21,9 +22,10 @@ under `agents/.agents/skills`. GNU Stow exposes them under
 `$HOME/.agents/skills`; static relative links under
 `agents/.claude/skills` expose the intended subset to Claude Code.
 
-Do not duplicate these skills under `$HOME/.codex/skills`. `$HOME/.codex`
-remains application-managed except when a specifically reviewed local skill
-is being migrated into the canonical Stow package.
+Portable custom user skills belong in `agents/.agents/skills`; do not copy
+application-managed skill directories into this repository. Plugins and
+application-managed skills remain the responsibility of their host
+applications and are outside this repository's inventory and lifecycle.
 
 The `agents` package must use `stow --no-folding`. This keeps
 `$HOME/.agents/skills` and `$HOME/.claude/skills` as real directories while
@@ -167,7 +169,7 @@ directories containing file-level links into the repository. Never use
 | Make a deliberate local fork | [06 — fork a third-party skill](prompts/agent-config/06-fork-third-party-skill.md) |
 | Remove one skill and reconcile references | [07 — remove a skill safely](prompts/agent-config/07-remove-skill-safely.md) |
 | Reconcile skills, metadata, and docs | [08 — maintain skills and docs](prompts/agent-config/08-maintain-skills-and-docs.md) |
-| Reassess safely trackable `.codex` config | [09 — audit Codex trackable config](prompts/agent-config/09-audit-codex-trackable-config.md) |
+| Audit one portable custom skill candidate | [09 — audit portable skill candidate](prompts/agent-config/09-audit-codex-trackable-config.md) |
 | Test a disposable clean-machine bootstrap | [10 — validate a new machine](prompts/agent-config/10-validate-new-machine.md) |
 | Perform final review, staging, and one commit | [11 — review and commit](prompts/agent-config/11-review-and-commit.md) |
 | Diagnose a failed installer without destructive rollback | [12 — recover a failed install](prompts/agent-config/12-recover-failed-install.md) |

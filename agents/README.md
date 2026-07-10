@@ -10,17 +10,16 @@ skills.
   requirements, writes, and risk.
 - [REQUIREMENTS.md](REQUIREMENTS.md): global, optional, project-specific, and
   agent-capability checks.
-- [PLUGINS_GUIDE.md](PLUGINS_GUIDE.md): installed application plugin inventory
-  and verified host lifecycle commands.
-- [TROUBLESHOOTING.md](TROUBLESHOOTING.md): discovery, Stow, lock, plugin, and
+- [TROUBLESHOOTING.md](TROUBLESHOOTING.md): discovery, Stow, lock, and
   recovery procedures.
 - [SKILLS_REGISTRY.md](SKILLS_REGISTRY.md) and
   [THIRD_PARTY.md](THIRD_PARTY.md): exact inventory and provenance.
 
-Skills are instruction packages selected for a task. Plugins are
-application-managed bundles that can supply skills, commands, hooks,
-connectors, or tools. This repository versions the reviewed skills below; it
-does not reproduce plugin installation or account state.
+Plugins and application-managed skills are intentionally outside dotfiles
+ownership. Install and manage them through Codex or Claude Code. This
+repository does not inventory, reproduce, or configure their state. Portable
+custom user skills belong under `agents/.agents/skills`; do not copy
+application-managed skill directories into this repository.
 
 ## Package tree
 
@@ -191,6 +190,36 @@ authorize running setup.
 Do not run `skills update --help` merely to inspect help. The audited CLI
 handled that command as an update. Use an isolated fixture for CLI inspection.
 
+## Self-service workflows
+
+Edit an existing skill only at its canonical source:
+
+```sh
+$EDITOR "$HOME/dotfiles/agents/.agents/skills/<skill>/SKILL.md"
+scripts/agent-skills status
+scripts/agent-skills audit
+```
+
+Editing an already-linked file is immediately visible through Stow. Adding a
+new support file may require a simulated and separately authorized restow
+because `--no-folding` deploys file-level links.
+
+Use prompts 05, 02, 03, 04, 07, 08, 11, and 12 respectively to add a local
+skill, install selected third-party skills, update the Matt allowlist, update
+`here-now`, remove a skill, maintain documentation, review and commit, or
+recover a failed installer. The linked prompt index below is authoritative.
+
+For third-party installation, run `pre-install`, change to
+`$HOME/dotfiles/agents`, and invoke `npx skills@latest add <SOURCE>`. Use
+project scope, explicit skills, and explicit Codex/Claude targets; never use
+`--global` or `--all`. Inspect every Git and lock change, scripts, executable
+modes, registry/provenance/licence updates, then run `post-install`, `status`,
+and `audit`. Simulate Stow before any separately authorized application.
+
+Matt updates are limited to `MATT_SKILLS` in `skills.conf`; adding another
+upstream name requires explicit approval. Preserve and reapply the documented
+`to-tickets` adaptation. There is no install-all workflow.
+
 ## Local and fork protection
 
 Third-party selections must never overlap `LOCAL_SKILLS` or
@@ -202,17 +231,12 @@ authoritative repository source.
 Codex-specific OpenAI interface metadata. It intentionally has no tracked
 Claude compatibility link.
 
-## Generated and application-managed exclusions
+## Generated and application-managed boundary
 
-Never copy or track:
-
-- `framer-project-*`
-- `$HOME/.agents/plugins`
-- `$HOME/.agents/.skill-lock.json`
-- `$HOME/.agents/.dotfiles-skills-state`
-- `$HOME/.claude` settings, plugins, sessions, caches, or backups
-- `$HOME/.codex` credentials, databases, sessions, logs, caches, system
-  skills, or plugin skills
+Never copy or track generated `framer-project-*` state, runtime lock/state
+files, credentials, sessions, logs, caches, databases, or application-managed
+skill directories. Do not inspect or reproduce application-managed skill or
+plugin inventories as part of dotfiles maintenance.
 
 The only normal runtime paths managed by this package are the approved skill
 views under `.agents/skills` and `.claude/skills`.
