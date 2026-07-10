@@ -4,6 +4,24 @@ The `agents` directory is a GNU Stow package and the source of truth for
 locally owned, intentionally forked, and approved vendored third-party
 skills.
 
+## Operating-guide index
+
+- [SKILLS_GUIDE.md](SKILLS_GUIDE.md): per-skill selection, invocation,
+  requirements, writes, and risk.
+- [REQUIREMENTS.md](REQUIREMENTS.md): global, optional, project-specific, and
+  agent-capability checks.
+- [PLUGINS_GUIDE.md](PLUGINS_GUIDE.md): installed application plugin inventory
+  and verified host lifecycle commands.
+- [TROUBLESHOOTING.md](TROUBLESHOOTING.md): discovery, Stow, lock, plugin, and
+  recovery procedures.
+- [SKILLS_REGISTRY.md](SKILLS_REGISTRY.md) and
+  [THIRD_PARTY.md](THIRD_PARTY.md): exact inventory and provenance.
+
+Skills are instruction packages selected for a task. Plugins are
+application-managed bundles that can supply skills, commands, hooks,
+connectors, or tools. This repository versions the reviewed skills below; it
+does not reproduce plugin installation or account state.
+
 ## Package tree
 
 ```text

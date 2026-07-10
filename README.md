@@ -150,8 +150,12 @@ directories and are never committed. Credentials, sessions, caches,
 databases, plugins, and broad Codex/Claude application state are also
 excluded.
 
-See [agents/README.md](agents/README.md) for the full lifecycle and recovery
-model. Start agent-configuration work from the reusable
+See [agents/README.md](agents/README.md) for the canonical operating-guide
+index, including the [skill decision guide](agents/SKILLS_GUIDE.md),
+[requirements](agents/REQUIREMENTS.md),
+[application-managed plugins](agents/PLUGINS_GUIDE.md), and
+[troubleshooting](agents/TROUBLESHOOTING.md). Start agent-configuration work
+from the reusable
 [prompt library](prompts/agent-config/README.md) or its human-facing index in
 [CODEX_USAGE.md](CODEX_USAGE.md).
 

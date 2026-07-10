@@ -3,6 +3,12 @@
 Practical guidance and the primary index for reusable agent-configuration
 prompts in this repository.
 
+Detailed operations live in [agents/README.md](agents/README.md): use
+[SKILLS_GUIDE.md](agents/SKILLS_GUIDE.md) to choose a skill,
+[REQUIREMENTS.md](agents/REQUIREMENTS.md) to verify prerequisites,
+[PLUGINS_GUIDE.md](agents/PLUGINS_GUIDE.md) for host-supported plugin
+management, and [TROUBLESHOOTING.md](agents/TROUBLESHOOTING.md) for recovery.
+
 ## Instruction and skill discovery
 
 `AGENTS.md` is canonical repository policy. `CLAUDE.md` is a relative symlink
