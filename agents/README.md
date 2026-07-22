@@ -1,8 +1,8 @@
 # Agent skills Stow package
 
 The `agents` directory is a GNU Stow package and the source of truth for
-locally owned, intentionally forked, and approved vendored third-party
-skills.
+global Codex instructions, locally owned skills, intentional forks, and
+approved vendored third-party skills.
 
 ## Operating-guide index
 
@@ -25,6 +25,8 @@ application-managed skill directories into this repository.
 
 ```text
 agents/
+├── .codex/
+│   └── AGENTS.md
 ├── .agents/
 │   └── skills/
 │       └── <tracked-skill>/
@@ -83,6 +85,9 @@ The runtime parents must be real directories:
 $HOME/.agents/skills
 $HOME/.claude/skills
 ```
+
+`$HOME/.codex` also remains a real application-owned directory; Stow manages
+only its `AGENTS.md` file.
 
 Always use:
 
@@ -238,8 +243,8 @@ files, credentials, sessions, logs, caches, databases, or application-managed
 skill directories. Do not inspect or reproduce application-managed skill or
 plugin inventories as part of dotfiles maintenance.
 
-The only normal runtime paths managed by this package are the approved skill
-views under `.agents/skills` and `.claude/skills`.
+The only normal runtime paths managed by this package are `.codex/AGENTS.md`
+and the approved skill views under `.agents/skills` and `.claude/skills`.
 
 ## Troubleshooting and recovery
 

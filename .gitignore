@@ -24,4 +24,5 @@ secrets/
 /agents/.claude/plugins/
 /agents/.claude/projects/
 /agents/.claude/session*
-/agents/.codex/
+/agents/.codex/*
+!/agents/.codex/AGENTS.md

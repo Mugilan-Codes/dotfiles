@@ -58,7 +58,7 @@ deployment, or external updates.
 - `tmux`: `$HOME/.tmux.conf`
 - `git`: `$HOME/.gitconfig`
 - `starship`: `$HOME/.config/starship.toml`
-- `agents`: tracked skills and static Claude compatibility links
+- `agents`: global Codex instructions, tracked skills, and static Claude links
 
 Always simulate before applying. Use `stow --no-folding` for `agents` so
 `$HOME/.agents/skills` and `$HOME/.claude/skills` remain real directories.
@@ -96,8 +96,9 @@ stale project-lock entries, which must be reconciled explicitly.
 
 Tracked relative links under `agents/.claude/skills` expose intended skills to
 Claude Code without duplicating contents. Codex reads `$HOME/.agents/skills`.
-Keep host-managed skills outside this repository and do not create a broad
-Codex Stow package.
+Global Codex instructions live at `agents/.codex/AGENTS.md` and deploy to
+`$HOME/.codex/AGENTS.md`. Keep all other host-managed Codex state outside this
+repository and do not create a broad Codex Stow package.
 
 ### Generated runtime skills
 

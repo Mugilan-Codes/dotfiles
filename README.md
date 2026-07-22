@@ -11,7 +11,7 @@ startup also supports common Intel macOS and Linuxbrew locations.
 | `tmux` | `$HOME/.tmux.conf` | tmux configuration |
 | `git` | `$HOME/.gitconfig` | Global Git configuration |
 | `starship` | `$HOME/.config/starship.toml` | Prompt configuration |
-| `agents` | `$HOME/.agents/skills`, `$HOME/.claude/skills` | Git-vendored local and approved third-party skills |
+| `agents` | `$HOME/.agents/skills`, `$HOME/.claude/skills`, `$HOME/.codex/AGENTS.md` | Agent instructions and Git-vendored skills |
 
 The `agents` package must always be stowed with `--no-folding`. This keeps
 `$HOME/.agents/skills` and `$HOME/.claude/skills` as real directories so
@@ -29,6 +29,7 @@ dotfiles/
 ├── CODEX_USAGE.md
 ├── Brewfile
 ├── agents/
+│   ├── .codex/AGENTS.md
 │   ├── .agents/skills/
 │   ├── .claude/skills/
 │   ├── licenses/
@@ -108,10 +109,12 @@ exec zsh
 
 ## Agent skill maintenance
 
-Canonical local, forked, and approved third-party contents live under
-`agents/.agents/skills`. Relative links under `agents/.claude/skills` expose
-the intended subset to Claude Code. Codex reads the Stow-managed
-`$HOME/.agents/skills` view; `$HOME/.codex` remains application-managed.
+Canonical global Codex instructions live at `agents/.codex/AGENTS.md` and are
+Stow-linked to `$HOME/.codex/AGENTS.md`. Canonical local, forked, and approved
+third-party skills live under `agents/.agents/skills`. Relative links under
+`agents/.claude/skills` expose the intended subset to Claude Code. Codex reads
+the Stow-managed `$HOME/.agents/skills` view. Other `$HOME/.codex` contents
+remain application-managed.
 
 The maintenance wrapper is read-only:
 

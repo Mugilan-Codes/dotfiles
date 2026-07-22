@@ -17,6 +17,9 @@ to it so Codex and Claude Code receive the same durable repository-level
 instructions. Codex discovers applicable `AGENTS.md` files from the repository
 hierarchy; always read the one governing the paths being changed.
 
+Global Codex instructions are tracked separately at
+`agents/.codex/AGENTS.md` and Stow-linked to `$HOME/.codex/AGENTS.md`.
+
 All repository-owned and approved third-party skill contents are Git-tracked
 under `agents/.agents/skills`. GNU Stow exposes them under
 `$HOME/.agents/skills`; static relative links under
