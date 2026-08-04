@@ -7,8 +7,8 @@ refer to its filename when the session lacks this repository context.
 Canonical architecture: Git tracks local skills, intentional forks, and
 approved vendored third-party skills under `agents/.agents/skills`. Relative
 links under `agents/.claude/skills` expose the Claude-compatible subset.
-Codex reads `$HOME/.agents/skills`. The `agents` package always uses
-`stow --no-folding` so both runtime parent directories stay real. Generated
+Codex reads `$HOME/.agents/skills`. Keep both runtime parents real and stow
+`agents` without `--no-folding` so each managed skill is a directory symlink. Generated
 `framer-project-*` skills and broad `.codex` application state stay outside
 Git.
 
@@ -26,6 +26,7 @@ Git.
 | Validate a new machine | [10](10-validate-new-machine.md) | Test bootstrap in a disposable HOME | Temporary fixture only | No | Temporary fixture only | GNU Stow, Git, temporary disk space |
 | Review and commit | [11](11-review-and-commit.md) | Perform the final full review and one commit | Index and commit | No | Yes | Explicit commit authority; validated intended diff |
 | Recover a failed install | [12](12-recover-failed-install.md) | Diagnose and plan scoped recovery | Temporary evidence only by default | No | No | Failed command/output and any backup path |
+| Full audit and refresh | [13](13-full-dotfiles-audit-and-refresh.md) | Recheck the repository after a long interval and refresh approved skills | Yes | Yes | No | Installer authority; reviewed upstream evidence |
 
 Quick choices:
 
@@ -37,5 +38,5 @@ Quick choices:
 
 Never use global skill installation, run the installer outside
 `dotfiles/agents`, track generated Framer state, or broadly track `.codex`.
-Only prompts 02–04 may run `npx skills@latest`; only prompt 11 routinely
+Only prompts 02–04 and 13 may run `npx skills@latest`; only prompt 11 routinely
 authorizes staging and one commit. No prompt authorizes an automatic push.

@@ -39,8 +39,8 @@ metadata without modifying them. Inspect exact runtime entries only with safe
 metadata, `stat`, `readlink`, and `realpath`.
 
 Canonical tracked source is `agents/.agents/skills`; static Claude links are
-`agents/.claude/skills`; `agents` uses `stow --no-folding` and real runtime
-parents. Classify affected names as local, local fork, approved vendored third
+`agents/.claude/skills`; `agents` uses real runtime parents and directory-level
+managed skill links from ordinary `stow`. Classify affected names as local, local fork, approved vendored third
 party, generated runtime, or application managed. Do not rely on any removed
 mixed-runtime manager.
 
@@ -79,7 +79,7 @@ git diff --summary
 bash -n scripts/agent-skills
 scripts/agent-skills status
 scripts/agent-skills audit
-stow --target="$HOME" --simulate --no-folding --verbose agents
+stow --target="$HOME" --simulate --verbose agents
 ```
 
 Run only checks that cannot worsen the incident. If runtime or repository

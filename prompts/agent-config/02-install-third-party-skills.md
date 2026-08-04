@@ -39,8 +39,9 @@ only mutable safety-critical state instead of repeating the audit.
    the `skills-maintainer` skill.
 
 The canonical tracked root is `agents/.agents/skills`; static relative Claude
-links live in `agents/.claude/skills`. The `agents` package always uses
-`stow --no-folding`, keeping runtime parent directories real. Classify every
+links live in `agents/.claude/skills`. Keep runtime parent directories real
+and stow `agents` without `--no-folding`; managed skills must be directory
+symlinks. Classify every
 name as local, local fork, approved vendored third party, generated runtime,
 or application managed. Never overwrite local/fork names, import generated
 `framer-project-*`, or vendor application-managed `.codex` state.
@@ -81,7 +82,7 @@ or application managed. Never overwrite local/fork names, import generated
 10. Simulate, but do not apply, runtime deployment:
 
    ```sh
-   stow --target="$HOME" --simulate --no-folding --verbose agents
+   stow --target="$HOME" --simulate --verbose agents
    ```
 
 ## Validation
@@ -94,7 +95,7 @@ git diff --summary
 bash -n scripts/agent-skills
 scripts/agent-skills post-install
 scripts/agent-skills audit
-stow --target="$HOME" --simulate --no-folding --verbose agents
+stow --target="$HOME" --simulate --verbose agents
 ```
 
 Also verify frontmatter, relative links, Claude targets, content hashes,

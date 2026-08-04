@@ -42,8 +42,8 @@ agents/.agents/skills/<SKILL_NAME>
 ```
 
 Static Claude compatibility links belong under `agents/.claude/skills`.
-Codex reads `$HOME/.agents/skills`. The `agents` package always uses
-`stow --no-folding` so runtime parents remain real. Keep ownership categories
+Codex reads `$HOME/.agents/skills`. Runtime parents remain real and ordinary
+`stow` must expose each managed skill as a directory symlink. Keep ownership categories
 separate: local, local fork, approved vendored third party, generated runtime,
 and application managed. This workflow creates only a local skill; it must not
 import `framer-project-*` or broad `.codex` state.
@@ -89,7 +89,7 @@ git diff --check
 git diff --cached --check
 bash -n scripts/agent-skills
 scripts/agent-skills audit
-stow --target="$HOME" --simulate --no-folding --verbose agents
+stow --target="$HOME" --simulate --verbose agents
 ```
 
 Verify frontmatter/name/description, all relative references, ownership-list

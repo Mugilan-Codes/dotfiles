@@ -1,6 +1,6 @@
 # Agent skills registry
 
-Last reviewed: 2026-07-10
+Last reviewed: 2026-08-04
 
 Canonical source is `agents/.agents/skills/<name>`. `Claude` means a tracked
 relative link exists under `agents/.claude/skills`; `Codex-only` means no such
@@ -34,6 +34,7 @@ link is intended.
 | `to-tickets` | Vendored third-party | `mattpocock/skills` | Codex, Claude | Setup-provided tracker; optional `prototype`; ordinary Codex implementation | Project-scoped installer plus documented local integration note | User-invoked tracer-ticket planning; `/implement` handoff replaced locally |
 | `writing-great-skills` | Vendored third-party | `mattpocock/skills` | Codex, Claude | None | Project-scoped installer | User-invoked skill-writing reference |
 | `here-now` | Vendored third-party | `heredotnow/skill` | Codex, Claude | Upstream network/tools | Project-scoped `skills@latest add` | Lock hash validated; install-policy note patched; scripts executable |
+| `design-taste-frontend` | Vendored third-party | `Leonxlnx/taste-skill` | Codex, Claude | Frontend project context; image-generation capability when available | Project-scoped `skills@latest add` | v2 experimental; landing, portfolio, and redesign surfaces only |
 
 ## Runtime-only generated entry
 
@@ -44,14 +45,22 @@ link is intended.
 ## Verified installer metadata
 
 - Installer specification: `skills@latest`
-- Resolved installer version observed during the last vendoring audit:
-  `1.5.15`
-- Matt upstream HEAD observed after the last project-scoped installation:
-  `d574778f94cf620fcc8ce741584093bc650a61d3`
-- here-now upstream HEAD observed after the last project-scoped installation:
-  `f6e7ddb92f51bed76ff4dc8f99457c14b83577e6`
+- Resolved installer version observed during this project-scoped refresh:
+  `1.5.21`
+- Matt upstream HEAD observed during this project-scoped refresh:
+  `2ab958093e83e0ec752e6c1c5932da465bf23e0c`
+- here-now upstream HEAD observed during this project-scoped refresh:
+  `c9fad058b8f1258061a2ff8766e257a384ae97ed`
+- Taste upstream HEAD observed during this project-scoped install:
+  `e988add20dab0fa97d7a76781c48961c8184288e`
 - The installer lock records content hashes but no immutable upstream
   revision. The observed HEADs are provenance evidence, not claimed pins.
+
+`design-taste-frontend` is the upstream v2 experimental default. It is
+contextual model guidance, not a hook or background process; its rules apply
+to landing pages, portfolios, and redesigns, and it explicitly excludes
+dashboards, data tables, multi-step forms, code editors, native mobile, and
+realtime collaboration surfaces.
 
 ## Ownership invariants
 

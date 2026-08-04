@@ -37,8 +37,8 @@ licences, package README, and `skills-maintainer`.
 Use the configured `MATT_SKILLS` value as the sole operational allowlist; do
 not maintain a second hardcoded list. Canonical source is
 `agents/.agents/skills`; static Claude links are in
-`agents/.claude/skills`; runtime parents stay real through
-`stow --no-folding`. Distinguish local, local fork, vendored third party,
+`agents/.claude/skills`; runtime parents stay real and ordinary `stow` creates
+directory-level managed skill links. Distinguish local, local fork, vendored third party,
 generated runtime, and application-managed content. Protect local/fork names,
 generated `framer-project-*`, and broad `.codex` state.
 
@@ -94,7 +94,7 @@ git diff --summary
 bash -n scripts/agent-skills
 scripts/agent-skills post-install
 scripts/agent-skills audit
-stow --target="$HOME" --simulate --no-folding --verbose agents
+stow --target="$HOME" --simulate --verbose agents
 ```
 
 Verify allowlist/lock parity, hashes, frontmatter, relative links, static

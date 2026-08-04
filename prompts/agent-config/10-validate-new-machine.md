@@ -34,9 +34,9 @@ staged/unstaged/untracked status with
 before copying.
 
 Canonical tracked skills are `agents/.agents/skills`; static Claude links are
-`agents/.claude/skills`; Codex reads `$HOME/.agents/skills`; `agents` requires
-`stow --no-folding`, leaving `.agents/skills` and `.claude/skills` as real
-directories. Ownership classes are local, local fork, approved vendored third
+`agents/.claude/skills`; Codex reads `$HOME/.agents/skills`. Keep the runtime
+parents real and use ordinary `stow` so managed skills are directory
+symlinks. Ownership classes are local, local fork, approved vendored third
 party, generated runtime, and application managed. Generated
 `framer-project-*` and broad `.codex` state must not be copied from the real
 machine.
@@ -86,10 +86,11 @@ From the fixture repo, with `HOME="$FIXTURE_HOME"` on every runtime-sensitive
 command, run the documented split flow:
 
 ```sh
+mkdir -p "$FIXTURE_HOME/.agents/skills" "$FIXTURE_HOME/.claude/skills" "$FIXTURE_HOME/.codex"
 stow --target="$FIXTURE_HOME" --simulate --verbose zsh tmux git starship
-stow --target="$FIXTURE_HOME" --simulate --no-folding --verbose agents
+stow --target="$FIXTURE_HOME" --simulate --verbose agents
 stow --target="$FIXTURE_HOME" --verbose zsh tmux git starship
-stow --target="$FIXTURE_HOME" --no-folding --verbose agents
+stow --target="$FIXTURE_HOME" --verbose agents
 HOME="$FIXTURE_HOME" scripts/agent-skills status
 HOME="$FIXTURE_HOME" scripts/agent-skills audit
 ```
@@ -98,7 +99,7 @@ Verify:
 
 - zsh, tmux, Git, Starship, and agents targets resolve into the fixture repo;
 - `.agents/skills` and `.claude/skills` remain real directories;
-- approved runtime skill directories are real and their files are Stow links;
+- approved runtime skill directories are Stow-managed directory symlinks;
 - every tracked skill is recreated directly from Git;
 - every intended static Claude link resolves; `staged-change-reviewer` remains
   Codex-only;
@@ -111,13 +112,12 @@ with matching package/mode commands:
 
 ```sh
 stow --target="$FIXTURE_HOME" --delete --verbose zsh tmux git starship
-stow --target="$FIXTURE_HOME" --delete --no-folding --verbose agents
+stow --target="$FIXTURE_HOME" --delete --verbose agents
 ```
 
 Verify only managed links were removed and both sentinels survived. Reapply
-the exact bootstrap commands and rerun status/audit. With `--no-folding`,
-empty Stow-created skill directories may remain after deletion; verify they
-contain no managed links/files and do not broadly clean them. Do not weaken
+the exact bootstrap commands and rerun status/audit. The real runtime parents
+and unmanaged sentinels must remain; do not broadly clean them. Do not weaken
 runtime validation to make the fixture pass; fix only a proven repository
 portability defect with separate edit authority.
 

@@ -30,8 +30,8 @@ upstream, staged/unstaged/untracked status, and read `agents/skills.conf`,
 lock, registry, provenance, package README, and `skills-maintainer`.
 
 Canonical tracked source is `agents/.agents/skills`; Claude compatibility
-uses static relative links in `agents/.claude/skills`; `agents` requires
-`stow --no-folding` and real runtime parent directories. Keep local skills,
+uses static relative links in `agents/.claude/skills`; `agents` requires real
+runtime parents and directory-level skill links from ordinary `stow`. Keep local skills,
 local forks, approved vendored skills, generated runtime, and
 application-managed state distinct. Never import `framer-project-*` or broad
 `.codex` state.
@@ -92,7 +92,7 @@ bash -n agents/.agents/skills/here-now/scripts/publish.sh
 bash -n scripts/agent-skills
 scripts/agent-skills post-install
 scripts/agent-skills audit
-stow --target="$HOME" --simulate --no-folding --verbose agents
+stow --target="$HOME" --simulate --verbose agents
 ```
 
 Also verify frontmatter, relative links, executable modes in Git and the

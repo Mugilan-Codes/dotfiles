@@ -535,6 +535,7 @@ dotstow() {
   local repo="$HOME/dotfiles"
   local packages=(zsh tmux git starship)
   local agent_package=agents
+  local agent_parent
   local confirm
 
   command -v stow >/dev/null 2>&1 || { echo "stow not found"; return 1; }
@@ -544,6 +545,14 @@ dotstow() {
     return 1
   fi
 
+  for agent_parent in "$HOME/.agents/skills" "$HOME/.claude/skills" "$HOME/.codex"; do
+    if [[ ! -d "$agent_parent" || -L "$agent_parent" ]]; then
+      echo "Agent runtime parent must be a real directory: $agent_parent"
+      echo "Create the three runtime parents before running dotstow."
+      return 1
+    fi
+  done
+
   echo "Previewing Stow changes from: $repo"
   echo "Packages: ${packages[*]} $agent_package"
   echo
@@ -552,7 +561,7 @@ dotstow() {
     echo "Stow simulation failed. Nothing was changed."
     return 1
   }
-  (cd "$repo" && stow --simulate --no-folding --verbose "$agent_package") || {
+  (cd "$repo" && stow --simulate --verbose "$agent_package") || {
     echo "Agent-package Stow simulation failed. Nothing was changed."
     return 1
   }
@@ -567,7 +576,7 @@ dotstow() {
   fi
 
   (cd "$repo" && stow --restow --verbose "${packages[@]}") &&
-    (cd "$repo" && stow --restow --no-folding --verbose "$agent_package")
+    (cd "$repo" && stow --restow --verbose "$agent_package")
 }
 
 # Check only the symlinks managed by this dotfiles repo.
@@ -726,10 +735,10 @@ dotdoctor() {
   if command -v stow >/dev/null 2>&1 && [[ -d "$repo" ]]; then
     if (cd "$repo" &&
       stow --simulate --verbose "${packages[@]}" >/dev/null 2>&1 &&
-      stow --simulate --no-folding --verbose "$agent_package" >/dev/null 2>&1); then
-      echo "ok: ${packages[*]} $agent_package (--no-folding)"
+      stow --simulate --verbose "$agent_package" >/dev/null 2>&1); then
+      echo "ok: ${packages[*]} $agent_package (directory-level skill links)"
     else
-      echo "failed: simulate ${packages[*]} and $agent_package with --no-folding"
+      echo "failed: simulate ${packages[*]} and $agent_package"
       (( failures++ ))
     fi
   else

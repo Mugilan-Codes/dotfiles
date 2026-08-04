@@ -13,9 +13,12 @@ startup also supports common Intel macOS and Linuxbrew locations.
 | `starship` | `$HOME/.config/starship.toml` | Prompt configuration |
 | `agents` | `$HOME/.agents/skills`, `$HOME/.claude/skills`, `$HOME/.codex/AGENTS.md` | Agent instructions and Git-vendored skills |
 
-The `agents` package must always be stowed with `--no-folding`. This keeps
-`$HOME/.agents/skills` and `$HOME/.claude/skills` as real directories so
-generated and application-owned entries can coexist with Stow-managed files.
+Before stowing `agents`, keep `$HOME/.agents/skills`,
+`$HOME/.claude/skills`, and `$HOME/.codex` as real directories. Ordinary Stow
+then links each managed skill directory while generated and application-owned
+entries remain siblings outside Stow ownership. Never use `--no-folding` for
+the `agents` package because Codex does not discover file-level `SKILL.md`
+links inside real skill directories.
 
 `macos/finder` is optional preference automation, not a Stow package. Run it
 only when Finder defaults are intentionally being changed.
@@ -80,11 +83,12 @@ ZSH_CUSTOM="${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}"
 Back up conflicting real home-directory entries, then simulate and apply:
 
 ```sh
+mkdir -p "$HOME/.agents/skills" "$HOME/.claude/skills" "$HOME/.codex"
 stow --target="$HOME" --simulate --verbose zsh tmux git starship
-stow --target="$HOME" --simulate --no-folding --verbose agents
+stow --target="$HOME" --simulate --verbose agents
 
 stow --target="$HOME" --verbose zsh tmux git starship
-stow --target="$HOME" --no-folding --verbose agents
+stow --target="$HOME" --verbose agents
 ```
 
 Approved skills are reconstructed directly from the committed repository.
@@ -132,6 +136,7 @@ package directory:
 cd "$HOME/dotfiles/agents"
 npx skills@latest add mattpocock/skills
 npx skills@latest add heredotnow/skill
+npx skills@latest add Leonxlnx/taste-skill
 ```
 
 Select project scope, only the allowlisted names in `skills.conf`, Codex, and
@@ -143,6 +148,11 @@ The Matt allowlist is a reviewed suite, not an upstream “install all” mirror
 Its setup skill is run separately per application repository when the
 issue-tracker/spec/ticket workflow is wanted; it is not part of dotfiles
 deployment.
+
+`design-taste-frontend` is a contextual, model-invoked skill for landing
+pages, portfolios, and redesigns. It has no automatic watcher or background
+process and does not apply to every frontend task; start a fresh agent session
+after runtime deployment so discovery can see the new skill.
 
 Do not run `skills update --help` to inspect help: the audited CLI handled
 that command as an update. Use the task-specific prompt and an isolated
@@ -178,7 +188,7 @@ zsh -n zsh/.zshrc zsh/.zprofile zsh/.zshenv zsh/.zlogin \
 scripts/agent-skills status
 scripts/agent-skills audit
 stow --target="$HOME" --simulate --verbose zsh tmux git starship
-stow --target="$HOME" --simulate --no-folding --verbose agents
+stow --target="$HOME" --simulate --verbose agents
 brew bundle check --no-upgrade --file=./Brewfile
 ```
 

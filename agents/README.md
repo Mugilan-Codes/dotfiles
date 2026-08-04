@@ -65,10 +65,11 @@ After cloning the repository, create no per-skill runtime state manually.
 Simulate first, then apply:
 
 ```sh
+mkdir -p "$HOME/.agents/skills" "$HOME/.claude/skills" "$HOME/.codex"
 stow --target="$HOME" --simulate --verbose zsh tmux git starship
-stow --target="$HOME" --simulate --no-folding --verbose agents
+stow --target="$HOME" --simulate --verbose agents
 stow --target="$HOME" --verbose zsh tmux git starship
-stow --target="$HOME" --no-folding --verbose agents
+stow --target="$HOME" --verbose agents
 scripts/agent-skills status
 scripts/agent-skills audit
 ```
@@ -89,17 +90,17 @@ $HOME/.claude/skills
 `$HOME/.codex` also remains a real application-owned directory; Stow manages
 only its `AGENTS.md` file.
 
-Always use:
+After confirming the runtime parents above are real directories, use:
 
 ```sh
-stow --target="$HOME" --simulate --no-folding --verbose agents
-stow --target="$HOME" --no-folding --verbose agents
+stow --target="$HOME" --simulate --verbose agents
+stow --target="$HOME" --verbose agents
 ```
 
-With GNU Stow 2.4.1, `--no-folding` creates real runtime skill directories
-and links their files individually into the tracked package. Static Claude
-entries are themselves tracked relative symlinks. Do not use `--adopt`, and
-do not replace either runtime parent with a whole-directory link.
+Ordinary Stow folds each direct managed skill child into a directory symlink.
+Static Claude entries are themselves tracked relative symlinks. Do not use
+`--no-folding` or `--adopt`, and do not replace either runtime parent with a
+whole-directory link.
 
 Generated Framer directories and their Claude runtime links coexist with the
 Stow package and must survive every restow.
@@ -112,7 +113,7 @@ Stow package and must survive every restow.
 - package and tracked roots
 - required Stow mode
 - installer targets
-- explicit Matt Pocock and here-now allowlists
+- explicit Matt Pocock, here-now, and Taste allowlists
 - local, forked, and Codex-only names
 - executable paths
 - the generated runtime exclusion
@@ -128,7 +129,7 @@ scripts/agent-skills post-install
 
 `status` requires no Node, npm, or network. It validates configured
 directories, frontmatter, references, executable modes, static Claude links,
-private-state exclusions, registry consistency, deployed Stow file targets,
+private-state exclusions, registry consistency, deployed directory targets,
 generated state, and independent Codex collisions.
 
 `audit` adds project-lock hashes/sources, licenses, provenance, and deeper
@@ -156,6 +157,7 @@ changes and validates the resulting package without rewriting it.
    ```sh
    npx skills@latest add mattpocock/skills
    npx skills@latest add heredotnow/skill
+   npx skills@latest add Leonxlnx/taste-skill
    ```
 
 6. Select project scope, only the configured allowlist, Codex, and Claude
@@ -180,6 +182,12 @@ The approved Matt suite includes user-invoked orchestration
 `prototype`, `research`, and `tdd`). The authoritative operational list is
 always `MATT_SKILLS` in `skills.conf`.
 
+`design-taste-frontend` is a separate contextual frontend skill for landing
+pages, portfolios, and redesigns. After a fresh agent session discovers it,
+the model may load it when the task matches that description or when the user
+invokes it. It has no watcher, hook, executable, or background process, and
+its design rules do not apply to every task.
+
 This is intentionally a practical subset. It omits the full-suite router,
 standalone grilling alias, commit-driving implementation wrapper, issue/PR
 triage state machine, and large-project wayfinding map. Use ordinary Codex
@@ -197,6 +205,126 @@ handled that command as an update. Use an isolated fixture for CLI inspection.
 
 ## Self-service workflows
 
+### Use an installed skill
+
+Invoke the current installed copy by name, for example:
+
+```text
+$design-taste-frontend
+```
+
+Invocation does not install or update anything. Likewise, invoking a name
+that is not installed, such as `$new-skill-name`, does not install it.
+
+### Check for upstream updates
+
+The currently recorded `skills` CLI 1.5.21 has no `check` command. Do not run
+`npx skills check` or use the mutating `update` command as a read-only check.
+Use `$skills-maintainer` to inspect configured upstream sources and compare
+their available revisions with `skills.conf`, `skills-lock.json`, and the
+vendored copies. Validate current local state separately:
+
+```sh
+cd "$HOME/dotfiles"
+scripts/agent-skills status
+scripts/agent-skills audit
+```
+
+The repository-native commands validate the committed inventory, provenance,
+hashes, links, and runtime topology without checking the network. Upstream
+comparison must include locally authored skills and intentional forks as
+separate ownership classes; no installer command covers `loopy`, `framer`, or
+`framer-code-components`.
+
+### Update existing third-party skills
+
+Prefer this high-level request:
+
+```text
+$skills-maintainer
+
+Check all managed skills for upstream updates. Show the source, current
+version/hash, available version/hash and meaningful diff before changing
+anything. Preserve local forks. Update canonical repository copies, licences,
+registry and lock records, validate directory-level deployment, and do not
+commit until the diff has been reviewed.
+```
+
+For entries managed by the current project lock, the installer command is:
+
+```sh
+cd "$HOME/dotfiles/agents"
+npx skills update
+```
+
+Run it only after `scripts/agent-skills pre-install` and explicit installer
+authorization. It updates installer-managed lock entries only; it does not
+supersede local-fork protection, licence/provenance maintenance, complete Git
+diff review, or `scripts/agent-skills post-install`, `status`, and `audit`.
+
+To update Taste only, use the upstream source and explicit name from the
+canonical package directory:
+
+```sh
+scripts/agent-skills pre-install
+cd "$HOME/dotfiles/agents"
+npx skills add \
+  https://github.com/Leonxlnx/taste-skill \
+  --skill design-taste-frontend
+cd ..
+scripts/agent-skills post-install
+scripts/agent-skills audit
+```
+
+Do not run this merely to invoke Taste. `pre-install` prints the canonical
+installer directory and approved selection; project scope writes the reviewed
+copy under `agents/.agents/skills`, and `post-install` rejects a lock/source
+mismatch. Runtime discovery continues to use Stow's directory link to that
+canonical copy.
+
+Update an intentional local fork manually: inspect its documented upstream,
+compare revisions and meaningful content changes, preserve the recorded local
+delta, then update its licence, provenance, registry, and validation results.
+Never pass `loopy` or another fork to `npx skills update` or `add`.
+
+### Add a new third-party skill
+
+Prefer this request:
+
+```text
+$skills-maintainer
+
+Install the following third-party skill into my dotfiles-managed skill system:
+
+<repository URL>
+
+Requirements:
+- inspect the source before installation;
+- identify the exact skill name;
+- review instructions, scripts and referenced resources for unsafe behavior;
+- record source, version/hash and licence;
+- install into the canonical repository;
+- preserve directory-level runtime symlinks;
+- update registry, lock files and documentation;
+- validate Codex and Claude discovery where applicable;
+- show the complete diff before committing;
+- do not overwrite local forks or unmanaged skills.
+```
+
+Use [prompt 02](../prompts/agent-config/02-install-third-party-skills.md) when
+a reusable, source-specific installation procedure is needed. Run the
+installer only from `dotfiles/agents`, in project scope, with the exact skill
+name and agents. Review the full result before any commit.
+
+### Remove or rediscover a skill
+
+Use [prompt 07](../prompts/agent-config/07-remove-skill-safely.md) to remove a
+skill. It reconciles the allowlist, lock, licence, provenance, registry,
+tracked Claude link, and runtime simulation without touching unmanaged
+siblings. After any add, update, or removal, validate the directory links and
+start a fresh Codex or Claude Code session; an existing session may retain its
+prior discovery snapshot.
+
 Edit an existing skill only at its canonical source:
 
 ```sh
@@ -205,9 +333,8 @@ scripts/agent-skills status
 scripts/agent-skills audit
 ```
 
-Editing an already-linked file is immediately visible through Stow. Adding a
-new support file may require a simulated and separately authorized restow
-because `--no-folding` deploys file-level links.
+Editing or adding files under a tracked skill is immediately visible through
+its directory symlink; no per-file restow is required.
 
 Use prompts 05, 02, 03, 04, 07, 08, 11, and 12 respectively to add a local
 skill, install selected third-party skills, update the Matt allowlist, update
@@ -263,10 +390,8 @@ target.
 
 For rollback, keep any scoped backup from an add/update operation until its
 diff, validation, commit, and runtime review are complete. Unstow only the
-`agents` package with the same `--no-folding` mode, then restore scoped runtime
-entries from the backup if required. GNU Stow may retain empty skill
-directories after removing their managed links; do not broadly delete them. A
-later restow safely reuses them.
+`agents` package, then restore scoped runtime entries from the backup if
+required. Never broadly delete either runtime parent or any generated entry.
 
 ## Everyday workflow prompts
 
@@ -284,6 +409,7 @@ full contents into a disconnected Codex session.
 | Record and protect an intentional fork | [06 — fork a skill](../prompts/agent-config/06-fork-third-party-skill.md) |
 | Remove a skill and stale lock references | [07 — remove safely](../prompts/agent-config/07-remove-skill-safely.md) |
 | Reconcile registry, provenance, licence, links, and modes | [08 — maintain skills and docs](../prompts/agent-config/08-maintain-skills-and-docs.md) |
+| Full audit and refresh | [13 — full dotfiles audit and refresh](../prompts/agent-config/13-full-dotfiles-audit-and-refresh.md) |
 | Recover from an installer failure | [12 — recover failed install](../prompts/agent-config/12-recover-failed-install.md) |
 
 For a runtime restow, always simulate the exact package first, preserve real
@@ -291,8 +417,9 @@ parent directories and generated entries, then apply only with separate
 runtime authority:
 
 ```sh
-stow --target="$HOME" --simulate --no-folding --verbose agents
-stow --target="$HOME" --no-folding --verbose agents
+mkdir -p "$HOME/.agents/skills" "$HOME/.claude/skills" "$HOME/.codex"
+stow --target="$HOME" --simulate --verbose agents
+stow --target="$HOME" --verbose agents
 scripts/agent-skills status
 ```
 

@@ -35,8 +35,8 @@ README, and every changed skill.
 
 Canonical tracked skills live in `agents/.agents/skills`; static relative
 Claude links live in `agents/.claude/skills`; Codex reads
-`$HOME/.agents/skills`. `stow --no-folding` is mandatory for `agents`, keeping
-runtime parents real. Classify names as local, local fork, approved vendored
+`$HOME/.agents/skills`. Keep runtime parents real and use ordinary `stow` for
+directory-level managed skill links. Classify names as local, local fork, approved vendored
 third party, generated runtime, or application managed. Generated
 `framer-project-*` and broad `.codex` state remain outside Git.
 
@@ -74,7 +74,7 @@ git diff --summary
 bash -n scripts/agent-skills
 scripts/agent-skills status
 scripts/agent-skills audit
-stow --target="$HOME" --simulate --no-folding --verbose agents
+stow --target="$HOME" --simulate --verbose agents
 ```
 
 When relevant:

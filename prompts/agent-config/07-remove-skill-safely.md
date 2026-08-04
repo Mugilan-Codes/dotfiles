@@ -33,8 +33,8 @@ provenance, project lock, package README, licences, and `skills-maintainer`.
 Search all tracked references and dependencies before editing.
 
 Canonical skills are under `agents/.agents/skills`; static Claude links are
-under `agents/.claude/skills`. The `agents` package uses
-`stow --no-folding`, preserving real runtime parent directories. Determine
+under `agents/.claude/skills`. Keep runtime parent directories real and use
+ordinary `stow`; managed skill children must be directory symlinks. Determine
 whether the name is local, local fork, approved vendored third party,
 generated runtime, or application managed. Stop if it is generated
 `framer-project-*` or application-managed state.
@@ -70,7 +70,7 @@ git diff --check
 git diff --cached --check
 bash -n scripts/agent-skills
 scripts/agent-skills audit
-stow --target="$HOME" --simulate --no-folding --verbose agents
+stow --target="$HOME" --simulate --verbose agents
 ```
 
 Search for remaining references to the exact name; distinguish intentional

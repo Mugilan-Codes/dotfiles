@@ -42,8 +42,8 @@ context.
 - Static Claude compatibility links: `agents/.claude/skills/{name}`.
 - Codex runtime discovery: `$HOME/.agents/skills`; do not duplicate approved
   skills in application-managed `$HOME/.codex`.
-- The `agents` package requires `stow --no-folding`; both
-  `$HOME/.agents/skills` and `$HOME/.claude/skills` are real directories.
+- The `agents` package requires real runtime parents and ordinary `stow`;
+  each managed skill child must be a directory symlink.
 - Ownership classes are local, intentional local fork, approved vendored
   third party, generated runtime, and application managed.
 - Generated `framer-project-*` directories and their runtime-only Claude links
@@ -79,7 +79,7 @@ git diff --cached --check
 bash -n scripts/agent-skills
 scripts/agent-skills status
 scripts/agent-skills audit
-stow --target="$HOME" --simulate --no-folding --verbose agents
+stow --target="$HOME" --simulate --verbose agents
 ```
 
 Inspect real runtime entries with `stat`, `readlink`, and `realpath` only when
@@ -109,7 +109,8 @@ repository:
 architecture:
   tracked_skill_root: agents/.agents/skills
   claude_link_root: agents/.claude/skills
-  agents_stow_flags: [--no-folding]
+  agents_stow_flags: []
+  managed_skill_link_mode: directory
 inventory:
   local: []
   local_forks: []

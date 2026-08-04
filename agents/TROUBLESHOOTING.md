@@ -6,7 +6,7 @@ Run `scripts/agent-skills status`, inspect the runtime entry with `stat`,
 `readlink`, and `realpath`, then simulate:
 
 ```sh
-stow --target="$HOME" --simulate --no-folding --verbose agents
+stow --target="$HOME" --simulate --verbose agents
 ```
 
 Apply Stow only with separate runtime authority. Start a fresh application
@@ -21,16 +21,17 @@ tracked link must be relative and resolve to `../../.agents/skills/<name>`.
 
 ## A new support file is not visible
 
-`--no-folding` exposes files individually. Re-run Stow simulation after adding
-the file, review the proposed link, then restow with separate authority and
-start a fresh task.
+Managed skills use directory-level symlinks, so a new support file is visible
+immediately. If it is not, verify the skill directory itself is a symlink to
+the canonical source and start a fresh task.
 
 ## Stow conflict or broken symlink
 
 Stop before `--adopt`. Inspect the real home entry and resolved target. Back
 up only the conflicting entry under `/private/tmp`, decide its ownership, and
 repeat simulation. Never delete an entire runtime parent; it must remain a
-real directory so generated/application entries can coexist.
+real directory so managed directory symlinks and generated entries can
+coexist.
 
 ## Installer changed unexpected files or the lock mismatches
 

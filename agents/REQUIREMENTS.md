@@ -1,6 +1,6 @@
 # Tracked skill requirements
 
-Snapshot audited on 2026-07-10. States describe this machine without printing
+Snapshot audited on 2026-08-04. States describe this machine without printing
 credential values. Re-run the commands rather than treating this snapshot as
 permanent.
 
@@ -10,15 +10,15 @@ permanent.
 | --- | --- | --- | --- | --- |
 | Git | Repository and review skills | SATISFIED (2.55.0) | `git --version` | `brew install git` |
 | GNU Stow | Runtime deployment | SATISFIED (2.4.1) | `stow --version` | `brew install stow` |
-| Node/npm/npx | Skill installer and Framer | SATISFIED (Node 24.18.0/npm 11.16.0) | `node --version; npm --version; npx --version` | Install through the preferred Node manager |
-| GitHub CLI | GitHub tracker workflows | SATISFIED | `gh --version; gh auth status` | `brew install gh`, then interactive login |
+| Node/npm/npx | Skill installer and Framer | SATISFIED (Node 26.5.1/npm 11.17.0) | `node --version; npm --version; npx --version` | Install through the preferred Node manager |
+| GitHub CLI | GitHub tracker workflows | SATISFIED (2.97.0) | `gh --version; gh auth status` | `brew install gh`, then interactive login |
 | GitLab CLI | GitLab tracker workflows only | MISSING / OPTIONAL | `command -v glab` | `brew install glab`, then interactive login |
 | curl/file/jq | `here-now` scripts | SATISFIED | `command -v curl file jq` | Install the missing binary with the OS package manager |
 | Bash/Zsh | Validators and shell package | SATISFIED | `bash --version; zsh --version` | OS/package-manager specific |
 
 `npx skills@latest` needs network access and resolves a mutable CLI version.
 It is needed only during an explicitly authorized third-party add/update. The
-last audited resolution was 1.5.15; committed skill contents are the
+last audited resolution was 1.5.21; committed skill contents are the
 reproducible artifact. Never run `skills update --help` on live state.
 
 ## Optional and use-time requirements
@@ -62,7 +62,7 @@ actual session.
 scripts/agent-skills status
 scripts/agent-skills audit
 command -v git gh glab node npm npx curl file jq stow
-stow --target="$HOME" --simulate --no-folding --verbose agents
+stow --target="$HOME" --simulate --verbose agents
 ```
 
 Absence of optional, project-specific, account-specific, or agent-capability

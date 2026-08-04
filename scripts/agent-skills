@@ -21,12 +21,13 @@ source "$config_file"
 read -r -a target_agents <<< "$SKILLS_TARGET_AGENTS"
 read -r -a matt_skills <<< "$MATT_SKILLS"
 read -r -a here_now_skills <<< "$HERE_NOW_SKILLS"
+read -r -a taste_skills <<< "$TASTE_SKILLS"
 read -r -a local_skills <<< "$LOCAL_SKILLS"
 read -r -a local_fork_skills <<< "$LOCAL_FORK_SKILLS"
 read -r -a codex_only_skills <<< "$CODEX_ONLY_SKILLS"
 read -r -a expected_executables <<< "$EXPECTED_EXECUTABLES"
 
-third_party_skills=("${matt_skills[@]}" "${here_now_skills[@]}")
+third_party_skills=("${matt_skills[@]}" "${here_now_skills[@]}" "${taste_skills[@]}")
 tracked_skills=(
   "${local_skills[@]}"
   "${local_fork_skills[@]}"
@@ -65,6 +66,10 @@ source_for_skill() {
   fi
   if contains_name "$skill" "${here_now_skills[@]}"; then
     printf '%s\n' "$HERE_NOW_SOURCE"
+    return 0
+  fi
+  if contains_name "$skill" "${taste_skills[@]}"; then
+    printf '%s\n' "$TASTE_SOURCE"
     return 0
   fi
   return 1
@@ -142,8 +147,8 @@ validate_config() {
     echo "invalid: CLAUDE_LINK_ROOT must be .claude/skills"
     failures=$((failures + 1))
   }
-  [[ "$STOW_MODE" == "--no-folding" ]] || {
-    echo "invalid: STOW_MODE must be --no-folding"
+  [[ "$STOW_MODE" == "directory-links" ]] || {
+    echo "invalid: STOW_MODE must be directory-links"
     failures=$((failures + 1))
   }
   [[ "$GENERATED_RUNTIME_PATTERN" == "framer-project-*" ]] || {
@@ -442,7 +447,8 @@ validate_licenses() {
   local license
   for license in \
     "$package_root/licenses/mattpocock-skills-LICENSE.txt" \
-    "$package_root/licenses/loopy-LICENSE.txt"; do
+    "$package_root/licenses/loopy-LICENSE.txt" \
+    "$package_root/licenses/leonxlnx-taste-skill-LICENSE.txt"; do
     if [[ ! -s "$license" ]]; then
       echo "invalid: missing license record: $license"
       failures=$((failures + 1))
@@ -467,38 +473,27 @@ validate_repository() {
   return "$failures"
 }
 
-validate_runtime_skill_files() {
+validate_runtime_skill_directory() {
   local skill="$1"
-  local failures=0
   local source_root="$tracked_root/$skill"
   local runtime_root="$agents_runtime/$skill"
-  local source_file
-  local relative
-  local runtime_file
   local source_real
   local runtime_real
 
-  if [[ ! -d "$runtime_root" || -L "$runtime_root" ]]; then
-    echo "invalid: Stow --no-folding requires a real runtime skill directory: $runtime_root"
+  if [[ ! -L "$runtime_root" || ! -d "$runtime_root" ]]; then
+    echo "invalid: runtime skill must be a readable directory symlink: $runtime_root"
     return 1
   fi
-  while IFS= read -r source_file; do
-    relative="${source_file#"$source_root"/}"
-    runtime_file="$runtime_root/$relative"
-    if [[ ! -L "$runtime_file" || ! -e "$runtime_file" ]]; then
-      echo "invalid: missing Stow-managed runtime file link: $runtime_file"
-      failures=$((failures + 1))
-      continue
-    fi
-    source_real="$(realpath "$source_file")"
-    runtime_real="$(realpath "$runtime_file" 2>/dev/null || true)"
-    if [[ "$runtime_real" != "$source_real" ]]; then
-      echo "invalid: wrong runtime file target: $runtime_file -> $runtime_real"
-      failures=$((failures + 1))
-    fi
-  done < <(find "$source_root" -type f -print | LC_ALL=C sort)
-
-  return "$failures"
+  source_real="$(realpath "$source_root")"
+  runtime_real="$(realpath "$runtime_root" 2>/dev/null || true)"
+  if [[ "$runtime_real" != "$source_real" ]]; then
+    echo "invalid: wrong runtime skill target: $runtime_root -> $runtime_real"
+    return 1
+  fi
+  if [[ ! -r "$runtime_root/SKILL.md" || -L "$runtime_root/SKILL.md" ]]; then
+    echo "invalid: SKILL.md must be readable through the directory link, not linked separately: $runtime_root/SKILL.md"
+    return 1
+  fi
 }
 
 validate_runtime() {
@@ -520,7 +515,7 @@ validate_runtime() {
   fi
 
   for name in "${tracked_skills[@]}"; do
-    validate_runtime_skill_files "$name" || failures=$((failures + 1))
+    validate_runtime_skill_directory "$name" || failures=$((failures + 1))
     path="$codex_runtime/$name"
     if [[ -e "$path" || -L "$path" ]]; then
       echo "invalid: duplicate approved skill under application-managed Codex state: $path"
@@ -587,9 +582,9 @@ validate_runtime() {
 }
 
 runtime_is_deployed() {
-  local probe="$agents_runtime/bug-triage/SKILL.md"
-  [[ -L "$probe" && -e "$probe" ]] || return 1
-  [[ "$(realpath "$probe")" == "$(realpath "$tracked_root/bug-triage/SKILL.md")" ]]
+  local probe="$agents_runtime/bug-triage"
+  [[ -L "$probe" && -d "$probe" ]] || return 1
+  [[ "$(realpath "$probe")" == "$(realpath "$tracked_root/bug-triage")" ]]
 }
 
 run_status() {
@@ -618,16 +613,20 @@ run_audit() {
   echo
   echo "== Licenses and provenance =="
   validate_licenses || failures=$((failures + 1))
-  grep -q 'Resolved installer version: `1.5.15`' "$third_party_file" || {
+  grep -q "Resolved installer version: \`$SKILLS_CLI_VERSION\`" "$third_party_file" || {
     echo "invalid: resolved installer version is not recorded"
     failures=$((failures + 1))
   }
-  grep -q 'd574778f94cf620fcc8ce741584093bc650a61d3' "$third_party_file" || {
+  grep -q "$MATT_UPSTREAM_HEAD" "$third_party_file" || {
     echo "invalid: verified Matt revision is not recorded"
     failures=$((failures + 1))
   }
-  grep -q 'f6e7ddb92f51bed76ff4dc8f99457c14b83577e6' "$third_party_file" || {
+  grep -q "$HERE_NOW_UPSTREAM_HEAD" "$third_party_file" || {
     echo "invalid: verified here-now revision is not recorded"
+    failures=$((failures + 1))
+  }
+  grep -q "$TASTE_UPSTREAM_HEAD" "$third_party_file" || {
+    echo "invalid: verified Taste revision is not recorded"
     failures=$((failures + 1))
   }
   echo
@@ -682,11 +681,14 @@ run_pre_install() {
   printf 'Matt selection: %s\n' "${matt_skills[*]}"
   echo "here-now source: $HERE_NOW_SOURCE"
   printf 'here-now selection: %s\n' "${here_now_skills[*]}"
+  echo "Taste source: $TASTE_SOURCE"
+  printf 'Taste selection: %s\n' "${taste_skills[*]}"
   echo
   echo "Use only from the package directory:"
   echo "  cd \"$package_root\""
   echo "  npx --yes $SKILLS_CLI_SPEC add $MATT_SOURCE --skill ${matt_skills[*]} --agent ${target_agents[*]} --yes"
   echo "  npx --yes $SKILLS_CLI_SPEC add $HERE_NOW_SOURCE --skill ${here_now_skills[*]} --agent ${target_agents[*]} --yes"
+  echo "  npx --yes $SKILLS_CLI_SPEC add $TASTE_SOURCE --skill ${taste_skills[*]} --agent ${target_agents[*]} --yes"
 
   if [[ "$failures" -eq 0 ]]; then
     echo

@@ -34,8 +34,8 @@ and staged/unstaged/untracked status. Read the skill, `agents/skills.conf`,
 `skills-maintainer`.
 
 Canonical tracked content belongs under `agents/.agents/skills`; static
-Claude links belong under `agents/.claude/skills`. Runtime parents remain real
-through `stow --no-folding`. Distinguish local, intentional local fork,
+Claude links belong under `agents/.claude/skills`. Keep runtime parents real;
+ordinary `stow` must create directory-level managed skill links. Distinguish local, intentional local fork,
 approved vendored third party, generated runtime, and application-managed
 content. Generated `framer-project-*` and broad `.codex` state cannot become
 fork source.
@@ -74,7 +74,7 @@ git diff --check
 git diff --cached --check
 bash -n scripts/agent-skills
 scripts/agent-skills audit
-stow --target="$HOME" --simulate --no-folding --verbose agents
+stow --target="$HOME" --simulate --verbose agents
 ```
 
 Verify frontmatter, references, licence/provenance, exact documented delta,

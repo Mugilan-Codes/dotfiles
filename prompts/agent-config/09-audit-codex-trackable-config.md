@@ -24,8 +24,8 @@ workflow for application-managed skills or plugins. Audit-only is the default.
 
 Portable custom user skills belong under `agents/.agents/skills/<name>`.
 Tracked Claude compatibility links belong under
-`agents/.claude/skills/<name>`, and the `agents` package requires
-`stow --no-folding`. Approved vendored skills also require allowlist, lock,
+`agents/.claude/skills/<name>`. The `agents` package requires real runtime
+parents and directory-level managed skill links from ordinary `stow`. Approved vendored skills also require allowlist, lock,
 registry, provenance, and licence review. Generated `framer-project-*` state,
 plugins, and application-managed skills remain outside Git.
 
@@ -53,7 +53,7 @@ git diff --check
 git diff --cached --check
 scripts/agent-skills status
 scripts/agent-skills audit
-stow --target="$HOME" --simulate --no-folding --verbose agents
+stow --target="$HOME" --simulate --verbose agents
 ```
 
 Do not run Node/npm/network commands. Confirm that no private content or secret

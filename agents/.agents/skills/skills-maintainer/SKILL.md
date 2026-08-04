@@ -44,19 +44,26 @@ reproducible artifact.
 
 ## Stow model
 
-The `agents` package must always use `stow --no-folding`. Runtime parent
-directories remain real so generated and application-owned entries can
-coexist. With GNU Stow 2.4.1, tracked skill directories are materialized as
-real runtime directories whose files are individual Stow-managed links.
+The repository is canonical. `$HOME/.agents/skills`,
+`$HOME/.claude/skills`, and `$HOME/.codex` remain real parent directories so
+generated and application-owned entries can coexist. Ordinary Stow exposes
+each managed child skill as one directory-level symlink to its matching
+canonical repository directory. Never create an independent `SKILL.md`
+symlink inside a real runtime skill directory.
 
-Always simulate before applying:
+Use the repository wrapper for topology and ownership validation. Always
+simulate before any separately authorized apply:
 
 ```sh
-stow --target="$HOME" --simulate --no-folding --verbose agents
-stow --target="$HOME" --no-folding --verbose agents
+scripts/agent-skills status
+scripts/agent-skills audit
+stow --target="$HOME" --simulate --verbose agents
 ```
 
-Never use `--adopt` for this package.
+Never use `--no-folding` or `--adopt` for this package. Preserve unmanaged
+siblings, especially real `framer-project-*` directories. Adding or updating
+a skill can require a fresh Codex or Claude Code session before discovery
+changes appear.
 
 ## Third-party workflow
 
@@ -91,6 +98,15 @@ The CLI's remove operation may leave stale entries in project
 `skills-lock.json`. Inspect and reconcile those entries explicitly; never
 rewrite the lock blindly.
 
+Before updating, compare the configured source and current lock hash with the
+available upstream revision and show the meaningful diff. Do not overwrite a
+local name or intentional fork. In particular, `loopy` is an intentional
+local fork and must be updated only by manual upstream review. Keep source
+metadata, observed revisions, lock hashes, registry entries, local-change
+notes, and third-party licence copies current. The recorded `skills` CLI
+1.5.21 has no read-only `check` command; treat `update` as mutating and perform
+read-only upstream comparison separately.
+
 ## Validation
 
 Confirm:
@@ -103,7 +119,8 @@ Confirm:
 - the project lock matches only approved third-party sources and contents
 - generated/private state is absent from Git
 - no approved skill is duplicated under `$HOME/.codex/skills`
-- Stow runtime file links resolve into the dotfiles repository
+- every managed runtime skill is a directory symlink to the matching
+  canonical repository directory, with no separately linked `SKILL.md`
 - the generated Framer directory and its runtime Claude link remain intact
 
 Every installer result needs a Git diff review before documentation is

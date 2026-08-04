@@ -14,7 +14,8 @@ This personal macOS/Linux dotfiles repository tracks:
 - optional macOS preference automation
 
 GNU Stow manages the `zsh`, `tmux`, `git`, `starship`, and `agents` packages.
-The `agents` package always requires `--no-folding`.
+The `agents` package requires real runtime parent directories and
+directory-level skill symlinks; never use `--no-folding` for it.
 
 New-machine setup and detailed commands belong in `README.md` and
 `agents/README.md`.
@@ -60,9 +61,10 @@ deployment, or external updates.
 - `starship`: `$HOME/.config/starship.toml`
 - `agents`: global Codex instructions, tracked skills, and static Claude links
 
-Always simulate before applying. Use `stow --no-folding` for `agents` so
-`$HOME/.agents/skills` and `$HOME/.claude/skills` remain real directories.
-Do not use `--adopt` without explicit intent to import existing home contents.
+Always simulate before applying. Pre-create `$HOME/.agents/skills`,
+`$HOME/.claude/skills`, and `$HOME/.codex` as real directories, then use
+ordinary `stow` for `agents`. Managed skill children must be directory
+symlinks. Do not use `--no-folding` or `--adopt` for this package.
 
 `macos/finder` is optional preference automation, not a Stow package. Do not
 run it unless explicitly requested.
@@ -167,7 +169,7 @@ zsh -n zsh/.zshrc zsh/.zprofile zsh/.zshenv zsh/.zlogin \
 scripts/agent-skills status
 scripts/agent-skills audit
 stow --target="$HOME" --simulate --verbose zsh tmux git starship
-stow --target="$HOME" --simulate --no-folding --verbose agents
+stow --target="$HOME" --simulate --verbose agents
 brew bundle check --no-upgrade --file=./Brewfile
 ```
 

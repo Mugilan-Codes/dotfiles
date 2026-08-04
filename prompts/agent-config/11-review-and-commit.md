@@ -39,8 +39,8 @@ staged, unstaged, untracked diff from HEAD. Read supplied handoffs and all
 changed documentation/configuration.
 
 For agents, canonical source is `agents/.agents/skills`, static Claude links
-are `agents/.claude/skills`, and the package requires
-`stow --no-folding` with real runtime parents. Confirm all names are correctly
+are `agents/.claude/skills`, and the package requires real runtime parents
+with directory-level managed skill links from ordinary `stow`. Confirm all names are correctly
 classified as local, local fork, approved vendored third party, generated
 runtime, or application managed. Generated `framer-project-*` and broad
 `.codex` state must not be committed.
@@ -72,7 +72,7 @@ runtime, or application managed. Generated `framer-project-*` and broad
    scripts/agent-skills pre-install
    scripts/agent-skills post-install
    stow --target="$HOME" --simulate --verbose zsh tmux git starship
-   stow --target="$HOME" --simulate --no-folding --verbose agents
+   stow --target="$HOME" --simulate --verbose agents
    ```
 
    Run `brew bundle check --file=./Brewfile` when Brewfile scope or repository

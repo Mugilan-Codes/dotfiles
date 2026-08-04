@@ -1,13 +1,13 @@
 # Third-party skills and attribution
 
-Audited: 2026-07-10
+Audited: 2026-08-04
 
 Approved third-party skill contents are vendored under
 `agents/.agents/skills`. Future installer results must remain project-scoped,
 produce a visible Git diff, and record the resolved `skills@latest` version
 in the maintenance report.
 
-Resolved installer version: `1.5.15`
+Resolved installer version: `1.5.21`
 
 ## `mattpocock/skills`
 
@@ -19,8 +19,8 @@ Resolved installer version: `1.5.15`
 - Update: project-scoped `npx skills@latest add mattpocock/skills` from
   `dotfiles/agents`
 - Targets: Codex and Claude Code
-- Observed upstream HEAD after the last project-scoped install:
-  `d574778f94cf620fcc8ce741584093bc650a61d3`
+- Observed upstream HEAD during this project-scoped refresh:
+  `2ab958093e83e0ec752e6c1c5932da465bf23e0c`
 
 Approved names:
 
@@ -69,28 +69,23 @@ The project lock records per-skill content hashes but does not record an
 immutable source revision. The observed HEAD is provenance evidence from the
 installation window, not a claim that the CLI pinned that commit.
 
-### Baseline comparison
+### Refresh review
 
-The imported runtime baseline matched the prior Git snapshot where one
-existed, except for snapshot-only support files already retired before the
-current steady-state package:
-
-- `grill-with-docs`: `ADR-FORMAT.md`, `CONTEXT-FORMAT.md`
-- `improve-codebase-architecture`: `ADR-FORMAT.md`, `CONTEXT-FORMAT.md`,
-  `DEEPENING.md`, `INTERFACE-DESIGN.md`, `LANGUAGE.md`
-- `tdd`: `deep-modules.md`, `interface-design.md`, `refactoring.md`
-
-Those retired files were upstream snapshot material, not local extensions.
-The project-scoped installer produced contents byte-equal to the imported
-baseline for all ten selected skills.
+The project-scoped refresh retained the configured 16-skill subset and added
+the upstream `agents/openai.yaml` interface metadata to each selected skill.
+Reviewed content changes include broader decision-oriented grilling, recent
+hot-spot-first architecture exploration, prototype capture on throwaway
+branches, conditional triage setup, and one-ticket-per-file local publishing.
+The documented local `to-tickets` handoff adaptation was reapplied after the
+upstream update.
 
 Known CLI caveat: `skills update --help` behaved as an update rather than help
 during audit. Do not use it for help inspection; use an isolated fixture.
 
-The 2026-07-10 update changed the vendored `handoff` terminology from PRDs to
-specs and updated `setup-matt-pocock-skills` to name `to-spec` and
-`to-tickets`. The other eight previously selected skill trees already matched
-the `v1.1.0` upstream contents at the observed revision.
+The 2026-08-04 refresh was project-scoped and did not add upstream names,
+overwrite local skills/forks, or apply Stow. The `skills@latest` lock records
+the resulting content hashes; the observed HEAD is provenance evidence, not
+an immutable pin.
 
 ## `heredotnow/skill`
 
@@ -100,8 +95,8 @@ the `v1.1.0` upstream contents at the observed revision.
 - Update: project-scoped `npx skills@latest add heredotnow/skill` from
   `dotfiles/agents`
 - Targets: Codex and Claude Code
-- Observed upstream HEAD after the last project-scoped install:
-  `f6e7ddb92f51bed76ff4dc8f99457c14b83577e6`
+- Observed upstream HEAD during this project-scoped refresh:
+  `c9fad058b8f1258061a2ff8766e257a384ae97ed`
 
 The repository README declares MIT, but the audited source still lacks a top-level
 license file. Retain this caveat until upstream publishes the license text.
@@ -113,6 +108,30 @@ future installer updates if upstream still recommends `--global` or `-g`.
 
 The observed HEAD is not an immutable installer pin because
 `skills-lock.json` records content hashes without a revision.
+
+## `Leonxlnx/taste-skill`
+
+- Source: <https://github.com/Leonxlnx/taste-skill>
+- Selected name: `design-taste-frontend`
+- License: MIT
+- License copy: `licenses/leonxlnx-taste-skill-LICENSE.txt`
+- Copyright notice: Copyright (c) 2026 Leonxlnx
+- Ownership here: reviewed vendored copy
+- Update: project-scoped `npx skills@latest add Leonxlnx/taste-skill` from
+  `dotfiles/agents`
+- Targets: Codex and Claude Code
+- Observed upstream HEAD during this project-scoped install:
+  `e988add20dab0fa97d7a76781c48961c8184288e`
+
+The selected skill is the upstream v2 experimental default. It is intended
+for landing pages, portfolios, and redesigns. It is contextual Markdown
+guidance with no scripts, hooks, watcher, or background process; it is
+considered when the task matches its description or the user invokes it. The
+document itself says its design rules are contextual rather than universal.
+It is not a fit for dashboards, data tables, multi-step forms, code editors,
+native mobile, or realtime collaboration UIs. The repository also publishes
+other Taste skills, including image-generation and legacy-v1 variants; they
+were inspected but not selected.
 
 ## Framer-derived local forks
 
@@ -147,6 +166,8 @@ third-party installer.
 - Update: manual upstream review only
 - Upstream HEAD observed during provenance review:
   `b88213d0d8252bb46a43f8cb7889ae40ed1c1187`
+- Current upstream HEAD checked during the 2026-08-04 audit:
+  `75966cbd572a4185064971c9fe5e9c52e8f8456d`
 
 The observed HEAD is not claimed as the fork base. The tracked fork includes
 OpenAI metadata and workflow references and is excluded from automatic

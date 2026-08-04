@@ -30,10 +30,11 @@ application-managed skill directories into this repository. Plugins and
 application-managed skills remain the responsibility of their host
 applications and are outside this repository's inventory and lifecycle.
 
-The `agents` package must use `stow --no-folding`. This keeps
-`$HOME/.agents/skills` and `$HOME/.claude/skills` as real directories while
-Stow exposes tracked content through file-level links. Generated
-`framer-project-*` entries remain private runtime-only state.
+Keep `$HOME/.agents/skills`, `$HOME/.claude/skills`, and `$HOME/.codex` as real
+directories, then stow `agents` without `--no-folding`. Each managed skill
+must be a directory symlink; individual `SKILL.md` symlinks are unsupported
+by Codex. Generated `framer-project-*` entries remain private runtime-only
+state.
 
 ## Authority boundaries
 
@@ -94,7 +95,7 @@ changes:
 
 ```sh
 scripts/agent-skills audit
-stow --target="$HOME" --simulate --no-folding --verbose agents
+stow --target="$HOME" --simulate --verbose agents
 ```
 
 ## Third-party add or update
@@ -111,6 +112,7 @@ Then run the official installer from exactly the package directory:
 cd "$HOME/dotfiles/agents"
 npx skills@latest add mattpocock/skills
 npx skills@latest add heredotnow/skill
+npx skills@latest add Leonxlnx/taste-skill
 ```
 
 Requirements:
@@ -151,14 +153,15 @@ The real parent directories must remain in place. Generated
 package contents.
 
 ```sh
-stow --target="$HOME" --simulate --no-folding --verbose agents
-stow --target="$HOME" --no-folding --verbose agents
+mkdir -p "$HOME/.agents/skills" "$HOME/.claude/skills" "$HOME/.codex"
+stow --target="$HOME" --simulate --verbose agents
+stow --target="$HOME" --verbose agents
 scripts/agent-skills status
 ```
 
-With GNU Stow 2.4.1 and `--no-folding`, runtime skill directories are real
-directories containing file-level links into the repository. Never use
-`--adopt`.
+Runtime parents remain real, while every managed child skill is a directory
+symlink into the repository. Never use `--no-folding` or `--adopt` for this
+package.
 
 ## Copy-paste prompt index
 
@@ -176,18 +179,20 @@ directories containing file-level links into the repository. Never use
 | Test a disposable clean-machine bootstrap | [10 — validate a new machine](prompts/agent-config/10-validate-new-machine.md) |
 | Perform final review, staging, and one commit | [11 — review and commit](prompts/agent-config/11-review-and-commit.md) |
 | Diagnose a failed installer without destructive rollback | [12 — recover a failed install](prompts/agent-config/12-recover-failed-install.md) |
+| Run a complete audit and refresh | [13 — full dotfiles audit and refresh](prompts/agent-config/13-full-dotfiles-audit-and-refresh.md) |
 
 Common choices:
 
 - Add an upstream skill with prompt 02.
 - Audit upstream changes, selection, and update the Matt suite with prompt 03.
+- Recheck the whole repository after a long interval with prompt 13.
 - Track a skill you wrote with prompt 05.
 - Diagnose a failed update with prompt 12.
 - Stage and commit only with prompt 11.
 
 ## Recommended workflow
 
-1. Audit or preflight with prompt 01 and the wrapper.
+1. Audit or preflight with prompt 01 or 13 and the wrapper.
 2. Make one scoped change with prompts 02–07.
 3. Reconcile metadata and docs with prompt 08.
 4. Validate clean-machine reproduction with prompt 10 when topology changes.
