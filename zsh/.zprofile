@@ -34,7 +34,7 @@ export PATH="$HOME/fvm/default/bin:$HOME/flutter/bin:$PATH"
 
 # Android SDK tools
 # ANDROID_HOME is defined in ~/.zshenv.
-export PATH="$ANDROID_HOME/emulator:$ANDROID_HOME/platform-tools:$ANDROID_HOME/cmdline-tools/latest/bin:$PATH"
+export PATH="$ANDROID_HOME/emulator:$ANDROID_HOME/platform-tools:$ANDROID_HOME/cmdline-tools/10.0/bin:$PATH"
 
 # JetBrains Toolbox CLI scripts
 # Lets you launch JetBrains tools from the terminal.

@@ -1154,18 +1154,18 @@ gwtc() {
   local branch="$1"
   local repo_name
   local safe_branch
-  local path
+  local worktree_dir
 
   repo_name=$(basename "$(git rev-parse --show-toplevel)")
   safe_branch="${branch//\//-}"
-  path="${2:-../${repo_name}-${safe_branch}}"
+  worktree_dir="${2:-../${repo_name}-${safe_branch}}"
 
-  if [[ -e "$path" ]]; then
-    echo "Worktree path already exists: $path"
+  if [[ -e "$worktree_dir" ]]; then
+    echo "Worktree path already exists: $worktree_dir"
     return 1
   fi
 
-  git worktree add "$path" "$branch" && echo "Worktree created: $path"
+  git worktree add "$worktree_dir" "$branch" && echo "Worktree created: $worktree_dir"
 }
 
 # List Git worktrees with paths, branches, and HEAD commits.
@@ -1491,7 +1491,7 @@ zoxfz() {
   fi
 
   dir=$(
-    zoxide query -l 50 \
+    zoxide query -l \
       | fzf --prompt="jump ▶ " \
             --preview='
               if [ -d "{}/.git" ]; then

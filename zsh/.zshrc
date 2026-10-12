@@ -34,6 +34,7 @@ fi
 # Plugins
 plugins=(git zsh-autosuggestions zsh-syntax-highlighting)
 
+# Oh My Zsh loads custom aliases, functions, and completions automatically.
 source "$ZSH/oh-my-zsh.sh"
 
 # Default editor (Change to nvim if neovim is preferred and available)
@@ -57,8 +58,3 @@ fi
 if command -v zoxide >/dev/null 2>&1; then
   eval "$(zoxide init zsh)"
 fi
-
-# Custom aliases, functions, and completions
-source "$ZSH/custom/aliases.zsh"
-source "$ZSH/custom/functions.zsh"
-source "$ZSH/custom/completions.zsh"

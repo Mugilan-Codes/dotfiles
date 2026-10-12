@@ -237,9 +237,9 @@ alias dloldgo="dloldx"      # Delete old files (moves to Trash)
 
 # Fast jumps to your common project folders.
 # These are machine-specific paths for this Mac.
-alias cdp="cd ~/Projects"
+alias cdp="cd ~/Development"
 alias cdw="cd ~/dev/work/vzlabs"
-alias cdapp="cd ~/Projects/Work/appverse-mobileapp"
+alias cdapp="cd ~/dev/work/vzlabs/appverse-mobileapp"
 
 # ─────────────────────────────
 # 📹 Media
