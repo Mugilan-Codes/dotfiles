@@ -50,7 +50,7 @@ else
   die "requires jq"
 fi
 
-for cmd in curl file; do
+for cmd in curl file python3; do
   command -v "$cmd" >/dev/null 2>&1 || die "requires $cmd"
 done
 
@@ -318,19 +318,13 @@ case "$CMD" in
       url="$BASE_URL/api/v1/drives/$id/files?prefix=$(urlenc "$prefix")&limit=200"
       [[ -n "$cursor" ]] && url="$url&cursor=$(urlenc "$cursor")"
       files=$(api_json GET "$url")
-      while IFS= read -r p; do
-        [[ -n "$p" ]] || continue
-        rel="$p"
-        [[ -n "$prefix" ]] && rel="${p#$prefix/}"
-        out="$to/$rel"
-        if [[ "$dry" -eq 1 ]]; then
-          echo "download $p -> $out"
-        else
-          mkdir -p "$(dirname "$out")"
-          curl -fsS "$BASE_URL/api/v1/drives/$id/files/$(urlenc_path "$p")" "${auth_header[@]}" -o "$out"
-        fi
-        total=$((total + 1))
-      done < <(echo "$files" | "$JQ_BIN" -r '.files[].path')
+      count=$(printf '%s' "$files" | python3 "$SCRIPT_DIR/safe-files.py" export \
+        "$prefix" "$to" "$BASE_URL/api/v1/drives/$id/files" "$dry" "${auth_header[@]}")
+      if [[ "$dry" -eq 1 ]]; then
+        printf '%s\n' "$count"
+      else
+        total=$((total + count))
+      fi
       cursor=$(echo "$files" | "$JQ_BIN" -r '.nextCursor // empty')
       [[ -n "$cursor" ]] || break
     done

@@ -30,7 +30,7 @@ reproducible artifact.
 1. Edit local skills and intentional forks only in
    `agents/.agents/skills/<name>`.
 2. Treat approved third-party contents there as reviewed vendored source.
-   Update them only through the explicit project-scoped installer workflow.
+   Update them through the explicit reviewed agent-skills lifecycle or project-scoped installer workflow.
 3. Protect local names and forks from every third-party selection. Stop on a
    name collision.
 4. Keep generated `framer-project-*` directories outside Git; they may contain
@@ -65,47 +65,31 @@ siblings, especially real `framer-project-*` directories. Adding or updating
 a skill can require a fresh Codex or Claude Code session before discovery
 changes appear.
 
-## Third-party workflow
+## Reviewed lifecycle
 
-Run the installer only from `$DOTFILES/agents`, only in project scope, and
-only for names allowlisted in `skills.conf`:
+Use `scripts/agent-skills list` and `check` to separate managed, external and
+unmanaged state. Follow `agents/README.md` for implemented `add`, `add-repo`,
+`import`, `update`, `record-patch` and `deploy` commands. Pinned repository
+imports require a full revision and subdirectory; local origin must be honest.
+Imports copy the complete reviewed package without executing scripts. Preserve
+license information, supported-agent distinctions and dependency declarations.
 
-```sh
-cd "$DOTFILES/agents"
-npx skills@latest add mattpocock/skills
-npx skills@latest add heredotnow/skill
-```
+Updates refuse local drift. Local/fork/patch-bearing candidates require an
+explicit explanation of patch preservation. Review every diff before recording
+new hashes. `record-patch` records a concrete change and review evidence; it is
+not permission to bless unexplained content. Existing installer hashes remain
+in `skills-lock.json`; lifecycle provenance is in `skills-manifest.json`.
 
-Select project scope, the explicit approved names, Codex, and Claude Code.
-Never use `--global`, `-g`, `--all`, or a global update. Non-interactive
-automation must spell out every selected skill and agent.
+If using the legacy `npx skills@latest add SOURCE` workflow, run `pre-install`
+first and `post-install` afterward from `dotfiles/agents`, project scope only.
+Select approved names/agents, never global or all. Record the resolved CLI
+version and review/reconcile changed packages and stale lock entries. Do not
+use `skills update --help` on live source; it previously performed an update.
+Never overwrite local forks or strip the here-now safety patch on update.
 
-`skills@latest` is intentional. Record the resolved CLI version in every
-update report, inspect its current help in an isolated fixture, and review all
-resulting Git changes. The CLI may recreate vendored directories and remove
-files deleted upstream.
-
-Use the read-only guardrails:
-
-```sh
-scripts/agent-skills pre-install
-scripts/agent-skills post-install
-scripts/agent-skills audit
-scripts/agent-skills status
-```
-
-The CLI's remove operation may leave stale entries in project
-`skills-lock.json`. Inspect and reconcile those entries explicitly; never
-rewrite the lock blindly.
-
-Before updating, compare the configured source and current lock hash with the
-available upstream revision and show the meaningful diff. Do not overwrite a
-local name or intentional fork. In particular, `loopy` is an intentional
-local fork and must be updated only by manual upstream review. Keep source
-metadata, observed revisions, lock hashes, registry entries, local-change
-notes, and third-party licence copies current. The recorded `skills` CLI
-1.5.21 has no read-only `check` command; treat `update` as mutating and perform
-read-only upstream comparison separately.
+Restore plugin-owned skills through the owning installer recorded in
+`external-skills.json`; do not vendor caches. New unmanaged skills remain
+reported until their provenance and contents have been explicitly reviewed.
 
 ## Validation
 

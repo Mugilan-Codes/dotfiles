@@ -1,0 +1,5 @@
+[
+  {"name":"Oh My Zsh", "url":"https://github.com/ohmyzsh/ohmyzsh.git", "revision":"6010fb6260f359e71d99ba25f05f9215809b3ed2", "destination":".oh-my-zsh", "probe":"oh-my-zsh.sh"},
+  {"name":"zsh-autosuggestions", "url":"https://github.com/zsh-users/zsh-autosuggestions.git", "revision":"a411ef3e0992d4839f0732ebeb9823024afaaaa8", "destination":".oh-my-zsh/custom/plugins/zsh-autosuggestions", "probe":"zsh-autosuggestions.zsh"},
+  {"name":"zsh-syntax-highlighting", "url":"https://github.com/zsh-users/zsh-syntax-highlighting.git", "revision":"caa749d030d22168445c4cb97befd406d2828db0", "destination":".oh-my-zsh/custom/plugins/zsh-syntax-highlighting", "probe":"zsh-syntax-highlighting.zsh"}
+]

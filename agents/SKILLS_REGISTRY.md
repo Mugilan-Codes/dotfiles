@@ -33,7 +33,7 @@ link is intended.
 | `to-spec` | Vendored third-party | `mattpocock/skills` | Codex, Claude | Setup-provided tracker/domain docs | Project-scoped installer | User-invoked spec publication |
 | `to-tickets` | Vendored third-party | `mattpocock/skills` | Codex, Claude | Setup-provided tracker; optional `prototype`; ordinary Codex implementation | Project-scoped installer plus documented local integration note | User-invoked tracer-ticket planning; `/implement` handoff replaced locally |
 | `writing-great-skills` | Vendored third-party | `mattpocock/skills` | Codex, Claude | None | Project-scoped installer | User-invoked skill-writing reference |
-| `here-now` | Vendored third-party | `heredotnow/skill` | Codex, Claude | Upstream network/tools | Project-scoped `skills@latest add` | Lock hash validated; install-policy note patched; scripts executable |
+| `here-now` | Vendored third-party | `heredotnow/skill` | Codex, Claude | Python 3, curl, jq, file, shasum | Reviewed update preserving local patches | DF-12/13 safety patch; docs/VENDOR-PATCHES.md; scripts executable |
 | `design-taste-frontend` | Vendored third-party | `Leonxlnx/taste-skill` | Codex, Claude | Frontend project context; image-generation capability when available | Project-scoped `skills@latest add` | v2 experimental; landing, portfolio, and redesign surfaces only |
 
 ## Runtime-only generated entry
@@ -70,3 +70,14 @@ realtime collaboration surfaces.
 - Generated Framer state remains outside Git.
 - No tracked skill depends on a local upstream clone.
 - `$HOME/.codex` remains application-managed.
+
+## Lifecycle metadata
+
+`skills-manifest.json` records content hashes, origin/revision limitations,
+supported agents, dependencies and local patch evidence for every managed
+package. `scripts/agent-skills` adds reviewed imports to this table and the
+manifest; existing ownership allowlists remain in `skills.conf`. See
+`external-skills.json` for installer-owned siblings and the six unresolved
+workflow packages. An empty dependency list means no fixed external runtime
+is required to read that instruction package, not that every possible project
+workflow can run without project-specific tools.

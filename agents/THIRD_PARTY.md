@@ -101,10 +101,11 @@ an immutable pin.
 The repository README declares MIT, but the audited source still lacks a top-level
 license file. Retain this caveat until upstream publishes the license text.
 The installer result includes upstream `scripts/publish.sh` and
-`scripts/drive.sh`; both remain executable. The only local content correction
-is the `SKILL.md` install note, which replaces upstream global-install wording
+`scripts/drive.sh`; both remain executable. The original local content correction
+was the `SKILL.md` install note, which replaces upstream global-install wording
 with this repository's project-scoped workflow. Reapply that policy note after
 future installer updates if upstream still recommends `--global` or `-g`.
+The later DF-12/DF-13 safety patch is described below and must also be retained.
 
 The observed HEAD is not an immutable installer pin because
 `skills-lock.json` records content hashes without a revision.
@@ -179,3 +180,11 @@ third-party updates.
 redistributed third-party source. They remain real directories outside Git
 under `$HOME/.agents/skills` and may contain private project metadata. Their
 Claude links remain runtime-only.
+
+## here-now reviewed local safety patch (2026-11-14)
+
+The vendored `here-now` package retains its recorded upstream base and license
+caveat. `docs/VENDOR-PATCHES.md` records upstream comparison, DF-12/DF-13 changes,
+the new Python dependency and regression scope. Its hash now represents those
+reviewed local changes, not an unmodified upstream tree. Future updates must
+preserve or supersede these protections through explicit review.

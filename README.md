@@ -50,129 +50,39 @@ dotfiles/
 └── zsh/
 ```
 
-## New-machine setup
-
-Install Homebrew, Git, and GNU Stow:
+## Installation and recovery
 
 ```sh
-/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
-eval "$(/opt/homebrew/bin/brew shellenv)"
-brew install git stow
+./install.sh --dry-run
+./install.sh
+./install.sh --check
 ```
 
-Clone the repository:
+Read [the clean-Mac recovery guide](docs/RECOVERY.md) first for HTTPS cloning
+before SSH credentials, CLT/Homebrew prerequisites, conflict backups, rollback,
+isolated targets and manual toolchain setup. `Brewfile.core` is required;
+`Brewfile` is optional application inventory. This installer targets Apple
+Silicon macOS, not the Ubuntu work environment. It never enables an AI proxy
+or hook. Do not run the live installer while merely reviewing these changes.
+
+## Agent instructions and skills
+
+[Agent maintenance](agents/README.md) documents the implemented `list`, `check`,
+`add`, `add-repo`, `import`, `update`, `record-patch` and `deploy` commands.
+The existing Stow/skills structure remains canonical. Personal global
+instructions are shared between Codex and Claude through a tracked link;
+repository instructions remain scoped here. Portable settings are selectively
+restored, while providers, credentials, trust and application state remain local.
 
 ```sh
-git clone git@github.com:Mugilan-Codes/dotfiles.git "$HOME/dotfiles"
-cd "$HOME/dotfiles"
-```
-
-Install Oh My Zsh and the plugins enabled by `.zshrc` if needed:
-
-```sh
-sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
-ZSH_CUSTOM="${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}"
-[[ -d "$ZSH_CUSTOM/plugins/zsh-autosuggestions" ]] ||
-  git clone https://github.com/zsh-users/zsh-autosuggestions \
-    "$ZSH_CUSTOM/plugins/zsh-autosuggestions"
-[[ -d "$ZSH_CUSTOM/plugins/zsh-syntax-highlighting" ]] ||
-  git clone https://github.com/zsh-users/zsh-syntax-highlighting \
-    "$ZSH_CUSTOM/plugins/zsh-syntax-highlighting"
-```
-
-Back up conflicting real home-directory entries, then simulate and apply:
-
-```sh
-mkdir -p "$HOME/.agents/skills" "$HOME/.claude/skills" "$HOME/.codex"
-stow --target="$HOME" --simulate --verbose zsh tmux git starship
-stow --target="$HOME" --simulate --verbose agents
-
-stow --target="$HOME" --verbose zsh tmux git starship
-stow --target="$HOME" --verbose agents
-```
-
-Approved skills are reconstructed directly from the committed repository.
-Node, npm, the skills CLI, upstream clones, global skill metadata, and network
-access are not needed to deploy those committed skills. Node/npm and
-project-scoped `skills@latest` are needed only for a future authorized
-third-party add or update.
-
-Install Homebrew packages:
-
-```sh
-brew bundle --file="$HOME/dotfiles/Brewfile"
-```
-
-Validate and start fresh agent sessions:
-
-```sh
-scripts/agent-skills status
+scripts/agent-skills list
+scripts/agent-skills check
 scripts/agent-skills audit
-exec zsh
 ```
 
-## Agent skill maintenance
-
-Canonical global Codex instructions live at `agents/.codex/AGENTS.md` and are
-Stow-linked to `$HOME/.codex/AGENTS.md`. Canonical local, forked, and approved
-third-party skills live under `agents/.agents/skills`. Relative links under
-`agents/.claude/skills` expose the intended subset to Claude Code. Codex reads
-the Stow-managed `$HOME/.agents/skills` view. Other `$HOME/.codex` contents
-remain application-managed.
-
-The maintenance wrapper is read-only:
-
-```sh
-scripts/agent-skills status
-scripts/agent-skills audit
-scripts/agent-skills pre-install
-scripts/agent-skills post-install
-```
-
-To update third-party contents, first run `pre-install`, then work from the
-package directory:
-
-```sh
-cd "$HOME/dotfiles/agents"
-npx skills@latest add mattpocock/skills
-npx skills@latest add heredotnow/skill
-npx skills@latest add Leonxlnx/taste-skill
-```
-
-Select project scope, only the allowlisted names in `skills.conf`, Codex, and
-Claude Code. Never use `--global` or `--all`. Review every resulting Git diff,
-run `post-install` and `audit`, update provenance/licenses when needed, then
-simulate Stow before changing runtime links.
-
-The Matt allowlist is a reviewed suite, not an upstream “install all” mirror.
-Its setup skill is run separately per application repository when the
-issue-tracker/spec/ticket workflow is wanted; it is not part of dotfiles
-deployment.
-
-`design-taste-frontend` is a contextual, model-invoked skill for landing
-pages, portfolios, and redesigns. It has no automatic watcher or background
-process and does not apply to every frontend task; start a fresh agent session
-after runtime deployment so discovery can see the new skill.
-
-Do not run `skills update --help` to inspect help: the audited CLI handled
-that command as an update. Use the task-specific prompt and an isolated
-fixture for CLI inspection.
-
-Generated `framer-project-*` skills remain private machine-local real
-directories and are never committed. Credentials, sessions, caches,
-databases, and broad Codex/Claude application state are also excluded.
-
-Plugins and application-managed skills are intentionally outside dotfiles
-ownership. Install and manage them through Codex or Claude Code. This
-repository does not inventory, reproduce, or configure their state.
-
-See [agents/README.md](agents/README.md) for the canonical operating-guide
-index, including the [skill decision guide](agents/SKILLS_GUIDE.md),
-[requirements](agents/REQUIREMENTS.md), and
-[troubleshooting](agents/TROUBLESHOOTING.md). Start agent-configuration work
-from the reusable
-[prompt library](prompts/agent-config/README.md) or its human-facing index in
-[CODEX_USAGE.md](CODEX_USAGE.md).
+An external skill installer does not automatically capture its result in
+Git. Review and explicitly import portable source, or record its external
+plugin owner. Uncommitted/unpushed work is not recovery protection.
 
 ## Verification
 
@@ -180,16 +90,21 @@ from the reusable
 git status --short --untracked-files=all
 git diff --check
 git diff --cached --check
+python3 -B tests/test_regressions.py
 bash -n scripts/agent-skills
-zsh -n zsh/.zshrc zsh/.zprofile zsh/.zshenv zsh/.zlogin \
+bash -n install.sh
+(for file in zsh/.zshrc zsh/.zprofile zsh/.zshenv zsh/.zlogin \
   zsh/.oh-my-zsh/custom/aliases.zsh \
   zsh/.oh-my-zsh/custom/functions.zsh \
-  zsh/.oh-my-zsh/custom/completions.zsh
+  zsh/.oh-my-zsh/custom/completions.zsh; do
+  zsh -f -n "$file" || exit 1
+done)
 scripts/agent-skills status
 scripts/agent-skills audit
 stow --target="$HOME" --simulate --verbose zsh tmux git starship
 stow --target="$HOME" --simulate --verbose agents
-brew bundle check --no-upgrade --file=./Brewfile
+./install.sh --check
+scripts/agent-skills check --source-only
 ```
 
 `brewup`, cleanup helpers, Docker volume removal, Git staging/commit helpers,

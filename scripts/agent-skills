@@ -8,6 +8,11 @@ repo_root="$(git -C "$script_dir/.." rev-parse --show-toplevel 2>/dev/null)" || 
   echo "error: scripts/agent-skills must run from a Git worktree" >&2
   exit 1
 }
+# Lifecycle commands use Python stdlib; legacy audit commands remain read-only.
+case "${1:-}" in
+  list|check|add|add-repo|import|update|record-patch|deploy)
+    exec python3 -B "$script_dir/skill-store.py" "$@" ;;
+esac
 config_file="$repo_root/agents/skills.conf"
 
 if [[ ! -f "$config_file" ]]; then
@@ -18,6 +23,8 @@ fi
 # shellcheck source=../agents/skills.conf
 source "$config_file"
 
+imported_names="$(python3 -B -c 'import json,sys; print(" ".join(k for k,v in json.load(open(sys.argv[1])).items() if v["ownership"] == "imported"))' "$repo_root/agents/skills-manifest.json")" || exit 1
+read -r -a imported_skills <<< "$imported_names"
 read -r -a target_agents <<< "$SKILLS_TARGET_AGENTS"
 read -r -a matt_skills <<< "$MATT_SKILLS"
 read -r -a here_now_skills <<< "$HERE_NOW_SKILLS"
@@ -33,6 +40,10 @@ tracked_skills=(
   "${local_fork_skills[@]}"
   "${third_party_skills[@]}"
 )
+
+if [[ -n "$imported_names" ]]; then
+  tracked_skills+=("${imported_skills[@]}")
+fi
 
 package_root="$repo_root/$SKILLS_PACKAGE_ROOT"
 tracked_root="$package_root/$TRACKED_SKILLS_ROOT"
@@ -55,7 +66,8 @@ contains_name() {
 }
 
 is_codex_only() {
-  contains_name "$1" "${codex_only_skills[@]}"
+  contains_name "$1" "${codex_only_skills[@]}" && return 0
+  python3 -B -c 'import json,sys; e=json.load(open(sys.argv[1])).get(sys.argv[2],{}); sys.exit(0 if e and "claude-code" not in e["agents"] else 1)' "$repo_root/agents/skills-manifest.json" "$1"
 }
 
 source_for_skill() {
@@ -464,6 +476,7 @@ validate_licenses() {
 
 validate_repository() {
   local failures=0
+  python3 -B "$script_dir/skill-store.py" check --source-only || failures=$((failures + 1))
   validate_config || failures=$((failures + 1))
   validate_skills || failures=$((failures + 1))
   validate_executables || failures=$((failures + 1))
@@ -544,7 +557,8 @@ validate_runtime() {
   shopt -s nullglob
   generated_entries=("$agents_runtime"/$GENERATED_RUNTIME_PATTERN)
   shopt -u nullglob
-  for generated in "${generated_entries[@]}"; do
+  for generated in "${generated_entries[@]-}"; do
+    [[ -n "$generated" ]] || continue
     name="$(basename "$generated")"
     if [[ -L "$generated" || ! -d "$generated" ]]; then
       echo "invalid: generated runtime skill must remain a real directory: $generated"
@@ -557,26 +571,14 @@ validate_runtime() {
     fi
   done
 
-  expected_names="$(
-    {
-      printf '%s\n' "${tracked_skills[@]}"
-      for generated in "${generated_entries[@]}"; do basename "$generated"; done
-    } |
-      LC_ALL=C sort
-  )"
   actual_names="$(
     find "$agents_runtime" -mindepth 1 -maxdepth 1 -exec basename {} \; |
       LC_ALL=C sort
   )"
-  if [[ "$actual_names" != "$expected_names" ]]; then
-    echo "invalid: runtime .agents skill inventory differs from configured plus generated state"
-    failures=$((failures + 1))
-  fi
-
-  while IFS= read -r path; do
-    echo "invalid: broken runtime link: $path -> $(readlink "$path")"
-    failures=$((failures + 1))
-  done < <(find "$agents_runtime" "$claude_runtime" -type l ! -exec test -e {} \; -print)
+  while IFS= read -r name; do
+    contains_name "$name" "${tracked_skills[@]}" && continue
+    echo "unmanaged/external sibling (preserved): $name"
+  done <<< "$actual_names"
 
   return "$failures"
 }
@@ -732,6 +734,9 @@ run_post_install() {
 usage() {
   cat <<'USAGE'
 Usage: scripts/agent-skills <command>
+
+Lifecycle commands (see agents/README.md for arguments):
+  list, check, add, add-repo, import, update, record-patch, deploy
 
 Read-only commands:
   status       Validate tracked skills, Stow runtime links, and collisions.

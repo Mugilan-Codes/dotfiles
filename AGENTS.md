@@ -85,21 +85,27 @@ Approved third-party contents are also tracked under
 `agents/skills.conf`; `agents/skills-lock.json` records project installer
 metadata.
 
-Add or update them only from `dotfiles/agents` with project-scoped
-`npx skills@latest add <source>`. Never use `--global`, `-g`, or `--all`.
-Select only approved names and review every resulting Git change before
-updating documentation or committing. Record the resolved CLI version in the
-update report; committed contents are the reproducible artifact.
+Use `scripts/agent-skills add`, `add-repo`, `import`, or `update` for explicit
+reviewed additions/updates. Pinned repository imports require a full commit and
+subdirectory. Preserve local patches and licenses; record provenance in
+`skills-manifest.json` and `THIRD_PARTY.md`. Run `check --source-only` and `audit`.
+Never bless unexplained drift: `record-patch` requires review evidence and a
+concrete note. Unmanaged siblings are reported, not adopted or deleted.
 
-Do not silently overwrite local skills or forks. Installer removal may leave
-stale project-lock entries, which must be reconciled explicitly.
+The legacy project-scoped `npx skills@latest` workflow remains separately
+reviewable from `dotfiles/agents`; never use `--global`, `-g`, or `--all`.
+Record its resolved version and review every diff before reconciling metadata.
+Do not overwrite local/fork changes or duplicate plugin-managed skills.
 
 ### Claude and Codex
 
 Tracked relative links under `agents/.claude/skills` expose intended skills to
 Claude Code without duplicating contents. Codex reads `$HOME/.agents/skills`.
-Global Codex instructions live at `agents/.codex/AGENTS.md` and deploy to
-`$HOME/.codex/AGENTS.md`. Keep all other host-managed Codex state outside this
+Shared personal instructions live at `agents/.codex/AGENTS.md` and deploy to
+`$HOME/.codex/AGENTS.md`; the tracked Claude global link exposes the same content
+at `$HOME/.claude/CLAUDE.md`. Repository rules remain in root AGENTS/CLAUDE.
+Keep portable preference changes in `agents/portable` and document selective
+restoration. Keep all other host-managed Codex state outside this
 repository and do not create a broad Codex Stow package.
 
 ### Generated runtime skills
@@ -144,7 +150,7 @@ generated project skills during ordinary dotfiles maintenance.
 
 ### `Brewfile`
 
-- Keep Homebrew changes in `Brewfile`.
+- Keep required recovery dependencies in `Brewfile.core`; optional inventory in `Brewfile`.
 - Prefer `bdump`, `brewadd`, and `brewrm` in a shell with these dotfiles.
 - Do not run `brewup` automatically.
 
@@ -155,22 +161,28 @@ generated project skills during ordinary dotfiles maintenance.
 
 ## Verification
 
-Run checks matching the files touched:
+Run checks matching the files touched. Use isolated targets for implementation tests;
+do not install packages or apply live links without authorization:
 
 ```sh
 git status --short --untracked-files=all
 git diff --check
 git diff --cached --check
+python3 -B tests/test_regressions.py
 bash -n scripts/agent-skills
-zsh -n zsh/.zshrc zsh/.zprofile zsh/.zshenv zsh/.zlogin \
+bash -n install.sh
+(for file in zsh/.zshrc zsh/.zprofile zsh/.zshenv zsh/.zlogin \
   zsh/.oh-my-zsh/custom/aliases.zsh \
   zsh/.oh-my-zsh/custom/functions.zsh \
-  zsh/.oh-my-zsh/custom/completions.zsh
+  zsh/.oh-my-zsh/custom/completions.zsh; do
+  zsh -f -n "$file" || exit 1
+done)
 scripts/agent-skills status
 scripts/agent-skills audit
 stow --target="$HOME" --simulate --verbose zsh tmux git starship
 stow --target="$HOME" --simulate --verbose agents
-brew bundle check --no-upgrade --file=./Brewfile
+./install.sh --check
+scripts/agent-skills check --source-only
 ```
 
 For Stow changes, always run simulation before recommending or applying the

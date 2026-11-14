@@ -155,12 +155,7 @@
 	timeline = reflog --date=local --pretty="%C(yellow)%h%Creset %ad - %gs"
 
 	# ⛔ Abort any in-progress merge, rebase, or cherry-pick
-		abort = "!f() { \
-	  git merge --abort 2>/dev/null || true; \
-	  git rebase --abort 2>/dev/null || true; \
-	  git cherry-pick --abort 2>/dev/null || true; \
-	  echo '🛑 Any operation in progress has been aborted.'; \
-	}; f"
+	abort = "!f() { git rev-parse --git-dir >/dev/null || return; if test -d \"$(git rev-parse --git-path rebase-merge)\" || test -d \"$(git rev-parse --git-path rebase-apply)\"; then git rebase --abort; elif test -f \"$(git rev-parse --git-path MERGE_HEAD)\"; then git merge --abort; elif test -f \"$(git rev-parse --git-path CHERRY_PICK_HEAD)\"; then git cherry-pick --abort; else echo 'No supported operation in progress.'; fi; }; f"
 
 	# ⬇️ Checkout PR by number
 	pr = "!f() { gh pr checkout \"$1\"; }; f"

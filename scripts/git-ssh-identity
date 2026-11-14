@@ -1,0 +1,11 @@
+#!/bin/sh
+# Proposed fail-closed identity routing; callers must choose their own key.
+set -eu
+key=${1:?usage: git-ssh-identity /absolute/private-key ssh-arguments...}
+shift
+case "$key" in /*) ;; *) echo 'Identity path must be absolute.' >&2; exit 2 ;; esac
+if [ ! -f "$key" ] || [ ! -r "$key" ]; then
+  echo 'Required SSH identity is missing or unreadable; refusing fallback.' >&2
+  exit 1
+fi
+exec /usr/bin/ssh -F /dev/null -o IdentitiesOnly=yes -o IdentityAgent=none -i "$key" "$@"

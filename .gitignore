@@ -26,3 +26,7 @@ secrets/
 /agents/.claude/session*
 /agents/.codex/*
 !/agents/.codex/AGENTS.md
+
+.herenow/
+__pycache__/
+*.pyc

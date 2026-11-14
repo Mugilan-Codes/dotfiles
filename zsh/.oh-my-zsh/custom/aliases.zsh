@@ -171,7 +171,7 @@ alias pingg='ping 8.8.8.8'
 alias routes='netstat -rn'
 
 # Serve current directory on localhost:8080
-alias serve="python3 -m http.server 8080"
+alias serve="servehere"
 
 # ─────────────────────────────
 # 💽 System / Maintenance

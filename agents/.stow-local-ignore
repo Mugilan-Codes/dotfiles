@@ -7,3 +7,5 @@
 (^|/).*[.](bak|swp|swo|tmp)$
 (^|/).*~$
 (^|/).*migration.*$
+
+(^|/)(skills-manifest[.]json|external-skills[.]json|portable)(/|$)

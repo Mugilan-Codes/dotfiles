@@ -1,11 +1,10 @@
+# Optional full application inventory; install.sh uses Brewfile.core only.
 # Third-party taps. Trust is scoped to the fully qualified packages below.
 tap "agrinman/tap"
 tap "anomalyco/tap"
 tap "fognil/tap"
 tap "hashicorp/tap"
 tap "jesseduffield/lazydocker"
-tap "leoafarias/fvm"
-tap "localsend/localsend"
 tap "oven-sh/bun"
 # Boring Notch uses a custom remote; only its stable cask is trusted below.
 tap "theboredteam/boring-notch", "https://github.com/TheBoredTeam/homebrew-boring-notch"
@@ -21,7 +20,7 @@ brew "hashicorp/tap/terraform", trusted: true
 # Terminal UI for Docker and Docker Compose
 brew "jesseduffield/lazydocker/lazydocker", trusted: true
 # Flutter version manager
-brew "leoafarias/fvm/fvm", trusted: true
+brew "fvm"
 # JavaScript runtime, bundler, and test runner
 brew "oven-sh/bun/bun", trusted: true
 # Automatic configure script builder
@@ -190,7 +189,7 @@ cask "itsycal"
 # JetBrains tools manager
 cask "jetbrains-toolbox"
 # An open source cross-platform alternative to AirDrop
-cask "localsend/localsend/localsend", trusted: true
+cask "localsend"
 # Clipboard manager
 cask "maccy"
 # Meet, chat, call, and collaborate in just one place
@@ -327,3 +326,9 @@ vscode "usernamehw.errorlens"
 vscode "wesbos.theme-cobalt2"
 vscode "yoavbls.pretty-ts-errors"
 vscode "zignd.html-css-class-completion"
+
+# Direct prompt/search/publisher dependencies
+brew "starship"
+brew "ripgrep"
+brew "jq"
+brew "python"

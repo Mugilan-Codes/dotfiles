@@ -1,0 +1,455 @@
+{
+  "bug-triage": {
+    "agents": [
+      "codex",
+      "claude-code"
+    ],
+    "dependencies": [],
+    "license": "Repository local content; no third-party license claimed",
+    "origin": "Existing dotfiles local skill; see SKILLS_REGISTRY.md",
+    "ownership": "local",
+    "patches": [],
+    "revision": null,
+    "sha256": "0f1c33c3852889fdb8ad813507b04a62764fbb7ec2982515590f09f8cbcfa1c0"
+  },
+  "code-review": {
+    "agents": [
+      "codex",
+      "claude-code"
+    ],
+    "dependencies": [
+      "git"
+    ],
+    "license": "agents/licenses/mattpocock-skills-LICENSE.txt",
+    "observed_upstream_revision": "2ab958093e83e0ec752e6c1c5932da465bf23e0c",
+    "origin": "https://github.com/mattpocock/skills",
+    "ownership": "vendor",
+    "patches": [],
+    "revision": null,
+    "sha256": "31d149a480eaa68c11e32f5ee77f0fd0b98a906834d531d881d502352edd0b8e"
+  },
+  "codebase-design": {
+    "agents": [
+      "codex",
+      "claude-code"
+    ],
+    "dependencies": [],
+    "license": "agents/licenses/mattpocock-skills-LICENSE.txt",
+    "observed_upstream_revision": "2ab958093e83e0ec752e6c1c5932da465bf23e0c",
+    "origin": "https://github.com/mattpocock/skills",
+    "ownership": "vendor",
+    "patches": [],
+    "revision": null,
+    "sha256": "6d9d51d8caa01633fd00cf87089c5618c982321f942ac69f62565dc001c6b22f"
+  },
+  "design-taste-frontend": {
+    "agents": [
+      "codex",
+      "claude-code"
+    ],
+    "dependencies": [
+      "Project-selected frontend runtime only when implementing; no global package required"
+    ],
+    "license": "agents/licenses/leonxlnx-taste-skill-LICENSE.txt",
+    "observed_upstream_revision": "e988add20dab0fa97d7a76781c48961c8184288e",
+    "origin": "https://github.com/Leonxlnx/taste-skill",
+    "ownership": "vendor",
+    "patches": [],
+    "revision": null,
+    "sha256": "6d838b246d0e35d0b53f4f23f98ba7a1dd561937e64f7d0c7553b0928e376c3e"
+  },
+  "diagnosing-bugs": {
+    "agents": [
+      "codex",
+      "claude-code"
+    ],
+    "dependencies": [
+      "git"
+    ],
+    "license": "agents/licenses/mattpocock-skills-LICENSE.txt",
+    "observed_upstream_revision": "2ab958093e83e0ec752e6c1c5932da465bf23e0c",
+    "origin": "https://github.com/mattpocock/skills",
+    "ownership": "vendor",
+    "patches": [],
+    "revision": null,
+    "sha256": "fd6c99466b7ba43be624e6e66ed6d7af2796ded7218f24c83820823977819e22"
+  },
+  "domain-modeling": {
+    "agents": [
+      "codex",
+      "claude-code"
+    ],
+    "dependencies": [],
+    "license": "agents/licenses/mattpocock-skills-LICENSE.txt",
+    "observed_upstream_revision": "2ab958093e83e0ec752e6c1c5932da465bf23e0c",
+    "origin": "https://github.com/mattpocock/skills",
+    "ownership": "vendor",
+    "patches": [],
+    "revision": null,
+    "sha256": "363cb0f53b0b431e7c00086ad1f823500b7e1b70b5616ee969c979f0934e9e6e"
+  },
+  "dsa-solution-review": {
+    "agents": [
+      "codex",
+      "claude-code"
+    ],
+    "dependencies": [],
+    "license": "Repository local content; no third-party license claimed",
+    "origin": "Existing dotfiles local skill; see SKILLS_REGISTRY.md",
+    "ownership": "local",
+    "patches": [],
+    "revision": null,
+    "sha256": "3d206fd48f229f421c43e5341d72a415692e850e71b59070e50266b507b9e2b4"
+  },
+  "framer": {
+    "agents": [
+      "codex",
+      "claude-code"
+    ],
+    "dependencies": [
+      "Node.js/npm (npx)",
+      "Framer agent CLI and authorized account; setup separate"
+    ],
+    "license": "See THIRD_PARTY.md and agents/licenses",
+    "origin": "Framer agent-generated local fork; original URL/revision/license unknown; THIRD_PARTY.md",
+    "ownership": "fork",
+    "patches": [
+      {
+        "evidence": "agents/THIRD_PARTY.md",
+        "note": "Existing scoped integration changes"
+      }
+    ],
+    "revision": null,
+    "sha256": "f30998ebd121110b6eaac0bfcfb89bf369fb7fa02a87e136d3d39e549fc8f8d7"
+  },
+  "framer-code-components": {
+    "agents": [
+      "codex",
+      "claude-code"
+    ],
+    "dependencies": [
+      "Framer project/runtime when editing components"
+    ],
+    "license": "See THIRD_PARTY.md and agents/licenses",
+    "origin": "Framer agent-generated local fork; original URL/revision/license unknown; THIRD_PARTY.md",
+    "ownership": "fork",
+    "patches": [
+      {
+        "evidence": "agents/THIRD_PARTY.md",
+        "note": "Existing scoped integration changes"
+      }
+    ],
+    "revision": null,
+    "sha256": "c47d63aed3153def5ea544d52a9ed2799265b0b5d0a4188275be5c1568df3b0a"
+  },
+  "grill-with-docs": {
+    "agents": [
+      "codex",
+      "claude-code"
+    ],
+    "dependencies": [
+      "skill: grilling",
+      "skill: domain-modeling"
+    ],
+    "license": "agents/licenses/mattpocock-skills-LICENSE.txt",
+    "observed_upstream_revision": "2ab958093e83e0ec752e6c1c5932da465bf23e0c",
+    "origin": "https://github.com/mattpocock/skills",
+    "ownership": "vendor",
+    "patches": [],
+    "revision": null,
+    "sha256": "9c460cbd94fd3c63cdef967dbdb6e66ca687103cdc380cd37834e4d10b738f78"
+  },
+  "grilling": {
+    "agents": [
+      "codex",
+      "claude-code"
+    ],
+    "dependencies": [],
+    "license": "agents/licenses/mattpocock-skills-LICENSE.txt",
+    "observed_upstream_revision": "2ab958093e83e0ec752e6c1c5932da465bf23e0c",
+    "origin": "https://github.com/mattpocock/skills",
+    "ownership": "vendor",
+    "patches": [],
+    "revision": null,
+    "sha256": "368d3dd7251247c69f3656d93dc83c8f1577792eacac2111f1e7981db2ece49b"
+  },
+  "handoff": {
+    "agents": [
+      "codex",
+      "claude-code"
+    ],
+    "dependencies": [],
+    "license": "agents/licenses/mattpocock-skills-LICENSE.txt",
+    "observed_upstream_revision": "2ab958093e83e0ec752e6c1c5932da465bf23e0c",
+    "origin": "https://github.com/mattpocock/skills",
+    "ownership": "vendor",
+    "patches": [],
+    "revision": null,
+    "sha256": "ad03e8d4ea3cbbff66420eb7ba3cc375b5cbe1821a2449b53e863256cf5b5cde"
+  },
+  "here-now": {
+    "agents": [
+      "codex",
+      "claude-code"
+    ],
+    "dependencies": [
+      "python3",
+      "curl",
+      "jq",
+      "file",
+      "shasum"
+    ],
+    "license": "Upstream claims MIT but lacks top-level license file; see THIRD_PARTY.md",
+    "observed_upstream_revision": "c9fad058b8f1258061a2ff8766e257a384ae97ed",
+    "origin": "https://github.com/heredotnow/skill",
+    "ownership": "vendor",
+    "patches": [
+      {
+        "evidence": "docs/VENDOR-PATCHES.md",
+        "note": "DF-12/DF-13 reviewed manifest exclusions, no-follow exclusive export, protected state and zero-upload loop"
+      },
+      {
+        "evidence": "docs/VENDOR-PATCHES.md",
+        "note": "Reviewed DF-12/DF-13 implementation and hidden-file allowlist; regression fixtures cover nested exclusions and exclusive contained exports"
+      },
+      {
+        "evidence": "docs/VENDOR-PATCHES.md",
+        "note": "Allow normal user-selected relative export roots while preserving strict server-path validation and no-follow traversal"
+      }
+    ],
+    "revision": null,
+    "sha256": "fd9e0a0e895129ba85f2dc164bc5909ae4743189f9ca796708c7528cf66b51dd"
+  },
+  "improve-codebase-architecture": {
+    "agents": [
+      "codex",
+      "claude-code"
+    ],
+    "dependencies": [
+      "git",
+      "skill: codebase-design",
+      "skill: domain-modeling",
+      "skill: grilling"
+    ],
+    "license": "agents/licenses/mattpocock-skills-LICENSE.txt",
+    "observed_upstream_revision": "2ab958093e83e0ec752e6c1c5932da465bf23e0c",
+    "origin": "https://github.com/mattpocock/skills",
+    "ownership": "vendor",
+    "patches": [],
+    "revision": null,
+    "sha256": "66e8a50c83c3c724fcfe0769701b665c56cec220cc4f49cc1aee8bdfc07de94a"
+  },
+  "loopy": {
+    "agents": [
+      "codex",
+      "claude-code"
+    ],
+    "dependencies": [
+      "Host agent tools relevant to the selected workflow; no fixed installer"
+    ],
+    "license": "See THIRD_PARTY.md and agents/licenses",
+    "origin": "https://github.com/Forward-Future/loopy",
+    "ownership": "fork",
+    "patches": [
+      {
+        "evidence": "agents/THIRD_PARTY.md",
+        "note": "Existing intentional local fork; base revision unproven"
+      }
+    ],
+    "revision": null,
+    "sha256": "f22d8ce0bc7079e5c411e149d7bfa6fc1ca8d988f31d3d4c411dce97bd649ef9"
+  },
+  "prototype": {
+    "agents": [
+      "codex",
+      "claude-code"
+    ],
+    "dependencies": [],
+    "license": "agents/licenses/mattpocock-skills-LICENSE.txt",
+    "observed_upstream_revision": "2ab958093e83e0ec752e6c1c5932da465bf23e0c",
+    "origin": "https://github.com/mattpocock/skills",
+    "ownership": "vendor",
+    "patches": [],
+    "revision": null,
+    "sha256": "faba901c53a6ca245174c4ba5db3929d14253232b3050fdbd46539720adf1ab8"
+  },
+  "repo-onboarding": {
+    "agents": [
+      "codex",
+      "claude-code"
+    ],
+    "dependencies": [
+      "git"
+    ],
+    "license": "Repository local content; no third-party license claimed",
+    "origin": "Existing dotfiles local skill; see SKILLS_REGISTRY.md",
+    "ownership": "local",
+    "patches": [],
+    "revision": null,
+    "sha256": "eaebd59a3b8cee6ee55d43a65402b2bf789108b20f7efba641617a846405abc6"
+  },
+  "research": {
+    "agents": [
+      "codex",
+      "claude-code"
+    ],
+    "dependencies": [
+      "Web/document lookup tools provided by the host agent"
+    ],
+    "license": "agents/licenses/mattpocock-skills-LICENSE.txt",
+    "observed_upstream_revision": "2ab958093e83e0ec752e6c1c5932da465bf23e0c",
+    "origin": "https://github.com/mattpocock/skills",
+    "ownership": "vendor",
+    "patches": [],
+    "revision": null,
+    "sha256": "bd3e2c6826671d82c86ed0da3dac3370ebcf63b0fe847f91bb444e1fb7dac21b"
+  },
+  "setup-matt-pocock-skills": {
+    "agents": [
+      "codex",
+      "claude-code"
+    ],
+    "dependencies": [
+      "git"
+    ],
+    "license": "agents/licenses/mattpocock-skills-LICENSE.txt",
+    "observed_upstream_revision": "2ab958093e83e0ec752e6c1c5932da465bf23e0c",
+    "origin": "https://github.com/mattpocock/skills",
+    "ownership": "vendor",
+    "patches": [],
+    "revision": null,
+    "sha256": "74e894a3509e2676d4cdb771c8eace087092430635e845e02a9cc2f757c552a4"
+  },
+  "skills-maintainer": {
+    "agents": [
+      "codex",
+      "claude-code"
+    ],
+    "dependencies": [
+      "bash",
+      "python3",
+      "git",
+      "stow",
+      "ripgrep",
+      "coreutils realpath",
+      "shasum"
+    ],
+    "license": "Repository local content; no third-party license claimed",
+    "origin": "Existing dotfiles local skill; see SKILLS_REGISTRY.md",
+    "ownership": "local",
+    "patches": [
+      {
+        "evidence": "agents/README.md",
+        "note": "Document authorized lifecycle, provenance review and external-owner boundaries; retain Stow topology and legacy installer safeguards"
+      }
+    ],
+    "revision": null,
+    "sha256": "6116a28929dff4511e401cab5df183fd9d0d66276035c9c81913cc22de84ab21"
+  },
+  "staged-change-reviewer": {
+    "agents": [
+      "codex"
+    ],
+    "dependencies": [
+      "git"
+    ],
+    "license": "Repository local content; no third-party license claimed",
+    "origin": "Existing dotfiles local skill; see SKILLS_REGISTRY.md",
+    "ownership": "local",
+    "patches": [],
+    "revision": null,
+    "sha256": "58881615cfa516fce7d597f924d104f08624946a9e177edf5b72a8390ec83b35"
+  },
+  "staged-diff-review": {
+    "agents": [
+      "codex",
+      "claude-code"
+    ],
+    "dependencies": [
+      "git"
+    ],
+    "license": "Repository local content; no third-party license claimed",
+    "origin": "Existing dotfiles local skill; see SKILLS_REGISTRY.md",
+    "ownership": "local",
+    "patches": [],
+    "revision": null,
+    "sha256": "89d0a9739ac7307105f36c7bb3bb8b63e8530e0233bba7e2705628ae4b39dd1a"
+  },
+  "tdd": {
+    "agents": [
+      "codex",
+      "claude-code"
+    ],
+    "dependencies": [],
+    "license": "agents/licenses/mattpocock-skills-LICENSE.txt",
+    "observed_upstream_revision": "2ab958093e83e0ec752e6c1c5932da465bf23e0c",
+    "origin": "https://github.com/mattpocock/skills",
+    "ownership": "vendor",
+    "patches": [],
+    "revision": null,
+    "sha256": "81eca2a5b53a63f481c0849be7a663a8cd43d5cf53f32b644ec0a2f50cf91aa2"
+  },
+  "teach": {
+    "agents": [
+      "codex",
+      "claude-code"
+    ],
+    "dependencies": [],
+    "license": "agents/licenses/mattpocock-skills-LICENSE.txt",
+    "observed_upstream_revision": "2ab958093e83e0ec752e6c1c5932da465bf23e0c",
+    "origin": "https://github.com/mattpocock/skills",
+    "ownership": "vendor",
+    "patches": [],
+    "revision": null,
+    "sha256": "68999bb1a241384b2f921f3321d779b7d05eb6089077b70d88cee2aee3d75ccc"
+  },
+  "to-spec": {
+    "agents": [
+      "codex",
+      "claude-code"
+    ],
+    "dependencies": [],
+    "license": "agents/licenses/mattpocock-skills-LICENSE.txt",
+    "observed_upstream_revision": "2ab958093e83e0ec752e6c1c5932da465bf23e0c",
+    "origin": "https://github.com/mattpocock/skills",
+    "ownership": "vendor",
+    "patches": [],
+    "revision": null,
+    "sha256": "0f544cd0c099c06f0dd0b7b9ee98b4237218e7e95fd3d3c02e791efbaf74bacb"
+  },
+  "to-tickets": {
+    "agents": [
+      "codex",
+      "claude-code"
+    ],
+    "dependencies": [
+      "Project-selected issue tracker CLI/connector or local Markdown; see SKILL.md"
+    ],
+    "license": "agents/licenses/mattpocock-skills-LICENSE.txt",
+    "observed_upstream_revision": "2ab958093e83e0ec752e6c1c5932da465bf23e0c",
+    "origin": "https://github.com/mattpocock/skills",
+    "ownership": "vendor",
+    "patches": [
+      {
+        "evidence": "agents/THIRD_PARTY.md",
+        "note": "Existing local Codex handoff adaptation"
+      }
+    ],
+    "revision": null,
+    "sha256": "87a0d279f6e59f7ba5ab6679b3adeb555d177a1f5a25c1a3813cb416de781807"
+  },
+  "writing-great-skills": {
+    "agents": [
+      "codex",
+      "claude-code"
+    ],
+    "dependencies": [],
+    "license": "agents/licenses/mattpocock-skills-LICENSE.txt",
+    "observed_upstream_revision": "2ab958093e83e0ec752e6c1c5932da465bf23e0c",
+    "origin": "https://github.com/mattpocock/skills",
+    "ownership": "vendor",
+    "patches": [],
+    "revision": null,
+    "sha256": "4deb21855fb4deeeb1b8217b041faff003fd0c915d24a22f636851c520bc9c5c"
+  }
+}

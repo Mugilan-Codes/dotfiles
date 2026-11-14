@@ -58,7 +58,7 @@ else
   die "requires jq"
 fi
 
-for cmd in curl file; do
+for cmd in curl file python3; do
   command -v "$cmd" >/dev/null 2>&1 || die "requires $cmd"
 done
 
@@ -208,36 +208,11 @@ guess_content_type() {
   esac
 }
 
-# Build file manifest as JSON array
-FILES_JSON="[]"
+# Local reviewed safety filter; preserve legitimate hidden assets (.well-known).
+MANIFEST=$(python3 "$SCRIPT_DIR/safe-files.py" manifest "$TARGET")
+FILES_JSON=$(printf '%s' "$MANIFEST" | "$JQ_BIN" '.files')
+FILE_MAP=$(printf '%s' "$MANIFEST" | "$JQ_BIN" '.map')
 
-if [[ -f "$TARGET" ]]; then
-  sz=$(wc -c < "$TARGET" | tr -d ' ')
-  ct=$(guess_content_type "$TARGET")
-  bn=$(basename "$TARGET")
-  h=$(compute_sha256 "$TARGET")
-  FILES_JSON=$("$JQ_BIN" -n --arg p "$bn" --argjson s "$sz" --arg c "$ct" --arg h "$h" \
-    '[{"path":$p,"size":$s,"contentType":$c,"hash":$h}]')
-  FILE_MAP=$("$JQ_BIN" -n --arg p "$bn" --arg a "$(cd "$(dirname "$TARGET")" && pwd)/$(basename "$TARGET")" \
-    '{($p):$a}')
-elif [[ -d "$TARGET" ]]; then
-  FILE_MAP="{}"
-  while IFS= read -r -d '' f; do
-    rel="${f#$TARGET/}"
-    [[ "$rel" == ".DS_Store" ]] && continue
-    [[ "$(basename "$rel")" == ".DS_Store" ]] && continue
-    [[ "$rel" == ".herenow/fork-meta.json" ]] && continue
-    sz=$(wc -c < "$f" | tr -d ' ')
-    ct=$(guess_content_type "$f")
-    h=$(compute_sha256 "$f")
-    abs=$(cd "$(dirname "$f")" && pwd)/$(basename "$f")
-    FILES_JSON=$(echo "$FILES_JSON" | "$JQ_BIN" --arg p "$rel" --argjson s "$sz" --arg c "$ct" --arg h "$h" \
-      '. + [{"path":$p,"size":$s,"contentType":$c,"hash":$h}]')
-    FILE_MAP=$(echo "$FILE_MAP" | "$JQ_BIN" --arg p "$rel" --arg a "$abs" '. + {($p):$a}')
-  done < <(find "$TARGET" -type f -print0 | sort -z)
-else
-  die "not a file or directory: $TARGET"
-fi
 
 file_count=$(echo "$FILES_JSON" | "$JQ_BIN" 'length')
 [[ "$file_count" -gt 0 ]] || die "no files found"
@@ -335,7 +310,7 @@ else
 fi
 upload_errors=0
 
-for i in $(seq 0 $((UPLOAD_COUNT - 1))); do
+for ((i=0; i<UPLOAD_COUNT; i++)); do
   upload_path=$(echo "$RESPONSE" | "$JQ_BIN" -r ".upload.uploads[$i].path")
   upload_url=$(echo "$RESPONSE" | "$JQ_BIN" -r ".upload.uploads[$i].url")
   upload_ct=$(echo "$RESPONSE" | "$JQ_BIN" -r ".upload.uploads[$i].headers[\"Content-Type\"] // empty")
@@ -382,7 +357,9 @@ if echo "$FIN_RESPONSE" | "$JQ_BIN" -e '.error' >/dev/null 2>&1; then
 fi
 
 # Save state
+[[ ! -L "$STATE_DIR" && ! -L "$STATE_FILE" ]] || die "refusing symlinked state"
 mkdir -p "$STATE_DIR"
+chmod 700 "$STATE_DIR"
 if [[ -f "$STATE_FILE" ]]; then
   STATE=$(cat "$STATE_FILE")
 else
@@ -400,7 +377,13 @@ RESPONSE_EXPIRES=$(echo "$RESPONSE" | "$JQ_BIN" -r '.expiresAt // empty')
 [[ -n "$RESPONSE_EXPIRES" ]] && entry=$(echo "$entry" | "$JQ_BIN" --arg v "$RESPONSE_EXPIRES" '.expiresAt = $v')
 
 STATE=$(echo "$STATE" | "$JQ_BIN" --arg slug "$OUT_SLUG" --argjson e "$entry" '.publishes[$slug] = $e')
-echo "$STATE" | "$JQ_BIN" '.' > "$STATE_FILE"
+state_tmp=$(mktemp "$STATE_DIR/.state.XXXXXX")
+chmod 600 "$state_tmp"
+if ! echo "$STATE" | "$JQ_BIN" '.' > "$state_tmp"; then
+  rm -f "$state_tmp"
+  die "state serialization failed"
+fi
+mv -f "$state_tmp" "$STATE_FILE"
 
 # Workspace label URL (finalize response preferred; create response fallback)
 ACCOUNT_URL=$(echo "$FIN_RESPONSE" | "$JQ_BIN" -r '.accountUrl // empty')

@@ -1,0 +1,7 @@
+# Selectively merge these keys into $CODEX_HOME/config.toml after reviewing
+# the installed version. This file is NOT loaded or copied by Stow.
+# Never append blindly: duplicate TOML keys are invalid.
+model_reasoning_effort = "high"
+personality = "pragmatic"
+approval_policy = "on-request"
+sandbox_mode = "workspace-write"

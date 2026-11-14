@@ -11,7 +11,8 @@ _dotfiles_edit() {
   local -a editor_cmd
 
   if [[ -n "$editor_spec" ]]; then
-    editor_cmd=(${(z)editor_spec})
+    editor_cmd=("${(@Q)${(z)editor_spec}}")
+    (( ${#editor_cmd} )) && [[ -n "$editor_cmd[1]" ]] || return 1
   elif command -v code >/dev/null 2>&1; then
     editor_cmd=(code --wait)
   elif command -v vim >/dev/null 2>&1; then
@@ -33,43 +34,40 @@ _dotfiles_edit() {
 # Usage:
 #   killport 3000
 killport() {
-  if [[ -z "$1" ]]; then
-    echo "Usage: killport <port>"
-    return 1
-  fi
-
-  local pids
-  pids=$(lsof -ti tcp:"$1")
-
-  if [[ -z "$pids" ]]; then
-    echo "No processes found on port $1"
-    return 0
-  fi
-
-  echo "Killing processes on port $1: $pids"
-  echo "$pids" | xargs kill
+  _dotfiles_kill_listener "${1:-}" -TERM
 }
 
-# Force-kill all processes listening on a given TCP port.
-# Sends SIGKILL; use only if normal killport does not work.
-# Usage:
-#   killportf 3000
+# Force-kill listeners only; use when normal killport does not work.
 killportf() {
-  if [[ -z "$1" ]]; then
-    echo "Usage: killportf <port>"
-    return 1
-  fi
+  _dotfiles_kill_listener "${1:-}" -KILL
+}
 
-  local pids
-  pids=$(lsof -ti tcp:"$1")
-
-  if [[ -z "$pids" ]]; then
-    echo "No processes found on port $1"
-    return 0
-  fi
-
-  echo "Force-killing processes on port $1: $pids"
-  echo "$pids" | xargs kill -9
+_dotfiles_kill_listener() {
+  emulate -L zsh
+  local port="$1" signal="$2" pids errors rc pid
+  _valid_tcp_port "$port" || { print -u2 -- 'Expected a TCP port (1–65535).'; return 1; }
+  command -v lsof >/dev/null || { print -u2 -- 'lsof not found'; return 1; }
+  errors=$(mktemp "${TMPDIR:-/tmp}/killport.XXXXXX") || return 1
+  {
+    pids=$(lsof -nP -a -iTCP:"$port" -sTCP:LISTEN -t 2>"$errors")
+    rc=$?
+    if (( rc == 1 )) && [[ -z "$pids" && ! -s "$errors" ]]; then
+      print -- "No listeners on port $port"
+      return 0
+    fi
+    if (( rc != 0 )) || [[ -s "$errors" ]]; then
+      cat "$errors" >&2
+      print -u2 -- "Could not inspect port $port (lsof status $rc)."
+      return 1
+    fi
+    [[ -n "$pids" ]] || return 0
+    for pid in "${(@f)pids}"; do
+      [[ "$pid" == <1-> ]] || { print -u2 -- 'Invalid PID from lsof'; return 1; }
+    done
+    kill "$signal" -- "${(@f)pids}"
+  } always {
+    command rm -f -- "$errors"
+  }
 }
 
 # Create a directory and immediately cd into it.
@@ -81,7 +79,7 @@ mkcd() {
     return 1
   fi
 
-  mkdir -p "$1" && cd "$1"
+  mkdir -p -- "$1" && cd -- "$1"
 }
 
 # Extract common archive formats.
@@ -94,7 +92,7 @@ extract() {
     return 1
   fi
 
-  local file="$1"
+  local file="${1:a}"
   if [[ ! -f "$file" ]]; then
     echo "File not found: $file"
     return 1
@@ -119,9 +117,10 @@ extract() {
 #   servehere
 #   servehere 9090
 servehere() {
-  local port=${1:-8080}
-  echo "Starting HTTP server at http://localhost:$port"
-  python3 -m http.server "$port"
+  local port="${1-8080}"
+  _valid_tcp_port "$port" || { print -u2 -- "Invalid TCP port: $port"; return 1; }
+  echo "Starting HTTP server at http://127.0.0.1:$port"
+  python3 -m http.server "$port" --bind 127.0.0.1
 }
 
 # Restart macOS Core Audio daemon.
@@ -255,12 +254,14 @@ tmpd() {
 # Usage:
 #   cpwd
 cpwd() {
+  emulate -L zsh
+  setopt pipefail
   command -v pbcopy >/dev/null 2>&1 || {
     echo "pbcopy not found"
     return 1
   }
 
-  pwd | pbcopy
+  pwd | pbcopy || return
   echo "Copied: $(pwd)"
 }
 
@@ -1186,6 +1187,8 @@ gwtl() {
 # Usage:
 #   gbcopy
 gbcopy() {
+  emulate -L zsh
+  setopt pipefail
   git rev-parse --is-inside-work-tree >/dev/null 2>&1 || {
     echo "Not inside a git repo"
     return 1
@@ -1200,7 +1203,7 @@ gbcopy() {
   fi
 
   if command -v pbcopy >/dev/null 2>&1; then
-    print -r -- "$branch" | pbcopy
+    print -r -- "$branch" | pbcopy || return
     echo "Copied: $branch"
   else
     echo "pbcopy not found. Branch: $branch"
@@ -1213,6 +1216,8 @@ gbcopy() {
 # Usage:
 #   ghash
 ghash() {
+  emulate -L zsh
+  setopt pipefail
   git rev-parse --is-inside-work-tree >/dev/null 2>&1 || {
     echo "Not inside a git repo"
     return 1
@@ -1222,7 +1227,7 @@ ghash() {
   hash=$(git rev-parse --short HEAD 2>/dev/null) || return 1
 
   if command -v pbcopy >/dev/null 2>&1; then
-    print -r -- "$hash" | pbcopy
+    print -r -- "$hash" | pbcopy || return
     echo "Copied: $hash"
   else
     echo "pbcopy not found. Hash: $hash"
@@ -1234,6 +1239,8 @@ ghash() {
 # ⚡ Fuzzy Helpers
 # ─────────────────────────────
 
+# These line-based pickers do not support filenames containing newlines.
+# fglive additionally does not support colons in filenames.
 # Open a file selected via fd + fzf.
 # Much faster than scanning blindly with plain fzf.
 # Usage:
@@ -1276,7 +1283,7 @@ fzf-content() {
   fi
 
   local file
-  file=$(rg --files-with-matches "$1" . 2>/dev/null | fzf --preview="$preview_cmd")
+  file=$(rg --files-with-matches -- "$1" . 2>/dev/null | fzf --preview="$preview_cmd")
 
   [[ -n "$file" ]] && _dotfiles_edit "$file"
 }
@@ -1320,7 +1327,7 @@ fglive() {
         --disabled \
         --delimiter ':' \
         --preview "$preview_cmd" \
-        --bind 'change:reload:rg --line-number --no-heading --color=always {q} . 2>/dev/null || true'
+        --bind 'change:reload:rg --line-number --no-heading --color=always -- {q} . 2>/dev/null || true'
   )
 
   [[ -z "$result" ]] && return
@@ -1494,10 +1501,10 @@ zoxfz() {
     zoxide query -l \
       | fzf --prompt="jump ▶ " \
             --preview='
-              if [ -d "{}/.git" ]; then
-                git -C "{}" --no-pager log --oneline --decorate --graph -10
+              if [ -d {}/.git ]; then
+                git -C {} --no-pager log --oneline --decorate --graph -10
               else
-                eza -1 --icons --color=always "{}" | head -40
+                eza -1 --icons --color=always {} | head -40
               fi
             '
   )
@@ -1576,6 +1583,8 @@ battery() {
 # Usage:
 #   emptytrash
 emptytrash() {
+  emulate -L zsh
+  setopt pipefail
   local trash_dir="$HOME/.Trash"
 
   if [[ ! -d "$trash_dir" ]]; then
@@ -1585,8 +1594,8 @@ emptytrash() {
 
   local size
   local count
-  size=$(du -sh "$trash_dir" 2>/dev/null | awk '{print $1}')
-  count=$(find "$trash_dir" -mindepth 1 -maxdepth 1 2>/dev/null | wc -l | tr -d ' ')
+  size=$(du -sh "$trash_dir" 2>/dev/null | awk '{print $1}') || return
+  count=$(find "$trash_dir" -mindepth 1 -maxdepth 1 2>/dev/null | wc -l | tr -d ' ') || return
 
   if [[ "$count" == "0" ]]; then
     echo "Trash is already empty."
@@ -1606,7 +1615,7 @@ emptytrash() {
     return 1
   fi
 
-  find "$trash_dir" -mindepth 1 -maxdepth 1 -exec rm -rf {} +
+  find "$trash_dir" -mindepth 1 -maxdepth 1 -exec rm -rf {} + || return
   echo "Trash emptied."
 }
 
@@ -1630,6 +1639,8 @@ emptytrash() {
 # Usage:
 #   cleanmac
 cleanmac() {
+  emulate -L zsh
+  setopt pipefail
   local cache_dir="$HOME/Library/Caches"
 
   if [[ ! -d "$cache_dir" ]]; then
@@ -1639,8 +1650,8 @@ cleanmac() {
 
   local size
   local count
-  size=$(du -sh "$cache_dir" 2>/dev/null | awk '{print $1}')
-  count=$(find "$cache_dir" -mindepth 1 -maxdepth 1 2>/dev/null | wc -l | tr -d ' ')
+  size=$(du -sh "$cache_dir" 2>/dev/null | awk '{print $1}') || return
+  count=$(find "$cache_dir" -mindepth 1 -maxdepth 1 2>/dev/null | wc -l | tr -d ' ') || return
 
   if [[ "$count" == "0" ]]; then
     echo "User cache directory is already empty."
@@ -1662,8 +1673,8 @@ cleanmac() {
     return 1
   fi
 
-  find "$cache_dir" -mindepth 1 -maxdepth 1 -exec rm -rf {} + 2>/dev/null
-  echo "Done. Some cache files may be skipped if they were in use."
+  find "$cache_dir" -mindepth 1 -maxdepth 1 -exec rm -rf {} + 2>/dev/null || return
+  echo "User caches removed."
 }
 
 # Homebrew cleanup.
@@ -1725,12 +1736,14 @@ cleanfluttercache() {
   fi
 
   echo "Cleaning Flutter and simulator caches..."
-  flutter clean 2>/dev/null || true
+  flutter clean || return
 
   local sim_cache="$HOME/Library/Developer/CoreSimulator/Caches"
-  [[ -d "$sim_cache" ]] && find "$sim_cache" -mindepth 1 -maxdepth 1 -exec rm -rf {} +
+  if [[ -d "$sim_cache" ]]; then
+    find "$sim_cache" -mindepth 1 -maxdepth 1 -exec rm -rf {} + || return
+  fi
 
-  rm -rf "$HOME/.dartServer"
+  rm -rf "$HOME/.dartServer" || return
 
   echo "Done."
 }
@@ -1748,6 +1761,8 @@ cleanfluttercache() {
 # Usage:
 #   cleanderived
 cleanderived() {
+  emulate -L zsh
+  setopt pipefail
   local derived_dir="$HOME/Library/Developer/Xcode/DerivedData"
 
   if [[ ! -d "$derived_dir" ]]; then
@@ -1756,7 +1771,7 @@ cleanderived() {
   fi
 
   local size
-  size=$(du -sh "$derived_dir" 2>/dev/null | awk '{print $1}')
+  size=$(du -sh "$derived_dir" 2>/dev/null | awk '{print $1}') || return
 
   echo "WARNING: This will remove Xcode DerivedData."
   echo "Path: $derived_dir"
@@ -1770,7 +1785,7 @@ cleanderived() {
     return 1
   fi
 
-  find "$derived_dir" -mindepth 1 -maxdepth 1 -exec rm -rf {} + 2>/dev/null
+  find "$derived_dir" -mindepth 1 -maxdepth 1 -exec rm -rf {} + 2>/dev/null || return
   echo "Removed Xcode DerivedData."
 }
 
@@ -1783,12 +1798,22 @@ cleanderived() {
 # Usage:
 #   neatcomp
 neatcomp() {
-  mkdir -p "$HOME/.zfunc"
-  neatcli completions zsh > "$HOME/.zfunc/_neatcli"
-  compinit
-  echo "neatCLI completions installed & reloaded"
+  emulate -L zsh
+  command -v neatcli >/dev/null || return 1
+  mkdir -p "$HOME/.zfunc" || return
+  local tmp
+  tmp=$(mktemp "$HOME/.zfunc/_neatcli.XXXXXX") || return
+  {
+    neatcli completions zsh > "$tmp" || return
+    [[ -s "$tmp" ]] || { print -u2 -- 'Empty completion output'; return 1; }
+    zsh -f -n "$tmp" || return
+    command mv -f -- "$tmp" "$HOME/.zfunc/_neatcli" || return
+    compinit || return
+    echo "neatCLI completions installed & reloaded"
+  } always {
+    command rm -f -- "$tmp"
+  }
 }
-
 # Preview organizing any folder by type.
 # Usage:
 #   neatpreview
@@ -1892,15 +1917,15 @@ dlclean() {
   local dir="$HOME/Downloads"
 
   echo "📊 Downloads stats:"
-  neatcli stats "$dir"
+  neatcli stats "$dir" || return
 
   echo ""
   echo "🧹 Preview organization:"
-  neatcli organize "$dir" --by-type --show-all-files
+  neatcli organize "$dir" --by-type --show-all-files || return
 
   echo ""
   echo "🔍 Duplicate check:"
-  neatcli duplicates "$dir"
+  neatcli duplicates "$dir" || return
 
   echo ""
   echo "Nothing was changed."
@@ -1925,7 +1950,7 @@ dlcleanx() {
     return 1
   fi
 
-  neatcli organize "$dir" --by-type --execute
+  neatcli organize "$dir" --by-type --execute || return
 
   echo ""
   echo "Done. If something looks wrong, run:"
@@ -2007,7 +2032,7 @@ docker-health() {
 # Usage:
 #   docker-use-orb
 docker-use-orb() {
-  docker context use orbstack
+  docker context use orbstack || return
   docker context ls
 }
 
@@ -2017,8 +2042,8 @@ docker-use-orb() {
 # Usage:
 #   orbreload
 orbreload() {
-  orb stop && orb start
-  docker context use orbstack >/dev/null 2>&1
+  orb stop && orb start || return
+  docker context use orbstack >/dev/null 2>&1 || return
   orb status
 }
 
@@ -2027,7 +2052,7 @@ orbreload() {
 # Usage:
 #   docker-restart
 docker-restart() {
-  orb restart docker
+  orb restart docker || return
   docker version
 }
 
@@ -2213,7 +2238,7 @@ docker-disk() {
 
 _valid_tcp_port() {
   emulate -L zsh
-  [[ "$1" == <-> ]] && (( 10#$1 >= 1 && 10#$1 <= 65535 ))
+  [[ "$1" == <-> && ${#1} -le 5 ]] && (( 10#$1 >= 1 && 10#$1 <= 65535 ))
 }
 
 _local_dev_password() {

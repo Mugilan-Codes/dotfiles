@@ -1,0 +1,93 @@
+{
+  "owners": [
+    {
+      "id": "caveman-cli",
+      "source": "https://www.npmjs.com/package/@caveman-ai/cli",
+      "observed_version": "1.3.1",
+      "scope": "user; npm global CLI plus user agent integrations",
+      "pinning": "npm CLI version can be pinned; companion/plugin versions may be selected by setup",
+      "agents": [
+        "codex",
+        "claude-code",
+        "opencode"
+      ],
+      "restoration": "npm install -g @caveman-ai/cli@1.3.1; review caveman setup before enabling integrations",
+      "skills": [
+        "cavecrew",
+        "caveman",
+        "caveman-commit",
+        "caveman-compress",
+        "caveman-discover",
+        "caveman-evidence-review",
+        "caveman-explore",
+        "caveman-help",
+        "caveman-learn",
+        "caveman-manage",
+        "caveman-optimize",
+        "caveman-review",
+        "caveman-setup",
+        "caveman-stats"
+      ]
+    },
+    {
+      "id": "rea-agents",
+      "source": "https://www.npmjs.com/package/rea-agents",
+      "observed_version": "6.7.0 (skill recovery instructions; engine not launched)",
+      "scope": "user; per-client registration",
+      "pinning": "npm package version; separately installed analysis engines are not pinned by dotfiles",
+      "agents": [
+        "codex",
+        "claude-code"
+      ],
+      "restoration": "npx -y rea-agents@6.7.0 setup --client codex --dry-run --json; review before separate apply",
+      "skills": [
+        "reverse-engineer-anything"
+      ]
+    },
+    {
+      "id": "codex-plugin-marketplaces",
+      "source": "Codex application-managed marketplace registrations",
+      "observed_version": "host-managed",
+      "scope": "Codex user profile; separate from universal skills",
+      "pinning": "No version-pin guarantee established; restore approved plugins using application UI",
+      "agents": [
+        "codex"
+      ],
+      "restoration": "Selectively reinstall approved plugins in Codex; do not copy plugin caches or account state",
+      "skills": []
+    },
+    {
+      "id": "claude-caveman-plugin",
+      "source": "https://github.com/JuliusBrussee/caveman",
+      "observed_version": "df2ccd85c94ec3c8289cb62ac020d241ccfb0c60",
+      "scope": "Claude user",
+      "pinning": "Observed commit; application marketplace updates may move it",
+      "agents": [
+        "claude-code"
+      ],
+      "restoration": "/plugin marketplace add JuliusBrussee/caveman; /plugin install caveman@caveman (review in Claude, not run by install.sh)",
+      "skills": []
+    },
+    {
+      "id": "claude-vercel-plugin",
+      "source": "https://github.com/vercel/vercel-plugin",
+      "observed_version": "0.44.0; 5f3f0ad7931ad49d6a4c6ed43ab4bf4781a69f6d",
+      "scope": "Claude user",
+      "pinning": "Observed release/commit; exact version restoration not proven",
+      "agents": [
+        "claude-code"
+      ],
+      "restoration": "/plugin marketplace add vercel/vercel-plugin; /plugin install vercel-plugin@vercel (review in Claude, not run by install.sh)",
+      "skills": []
+    }
+  ],
+  "unmanaged_review": [
+    "investigate-first",
+    "lean-build",
+    "migration",
+    "safe-refactor",
+    "surgical-patch",
+    "verify-and-stop"
+  ],
+  "review_note": "All six SKILL.md files reviewed: portable workflow guidance, but original authorship/license and installer ownership are unproven. Preserve runtime copies; do not claim they are personal authored source."
+}
