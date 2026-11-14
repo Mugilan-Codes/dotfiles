@@ -65,6 +65,10 @@ def restore(record_path):
     record = json.loads(record_path.read_text())
     target = Path(record['target'])
     # Refuse all conflicts before restoring anything; records are local trusted artifacts.
+    for item in record['backups']:
+        backup = record_path.parent / item['backup']
+        if not exists(backup):
+            raise ValueError('restore backup is missing: ' + str(backup))
     for item in record['links']:
         dest = target / item['path']
         if exists(dest) and (not dest.is_symlink() or os.readlink(dest) != item['link']):
@@ -72,7 +76,7 @@ def restore(record_path):
     created_dirs = set(record['directories'])
     for directory in created_dirs:
         p = Path(directory)
-        if p.is_symlink():
+        if p.is_symlink() or (exists(p) and not p.is_dir()):
             raise ValueError('restore refuses changed directory: ' + directory)
         if p.is_dir():
             expected = {str(target / x['path']) for x in record['links']} | created_dirs
@@ -92,8 +96,7 @@ def restore(record_path):
             p.rmdir()
     for item in record['backups']:
         backup = record_path.parent / item['backup']
-        if exists(backup):
-            backup.rename(target / item['path'])
+        backup.rename(target / item['path'])
     print('RESTORED: ' + str(record_path))
 
 

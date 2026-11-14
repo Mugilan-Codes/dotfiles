@@ -240,6 +240,61 @@ class DeploymentTests(Fixture):
         self.assertEqual((target / '.config').read_text(), 'ORIGINAL PARENT')
         self.assertEqual((runtime / 'SKILL.md').read_text(), 'untouched')
 
+    def test_missing_backup_preserves_all_destinations(self):
+        target = self.base / 'missing backup'; target.mkdir()
+        (target / '.zshrc').write_text('ORIGINAL ZSH')
+        (target / '.tmux.conf').write_text('ORIGINAL TMUX')
+        self.install('--target', str(target), '--backup')
+        record = next((target / '.dotfiles-backups').glob('*/restore.json'))
+        journal = record.read_bytes()
+        data = json.loads(journal)
+        missing = record.parent / data['backups'][-1]['backup']
+        missing.unlink()
+        links = {item['path']: os.readlink(target / item['path']) for item in data['links']}
+        retained_backup = record.parent / data['backups'][0]['backup']
+        original = retained_backup.read_bytes()
+
+        result = self.install('--restore', str(record), ok=False)
+
+        self.assertIn(str(missing), result.stderr)
+        for rel, link in links.items():
+            self.assertTrue((target / rel).is_symlink(), rel)
+            self.assertEqual(os.readlink(target / rel), link)
+        self.assertEqual(retained_backup.read_bytes(), original)
+        self.assertEqual(record.read_bytes(), journal)
+
+    def test_replaced_created_directory_is_preserved(self):
+        for replacement_type in ('file', 'symlink'):
+            with self.subTest(replacement_type=replacement_type):
+                target = self.base / replacement_type; target.mkdir()
+                config = target / '.config'
+                config.write_text('ORIGINAL CONFIG')
+                self.install('--target', str(target), '--backup')
+                record = next((target / '.dotfiles-backups').glob('*/restore.json'))
+                data = json.loads(record.read_text())
+                (config / 'starship.toml').unlink()
+                config.rmdir()
+                if replacement_type == 'file':
+                    config.write_text('NEW CONFIG')
+                else:
+                    replacement = self.base / 'replacement directory'; replacement.mkdir()
+                    (replacement / 'sentinel').write_text('PRESERVED')
+                    config.symlink_to(replacement)
+                other_link = os.readlink(target / '.zshrc')
+                backup = record.parent / data['backups'][0]['backup']
+
+                self.install('--restore', str(record), ok=False)
+
+                self.assertEqual(os.readlink(target / '.zshrc'), other_link)
+                self.assertEqual(backup.read_text(), 'ORIGINAL CONFIG')
+                if replacement_type == 'file':
+                    self.assertFalse(config.is_symlink())
+                    self.assertEqual(config.read_text(), 'NEW CONFIG')
+                else:
+                    self.assertTrue(config.is_symlink())
+                    self.assertEqual(os.readlink(config), str(replacement))
+                    self.assertEqual((replacement / 'sentinel').read_text(), 'PRESERVED')
+
     def test_repository_path_spaces(self):
         clone = self.base / 'repository with spaces'
         shutil.copytree(ROOT, clone, symlinks=True, ignore=shutil.ignore_patterns('.git', '__pycache__'))
