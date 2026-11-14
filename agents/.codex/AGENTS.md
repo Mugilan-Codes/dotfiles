@@ -14,6 +14,8 @@ For code:
 - Use the simplest correct code.
 - Avoid unnecessary abstractions, wrappers, files, comments, types,
   duplication, and dependencies.
+- Preserve unrelated user changes, including staged and unstaged work.
+- Commit, push, update PRs, or deploy only when explicitly requested.
 
 For verification:
 
