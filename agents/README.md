@@ -5,6 +5,14 @@ trust, plugins and generated project state. `scripts/agent-skills` is the single
 maintenance entry point. Python 3 and Git are needed for maintenance; Stow for
 deployment. No external skill script runs during import.
 
+## Workflows
+
+Start with the [workflow index](prompts/README.md) for a task prompt or an
+existing skill. The library stays in the checkout and is read on demand.
+See [tool and model selection](prompts/guides/tool-and-model-selection.md)
+and [instructions and context](prompts/guides/instructions-and-context.md)
+for choosing the surface, scope and permissions.
+
 ## Instruction map
 
 | Repository source | Global destination | Scope/status |
@@ -152,7 +160,7 @@ Real runtime parents and directory skill links are mandatory; never `--adopt`
 or `--no-folding`. `install.sh --restore RECORD` restores its deployment record.
 A nondefault CODEX_HOME requires the selective workflow in `docs/RECOVERY.md`.
 
-## External installers and the 21 extra skills
+## External installers and other runtime skills
 
 **An arbitrary external install command does not guarantee dotfiles capture.**
 If an installer supports an explicit destination, install into an isolated
@@ -168,38 +176,20 @@ inspect every diff and record each reviewed package change before audit.
 The installer CLI version is not the reproducible artifact: committed contents
 and their metadata are.
 
-Classification (all runtime entries preserved):
+Classification and recovery:
 
 | Count | Ownership | Recovery |
 | --- | --- | --- |
 | 27 | Existing managed inventory: 6 local, 3 forks, 18 vendors | Commit source/metadata, deploy Stow links |
 | 14 | Caveman/cavecrew family | Caveman CLI/plugin; see `external-skills.json` |
 | 1 | `reverse-engineer-anything` | REA installer; pinned dry-run recovery command recorded |
-| 6 | `investigate-first`, `lean-build`, `migration`, `safe-refactor`, `surgical-patch`, `verify-and-stop` | Portable content reviewed, origin/license unclear; retain locally pending provenance decision |
+| 6 | Formerly unmanaged skills in private backup | See [skill reconciliation and recovery](prompts/guides/skill-reconciliation.md) |
 | Separate | Generated Framer project skill | Private runtime state; never vendor automatically |
 
 `external-skills.json` records owners, sources, observed versions, pinning
 limitations, scope, supported agents and restoration commands. Codex and
 Claude application plugins are separately owned, not duplicate vendored
 inventory. No new unmanaged package was adopted without adequate provenance.
-
-### Prompt library candidates
-
-On 2026-11-26, all six were real directories under
-`~/.agents/skills/<name>/`, each containing `SKILL.md` and
-`agents/openai.yaml`. No same-name Claude or Codex-specific copy and no
-byte-identical tracked `SKILL.md` were found. The package metadata describes
-usage. Authorship, license, upstream source and an update owner are unverified
-for each skill. Keep the runtime copies pending review.
-
-| Skill | Purpose and overlap | Recommended disposition |
-| --- | --- | --- |
-| `investigate-first` | Rank hypotheses before editing. Overlaps tracked `diagnosing-bugs`. | Replace with `diagnosing-bugs`. |
-| `lean-build` | Reuse existing code and constrain feature scope. Overlaps the external Ponytail skill. | Replace with Ponytail plus explicit acceptance criteria in the task prompt. |
-| `migration` | Plan compatibility, reversible transitions and rollback proof. Tracked `tdd` covers testing only. | Retain as a distinct workflow candidate. Review provenance before importing. |
-| `safe-refactor` | Preserve behavior by verifying before and after structural edits. Overlaps `tdd` and `code-review`. | Retain as a focused refactoring workflow candidate. Review provenance before importing. |
-| `surgical-patch` | Fix a bug at its owning layer with narrow regression proof. Overlaps tracked `bug-triage`. | Replace with `bug-triage`. |
-| `verify-and-stop` | Check acceptance criteria without expanding scope. Overlaps the validation portion of `code-review`. | Retain the use case as an original verification-only prompt in the library. |
 
 Future portable preferences, personal instructions, hooks you actually own,
 and reviewed skill changes must be reflected in canonical repository source,

@@ -1,21 +1,23 @@
 # Skills operating guide
 
-This guide answers which tracked skill to use. The exact ownership, source,
-hash, and licence records remain in [SKILLS_REGISTRY.md](SKILLS_REGISTRY.md)
-and [THIRD_PARTY.md](THIRD_PARTY.md).
+Start with the [workflow index](prompts/README.md) to select a skill or prompt.
+The [registry](SKILLS_REGISTRY.md) and [third-party records](THIRD_PARTY.md)
+document ownership, source, hashes and licenses.
 
-Invocation is **model** unless the skill sets `disable-model-invocation: true`.
-User-invoked skills must be named explicitly. All skills are available to
-Codex through `$HOME/.agents/skills`; all except `staged-change-reviewer` have
-a tracked Claude compatibility link.
+Invoke **user** entries explicitly. For **model** entries, the tool can also
+select a relevant skill. Claude Code controls this with
+`disable-model-invocation` in `SKILL.md`; Codex uses
+`policy.allow_implicit_invocation` in `agents/openai.yaml`.
+[Codex skills](https://developers.openai.com/codex/skills) · [Claude Code skills](https://code.claude.com/docs/en/skills)
 
-The inventory below is definitive for the 26 tracked skills. “Light” setup
+The inventory below covers 27 tracked skills. “Light” setup
 means no durable project setup, “moderate” means project files or a toolchain
 may be needed, and “heavy” means account, network, external publication, or
 multi-artifact setup may be involved. Requirement states are `SATISFIED`,
 `OPTIONAL`, `PROJECT-SPECIFIC`, `ACCOUNT-SPECIFIC`,
-`AGENT-CAPABILITY-SPECIFIC`, `MISSING`, or `UNKNOWN`. Every skill is available
-to Codex and Claude Code except the explicitly Codex-only staged reviewer.
+`AGENT-CAPABILITY-SPECIFIC`, `MISSING`, or `UNKNOWN`. The local installation
+exposes all 27 skills to Codex and 26 to Claude Code. `staged-change-reviewer`
+is Codex-only. Check the selector for the active workspace or client.
 
 ## Inventory and selection
 
@@ -58,27 +60,6 @@ without separate authority. User-invoked skills are `grill-with-docs`,
 `teach`, `to-spec`, `to-tickets`, and `writing-great-skills`;
 `skills-maintainer` is maintenance-oriented and the remaining skills are
 model-invoked.
-
-## Fast decision guide
-
-- New repository: `repo-onboarding`.
-- Straightforward failure: `bug-triage`; hard/flaky/performance failure:
-  `diagnosing-bugs`.
-- DSA practice: `dsa-solution-review`.
-- Test-first behavior change: `tdd`; uncertain feasibility first: `prototype`.
-- One module/interface decision: `codebase-design`; sustained vocabulary and
-  decision capture: `domain-modeling`; both plus questioning:
-  `grill-with-docs`.
-- Staged pre-commit review: `staged-diff-review` (or Codex-only
-  `staged-change-reviewer`); branch/spec review: `code-review`.
-- Small task planning: normal Codex plan; durable product spec: `to-spec`;
-  multi-task tracker publication: `to-tickets`.
-- Custom skill design: `writing-great-skills`; this repository’s lifecycle:
-  `skills-maintainer`.
-- Generic freelance site: ordinary web workflow; Framer project: `framer`;
-  authorized quick hosting: `here-now`.
-- Long-running work nearing a context boundary: `handoff`; repeatable agent
-  procedure: `loopy`.
 
 ## Important overlaps
 

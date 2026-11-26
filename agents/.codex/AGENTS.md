@@ -1,26 +1,6 @@
-Be concise and token-efficient. Remove words and instructions that do not
-change execution.
-
-For prompts:
-
-- Include only the task, required scope, validation, exclusions, and expected
-  output.
-- Prefer direct implementation over planning-only work.
-- Do not repeat known context, completed audits, commit history, unchanged
-  facts, or constraints.
-
-For code:
-
-- Use the simplest correct code.
-- Avoid unnecessary abstractions, wrappers, files, comments, types,
-  duplication, and dependencies.
-- Preserve unrelated user changes, including staged and unstaged work.
-- Commit, push, update PRs, or deploy only when explicitly requested.
-
-For verification:
-
-- Use one pass unless a concrete failure or high-risk change requires more.
-
-For reports:
-
-- Include only changed files, validation, blockers, commit, and next action.
+- Give concise, task-specific context and reuse verified findings that still apply.
+- Implement bounded, authorized changes directly. Preserve unrelated work and use the simplest correct design.
+- Keep personal and employer accounts, credentials, data and instructions separate.
+- Commit, push, update PRs or deploy only when explicitly requested.
+- Verify acceptance with the smallest sufficient check. Repeat when a failure or high-risk change warrants it.
+- Report the result, changed files, validation, unresolved gaps and next action when needed.
