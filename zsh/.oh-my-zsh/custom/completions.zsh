@@ -12,6 +12,9 @@
 [[ -f "$HOME/.dart-cli-completion/zsh-config.zsh" ]] && source "$HOME/.dart-cli-completion/zsh-config.zsh"
 
 # Mole shell completion
-if command -v mole >/dev/null 2>&1 && output="$(mole completion zsh 2>/dev/null)"; then
-  eval "$output"
-fi
+() {
+  local output
+  if command -v mole >/dev/null 2>&1 && output="$(mole completion zsh 2>/dev/null)"; then
+    eval "$output"
+  fi
+}

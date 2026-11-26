@@ -64,6 +64,26 @@ class Fixture(unittest.TestCase):
 
 
 class ShellTests(Fixture):
+    def test_missing_oh_my_zsh_retains_personal_shell_tools(self):
+        custom = self.home / '.oh-my-zsh/custom'
+        custom.mkdir(parents=True)
+        for name in ('aliases.zsh', 'functions.zsh'):
+            (custom / name).symlink_to(FUNCTIONS.parent / name)
+        code = 'PATH=/usr/bin:/bin; source ' + shlex.quote(str(ROOT / 'zsh/.zshrc'))
+        result = self.run_command(['/bin/zsh', '-fic', code + '; whence -w ga servehere'])
+        self.assertIn('Oh My Zsh is missing', result.stderr)
+        self.assertIn('ga: alias', result.stdout)
+        self.assertIn('servehere: function', result.stdout)
+
+    def test_brew_guard_refuses_failed_git_diff(self):
+        self.executable('git', 'exit 128\n')
+        self.zsh('_brewfile_refuse_unrelated_staged .', ok=False)
+
+    def test_mole_completion_preserves_global_output(self):
+        self.executable('mole', 'echo MOLE_FIXTURE=ready\n')
+        self.zsh('output=keep; source ' + shlex.quote(str(FUNCTIONS.with_name('completions.zsh'))) +
+                 '; [[ $output == keep && $MOLE_FIXTURE == ready ]]')
+
     def test_editor_quotes_no_eval_and_arguments(self):
         editor = self.executable('editor with space', 'printf "<%s>\\n" "$@"\n')
         spec = shlex.quote('"' + str(editor) + '" --wait')

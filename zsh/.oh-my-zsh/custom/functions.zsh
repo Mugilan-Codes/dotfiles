@@ -326,7 +326,7 @@ _brewfile_refuse_unrelated_staged() {
   local repo="$1"
   local unrelated
 
-  unrelated=$(git -C "$repo" diff --cached --name-only -- . ':(exclude)Brewfile')
+  unrelated=$(git -C "$repo" diff --cached --name-only -- . ':(exclude)Brewfile') || return 1
   if [[ -n "$unrelated" ]]; then
     echo "Refusing: unrelated staged files exist:"
     print -r -- "$unrelated"

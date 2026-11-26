@@ -35,7 +35,18 @@ fi
 plugins=(git zsh-autosuggestions zsh-syntax-highlighting)
 
 # Oh My Zsh loads custom aliases, functions, and completions automatically.
-source "$ZSH/oh-my-zsh.sh"
+if [[ -r "$ZSH/oh-my-zsh.sh" ]]; then
+  source "$ZSH/oh-my-zsh.sh"
+else
+  print -ru2 -- 'Oh My Zsh is missing. Review ./install.sh --dry-run in your dotfiles checkout.'
+  () {
+    local custom_file
+    for custom_file in aliases.zsh functions.zsh; do
+      local config="${ZSH_CUSTOM:-$ZSH/custom}/$custom_file"
+      [[ ! -r "$config" ]] || source "$config"
+    done
+  }
+fi
 
 # Default editor (Change to nvim if neovim is preferred and available)
 export EDITOR="code --wait"
