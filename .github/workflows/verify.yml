@@ -24,7 +24,7 @@ jobs:
           BASE_SHA: ${{ github.event.pull_request.base.sha }}
         run: git diff --check "$BASE_SHA"...HEAD
       - name: Install fixture dependencies
-        run: brew install stow python coreutils
+        run: brew install stow python coreutils ripgrep
       - name: Check shell syntax
         shell: bash
         run: |
