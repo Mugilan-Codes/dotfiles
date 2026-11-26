@@ -16,6 +16,7 @@ import tarfile
 import tomllib
 import unittest
 from unittest.mock import patch
+from urllib.parse import urlsplit
 
 ROOT = Path(__file__).resolve().parent.parent
 FUNCTIONS = ROOT / 'zsh/.oh-my-zsh/custom/functions.zsh'
@@ -234,6 +235,7 @@ class DeploymentTests(Fixture):
         self.assertTrue((target / '.agents/skills/bug-triage').is_symlink())
         self.assertFalse((target / '.agents/skills').is_symlink())
         self.assertFalse((target / 'skills-manifest.json').exists())
+        self.assertFalse(os.path.lexists(target / 'prompts'))
         (target / '.agents/skills/bug-triage').unlink()
         self.install('--check', '--target', str(target), ok=False)
 
@@ -582,6 +584,66 @@ class ConfigurationTests(Fixture):
         self.run_command(['/usr/bin/git', 'config', '--file', str(ROOT / 'git/.gitconfig'),
                           '--no-includes', '--list'])
 
+
+
+class WorkflowTests(unittest.TestCase):
+    library = ROOT / 'agents/prompts'
+    links = re.compile(r'\[([^\[\]\n]+)\]\(([^\s)]+)\)')
+
+    def test_workflow_index_matches_templates_and_managed_skills(self):
+        manifest = self.library.parent / 'skills-manifest.json'
+        skill_names = [name for name, _ in json.loads(manifest.read_text(), object_pairs_hook=list)]
+        self.assertEqual(len(skill_names), len(set(skill_names)), 'duplicate skill IDs')
+        index = self.library / 'README.md'
+        templates = []
+        for page in sorted(self.library.glob('*.md')):
+            if page == index:
+                continue
+            sections = re.split(r'^### ([a-z0-9]+(?:-[a-z0-9]+)*)\n', page.read_text(), flags=re.M)
+            self.assertGreater(len(sections), 1, page.name)
+            for name, body in zip(sections[1::2], sections[2::2]):
+                blocks = re.findall(r'^```text\n(.*?)\n```$', body, re.M | re.S)
+                self.assertEqual(len(blocks), 1, name)
+                self.assertRegex(blocks[0], r'\[[A-Z_]+')
+                templates.append((name, f'{page.name}#{name}'))
+        rows = re.findall(r'^\| ([^|]+?) \| \[([^\]]+)\]\(([^)]+)\) \|$',
+                          index.read_text(), re.M)
+        self.assertTrue(rows)
+        for column in zip(*rows):
+            self.assertEqual(len(column), len(set(column)), 'duplicate workflow entries')
+        indexed_templates = []
+        workflow_ids = [name for name, _ in templates]
+        self.assertEqual(len(workflow_ids), len(set(workflow_ids)), 'duplicate prompt IDs')
+        self.assertTrue(set(workflow_ids).isdisjoint(skill_names), 'prompt ID reuses a managed skill name')
+        for _, name, link in rows:
+            if link.startswith('../.agents/skills/'):
+                self.assertIn(name, skill_names)
+                self.assertEqual(link, f'../.agents/skills/{name}/SKILL.md')
+            else:
+                indexed_templates.append((name, link))
+        self.assertCountEqual(indexed_templates, templates)
+
+    def test_local_links_and_library_files(self):
+        pages = []
+        for path in self.library.rglob('*'):
+            self.assertFalse(path.is_symlink() or path.name.startswith('.'), path)
+            if not path.is_dir():
+                self.assertTrue(path.is_file() and path.suffix == '.md', path)
+                pages.append(path)
+        pages.extend(self.library.parent / name for name in ('README.md', 'SKILLS_GUIDE.md'))
+        for page in pages:
+            for _, link in self.links.findall(page.read_text()):
+                url = urlsplit(link)
+                if url.scheme or url.netloc:
+                    self.assertTrue(url.scheme == 'https' and url.hostname and not url.username, link)
+                    continue
+                target = (page.parent / url.path).resolve() if url.path else page
+                self.assertTrue(target.is_relative_to(ROOT) and target.exists(), f'{page.name}: {link}')
+                if url.fragment:
+                    headings = re.findall(r'^#{1,6} (.+)$', target.read_text(), re.M)
+                    anchors = {re.sub(r'[^\w -]', '', heading.lower()).replace(' ', '-')
+                               for heading in headings}
+                    self.assertIn(url.fragment, anchors, f'{page.name}: {link}')
 
 
 if __name__ == '__main__':
