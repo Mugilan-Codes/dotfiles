@@ -11,6 +11,20 @@
 .env.*
 .secret
 secrets/
+.dotfiles-backups/
+.ssh/
+.aws/
+.netrc
+.npmrc
+.pypirc
+auth.json
+credentials.json
+*.pem
+*.key
+*.db
+*.sqlite
+*.sqlite3
+*.log
 
 # Generated Framer project skills are private machine-local runtime state.
 /agents/.agents/skills/framer-project-*/

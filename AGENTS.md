@@ -28,8 +28,10 @@ New-machine setup and detailed commands belong in `README.md` and
 - Preserve all pre-existing unrelated changes.
 - Keep changes small, scoped, and reviewable.
 - Keep commands concise and copy-pasteable.
-- Inspect a real home-directory entry and its resolved target before
-  replacing it.
+- Check whether each file to edit is an active symlink target. For active
+  configs, prepare and test a patch in a temporary copy, then get approval
+  before editing the live-linked repository file.
+- Inspect a home-directory entry and its resolved target before replacing it.
 - Do not run broad, destructive, or cleanup commands unless explicitly
   requested.
 - Never commit secrets, keys, tokens, credentials, `.env` files, databases,
@@ -65,6 +67,8 @@ Always simulate before applying. Pre-create `$HOME/.agents/skills`,
 `$HOME/.claude/skills`, and `$HOME/.codex` as real directories, then use
 ordinary `stow` for `agents`. Managed skill children must be directory
 symlinks. Do not use `--no-folding` or `--adopt` for this package.
+Update the explicit paths in `scripts/deploy.py` when adding a managed shell,
+Git, tmux or Starship file. Skill deployment follows the manifest.
 
 `macos/finder` is optional preference automation, not a Stow package. Do not
 run it unless explicitly requested.
@@ -179,8 +183,7 @@ bash -n install.sh
 done)
 scripts/agent-skills status
 scripts/agent-skills audit
-stow --target="$HOME" --simulate --verbose zsh tmux git starship
-stow --target="$HOME" --simulate --verbose agents
+./install.sh --dry-run
 ./install.sh --check
 scripts/agent-skills check --source-only
 ```

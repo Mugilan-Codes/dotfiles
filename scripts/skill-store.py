@@ -19,6 +19,12 @@ PACKAGE = ROOT / 'agents'
 SKILLS = PACKAGE / '.agents/skills'
 MANIFEST = PACKAGE / 'skills-manifest.json'
 EXTERNAL = PACKAGE / 'external-skills.json'
+PRIVATE_NAMES = {
+    '.git', '.herenow', '__pycache__', 'node_modules', '.cache', 'sessions',
+    'auth.json', 'credentials.json', '.ds_store', '.npmrc', '.netrc', '.pypirc',
+    '.ssh', '.aws', '.codex', '.claude', '.secret', 'secrets', '.dotfiles-backups',
+}
+PRIVATE_SUFFIXES = ('.pyc', '.db', '.sqlite', '.sqlite3', '.log', '.pem', '.key')
 
 
 def load():
@@ -45,10 +51,11 @@ def validate_package(directory, name):
             raise ValueError('imports require self-contained regular files; symlinks are not imported')
         if not (path.is_file() or path.is_dir()):
             raise ValueError('special file in skill package')
-        parts = path.relative_to(directory).parts
-        if any(p in ('.git', '.herenow', '__pycache__', 'node_modules', '.cache', 'sessions', 'auth.json', 'credentials.json', '.DS_Store', '.npmrc', '.netrc', '.pypirc', '.ssh', '.aws', '.codex', '.claude') or p.startswith('.env') or p.endswith(('.pyc', '.db', '.sqlite', '.log', '.pem', '.key')) for p in parts):
-            raise ValueError('runtime/private content in skill package: ' + str(path.relative_to(directory)))
-        if any(ord(c) < 32 for c in str(path.relative_to(directory))):
+        relative = path.relative_to(directory)
+        if any(p in PRIVATE_NAMES or p.startswith(('.env', 'framer-project-')) or p.endswith(PRIVATE_SUFFIXES)
+               for p in map(str.casefold, relative.parts)):
+            raise ValueError('runtime/private content in skill package: ' + str(relative))
+        if any(ord(c) < 32 for c in str(relative)):
             raise ValueError('control character in package path')
     for path in directory.rglob('*'):
         if path.is_file():
@@ -300,8 +307,6 @@ def main():
     elif args.command == 'check':
         check(args.target, args.source_only)
     elif args.command == 'deploy':
-        if args.target.absolute() == Path.home() and os.environ.get('CODEX_HOME', str(Path.home() / '.codex')) != str(Path.home() / '.codex'):
-            raise ValueError('nondefault CODEX_HOME requires selective deployment; see docs/RECOVERY.md')
         from deploy import deploy
         check(args.target, source_only=True)
         deploy(args.target, 'dry' if args.dry_run else 'install', args.backup, packages=('agents',))

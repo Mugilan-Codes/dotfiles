@@ -39,10 +39,13 @@ agent provider configuration or application inventory to an employer machine.
 `install.sh` uses macOS Bash and fixed system/Homebrew paths. Once prerequisites
 exist it installs only missing formulae from `Brewfile.core`, provisions absent
 OMZ/plugins at the revisions in `shell-sources.json`, simulates Stow, and applies
-links. It never runs the OMZ installer script. Existing integrations are kept,
-not upgraded/reset to pins. Pins are observed commits from the current local
-clones; remote availability was not tested. Existing OMZ auto-update policy
-remains your intentional live policy, so versions can drift later.
+links. Each new integration is checked out in a temporary sibling directory
+and moved into place after its entry file is verified. Existing complete
+integrations and their update policy are preserved. Review an incomplete
+integration before retrying. A conflicting Oh My Zsh parent needs manual
+resolution because moving it could also displace the installed integration.
+GitHub resolved all three shell commit pins on 2026-11-26. Download and
+checkout on a clean Mac remain unverified.
 
 `--check` verifies required package receipts by opt paths, shell integration
 entry files, instruction destinations and managed Stow links; it exits nonzero
@@ -54,8 +57,9 @@ Checks do not prove authentication, model availability or live shell startup.
 `--dry-run` creates no directories, cache, downloads, backups or links. With
 missing initial prerequisites it describes the next manual prerequisite and
 stops successfully. With available dependencies it performs preflight and a
-Stow simulation when the destination already exists. It is not a promise that
-future downloads/installations will succeed.
+Stow simulation when the target already exists and has no conflicts.
+Deployment uses the configuration paths in `scripts/deploy.py` and the skill
+manifest as its allowlist. The installer ignores personal Stow defaults.
 
 ## Conflicts and rollback
 
@@ -70,20 +74,22 @@ those files and resolved links, opt into backup-and-replace:
 ```
 
 Each changed deployment keeps a restore journal and displaced entries under
-`TARGET/.dotfiles-backups/deploy-ID/`. Restore removes only recorded, unchanged
-links and empty created directories, then restores originals. It refuses
-changed destinations or new content in created directories. Preserve the
-journal privately. It may reference local configuration; never add backups to
-Git. A repeated complete install skips link work without creating another
-record. Package installs and cloned shell integrations are **not** undone by
-link restore; inspect those separately. Partial failures print the journal
-location, and a retry or explicit restore is possible. Do not run concurrent
-deployments or edit destinations during install/restore.
+`TARGET/.dotfiles-backups/deploy-ID/`. The backup root must be owned by your
+account and inaccessible to group and others. Keep the journal in its original
+directory. Restore checks the full plan for changed links, new content in
+created directories and redirected parent directories before moving anything.
+A complete repeat install skips link work and creates no journal.
 
-The journal is a trusted local artifact, not an interchange format. Review it
-before restoring a record supplied by anyone else. Stow adoption is never used.
-Real `.agents/skills`, `.claude/skills` and `.codex` parents are preserved;
-managed skill children are directory symlinks.
+If Stow or a backup move fails after `RESTORE RECORD` appears, use that
+record to roll back before retrying deployment. New journals record planned
+links and backup identities so restore can distinguish unfinished moves from
+missing backups. Restore covers configuration links and displaced files.
+Handle packages and shell integrations separately. Use only journals you
+created locally and keep them out of Git. Run one deployment or restore at
+a time and leave the destinations untouched until it finishes.
+
+Real `.agents/skills`, `.claude/skills` and `.codex` parents are preserved.
+Managed skill children are directory symlinks.
 
 ## Isolated deployment
 
@@ -109,6 +115,7 @@ package boundaries. No clean-macOS reinstall is claimed.
 | --- | --- |
 | FNM | Required formula; after install, run `eval "$(fnm env)"`, `fnm install --lts`, `fnm default lts-latest`; projects should carry `.node-version`/`.nvmrc`. Existing installed Node 24.20.0 is an observation, not a new global pin. Choose project-required Node versions before global CLI installation. |
 | pnpm/Yarn/Bun | Choose the project's package manager/version; don't install a competing global manager just to match every historical receipt. Optional Brewfile lists previous choices. |
+| Python | Homebrew provides the `python3` used by recovery. Use a project-required interpreter and a virtual environment for project dependencies. Keep any optional versioned formula only where needed. |
 | SDKMAN / Java | SDKMAN is not supplied by Stow/Homebrew core setup. Follow https://sdkman.io/install, review its shell edits, then install a project-required JDK and choose `sdk default java VERSION`. SDKMAN init remains conditional. No old Java identity/config copied. |
 | FVM / Flutter | Optional core formula `brew install fvm`, then `fvm install VERSION` and `fvm global VERSION` if a global default is wanted. Prefer project `.fvmrc`. Flutter SDKs and fallback `~/flutter` are not backed up by dotfiles. Existing SSH Flutter URL may require GitHub credentials; choose HTTPS explicitly if cloning without SSH. |
 | Android | Install Android Studio/SDK tools separately; accept licenses and download required SDKs. Shell uses `~/Library/Android/sdk` and current `cmdline-tools/10.0/bin` when present. Match that version or review the PATH before changing it. `adb` is already owned by SDK platform-tools on this Mac; the optional cask is not required. |
@@ -132,11 +139,14 @@ exact-version snapshot of an old machine.
 
 ## Legacy-work identity decision (DF-01)
 
-The old `~/dev/work/vzlabs` workspace and its local include remain unchanged.
-Its referenced `id_vzlabs` key is missing. Decide whether this workspace is
-retired/offline or still authorized for remote operations. Historical commits
-and repository remotes must be preserved either way. No replacement identity
-or employer credential is inferred.
+On 2026-11-26, the active personal Git config still contained the legacy
+directory-scoped include, and the personal shell still defined `cdw` and
+`cdapp` shortcuts into that tree. The previously recorded key path was
+absent. The effective route remains unverified without inspecting the legacy
+workspace or its include. Recommend retiring the route and shortcuts after
+confirming remote access is no longer required. If access is still authorized,
+provision a dedicated identity through its owner. Preserve historical commits
+and remotes either way.
 
 `scripts/git-ssh-identity` is prepared but not enabled. It refuses a missing
 absolute key before SSH, disables implicit SSH config and agent fallback, and

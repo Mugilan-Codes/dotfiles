@@ -9,7 +9,7 @@ startup also supports common Intel macOS and Linuxbrew locations.
 | --- | --- | --- |
 | `zsh` | `$HOME/.zsh*`, `$HOME/.oh-my-zsh/custom/*` | Shell, PATH, aliases, functions, completions |
 | `tmux` | `$HOME/.tmux.conf` | tmux configuration |
-| `git` | `$HOME/.gitconfig` | Global Git configuration |
+| `git` | `$HOME/.gitconfig`, `$HOME/.gitignore-global` | Global Git configuration |
 | `starship` | `$HOME/.config/starship.toml` | Prompt configuration |
 | `agents` | `$HOME/.agents/skills`, `$HOME/.claude/skills`, `$HOME/.codex/AGENTS.md` | Agent instructions and Git-vendored skills |
 
@@ -30,7 +30,9 @@ dotfiles/
 ├── AGENTS.md
 ├── CLAUDE.md -> AGENTS.md
 ├── CODEX_USAGE.md
-├── Brewfile
+├── Brewfile, Brewfile.core
+├── install.sh, shell-sources.json
+├── docs/RECOVERY.md
 ├── agents/
 │   ├── .codex/AGENTS.md
 │   ├── .agents/skills/
@@ -42,7 +44,8 @@ dotfiles/
 │   ├── THIRD_PARTY.md
 │   ├── skills-lock.json
 │   └── skills.conf
-├── scripts/agent-skills
+├── scripts/                 # Deployment and skill maintenance
+├── tests/test_regressions.py
 ├── git/
 ├── macos/finder/
 ├── starship/
@@ -63,7 +66,22 @@ before SSH credentials, CLT/Homebrew prerequisites, conflict backups, rollback,
 isolated targets and manual toolchain setup. `Brewfile.core` is required;
 `Brewfile` is optional application inventory. This installer targets Apple
 Silicon macOS, not the Ubuntu work environment. It never enables an AI proxy
-or hook. Do not run the live installer while merely reviewing these changes.
+or hook.
+
+## Daily maintenance
+
+- Use `./install.sh --check` to verify the core setup and
+  `brewcheck` to compare optional inventory.
+- Use `bdump` to preview a replacement of the optional Brewfile.
+  `brewadd PACKAGE` and `brewrm PACKAGE` change installed packages first,
+  then open that inventory review. Edit `Brewfile.core` separately when a
+  shell or recovery dependency changes. Review tap and trust changes before
+  saving any dump.
+- Leave Node and Java version selection to FNM and SDKMAN. Use project pins
+  for Flutter via FVM and isolated Python environments for project libraries.
+- The Oh My Zsh Git plugin loads before the personal overrides. Here `ga`
+  stages the current tree, `gclean` runs the branch-cleanup helper, and
+  `gbcopy` uses the personal clipboard helper.
 
 ## Agent instructions and skills
 
@@ -86,6 +104,10 @@ plugin owner. Uncommitted/unpushed work is not recovery protection.
 
 ## Verification
 
+The Apple Silicon GitHub Actions job runs syntax checks, offline regression
+fixtures and the skill audit in a hosted runner. For local work, start with
+the isolated deployment in [the recovery guide](docs/RECOVERY.md).
+
 ```sh
 git status --short --untracked-files=all
 git diff --check
@@ -101,8 +123,7 @@ bash -n install.sh
 done)
 scripts/agent-skills status
 scripts/agent-skills audit
-stow --target="$HOME" --simulate --verbose zsh tmux git starship
-stow --target="$HOME" --simulate --verbose agents
+./install.sh --dry-run
 ./install.sh --check
 scripts/agent-skills check --source-only
 ```

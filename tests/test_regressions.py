@@ -13,6 +13,7 @@ import sys
 import tempfile
 import io
 import tarfile
+import tomllib
 import unittest
 from unittest.mock import patch
 
@@ -41,7 +42,8 @@ class Fixture(unittest.TestCase):
         self.home.mkdir()
         self.bin = self.base / 'bin'
         self.bin.mkdir()
-        self.env = dict(os.environ, HOME=str(self.home), ZDOTDIR=str(self.home), TMPDIR=str(self.base), PATH=str(self.bin) + ':' + os.environ['PATH'], PYTHONDONTWRITEBYTECODE='1', GIT_CONFIG_GLOBAL=os.devnull, GIT_CONFIG_SYSTEM=os.devnull, GIT_CONFIG_NOSYSTEM='1', GIT_OPTIONAL_LOCKS='0')
+        self.env = dict(os.environ, HOME=str(self.home), ZDOTDIR=str(self.home), TMPDIR=str(self.base), PATH=str(self.bin) + ':/opt/homebrew/bin:/usr/bin:/bin:/usr/sbin:/sbin', PYTHONDONTWRITEBYTECODE='1', GIT_CONFIG_GLOBAL=os.devnull, GIT_CONFIG_SYSTEM=os.devnull, GIT_CONFIG_NOSYSTEM='1', GIT_CONFIG_COUNT='0', GIT_OPTIONAL_LOCKS='0')
+        self.env.pop('CODEX_HOME', None)
 
     def run_command(self, args, ok=True, **kwargs):
         p = subprocess.run(args, cwd=self.base, env=self.env, capture_output=True, text=True, **kwargs)
@@ -302,6 +304,89 @@ class DeploymentTests(Fixture):
         self.run_command([str(clone / 'install.sh'), '--target', str(target)])
         self.assertEqual((target / '.zshrc').resolve(), clone / 'zsh/.zshrc')
 
+    def test_stow_ignores_private_sources_and_user_defaults(self):
+        clone = self.base / 'repo'
+        shutil.copytree(ROOT, clone, symlinks=True, ignore=shutil.ignore_patterns('.git'))
+        (self.home / '.stowrc').write_text('--simulate\n--no-folding\n')
+        (self.base / '.stowrc').write_text('--adopt\n')
+        (clone / 'zsh/.env.fixture').write_text('private placeholder')
+        (clone / 'zsh/.oh-my-zsh/custom/extra.zsh').write_text('unmanaged fixture')
+        (clone / 'agents/.codex/auth.json').write_text('private placeholder')
+        self.install('--dry-run', '--target', str(self.home))
+        self.assertEqual(list(self.home.iterdir()), [self.home / '.stowrc'])
+        self.run_command([str(clone / 'install.sh'), '--target', str(self.home)])
+        self.assertTrue((self.home / '.agents/skills/bug-triage').is_symlink())
+        for name in ('.env.fixture', '.oh-my-zsh/custom/extra.zsh', '.codex/auth.json'):
+            self.assertFalse(os.path.lexists(self.home / name))
+
+    def test_partial_stow_failure_restores_then_retries(self):
+        original = self.home / '.zshrc'
+        original.write_text('original')
+        run_stow = deployment.run_stow
+
+        def partial(stow, target, items, packages, simulate=False):
+            if simulate:
+                run_stow(stow, target, items, packages, simulate=True)
+            else:
+                original.symlink_to(os.path.relpath(items['.zshrc'], self.home))
+                raise subprocess.CalledProcessError(1, stow)
+
+        with patch.object(deployment, 'run_stow', side_effect=partial):
+            with self.assertRaises(subprocess.CalledProcessError):
+                deployment.deploy(self.home, 'install', backup=True)
+        record = next((self.home / '.dotfiles-backups').glob('*/restore.json'))
+        self.assertTrue(original.is_symlink())
+        self.assertFalse((self.home / '.tmux.conf').exists())
+        self.install('--restore', str(record))
+        self.install('--restore', str(record))
+        self.assertEqual(original.read_text(), 'original')
+        self.install('--target', str(self.home), '--backup')
+        self.install('--check', '--target', str(self.home))
+
+    def test_failed_backup_rename_preserves_original_and_allows_restore(self):
+        originals = {self.home / name: name for name in ('.tmux.conf', '.zshrc')}
+        for path, value in originals.items():
+            path.write_text(value)
+        rename = Path.rename
+
+        def fail_second(path, destination):
+            if path == self.home / '.zshrc':
+                raise PermissionError('injected rename failure')
+            return rename(path, destination)
+
+        with patch.object(Path, 'rename', fail_second):
+            with self.assertRaises(PermissionError):
+                deployment.deploy(self.home, 'install', backup=True)
+        record = next((self.home / '.dotfiles-backups').glob('*/restore.json'))
+        self.install('--restore', str(record))
+        self.assertEqual({p: p.read_text() for p in originals}, originals)
+
+    def test_restore_refuses_symlinked_preexisting_parent(self):
+        config = self.home / '.config'
+        config.mkdir()
+        self.install('--target', str(self.home))
+        record = next((self.home / '.dotfiles-backups').glob('*/restore.json'))
+        outside = self.base / 'outside'
+        os.rename(config, outside)
+        config.symlink_to(outside)
+        self.install('--restore', str(record), ok=False)
+        self.assertTrue((outside / 'starship.toml').is_symlink())
+        self.assertTrue((self.home / '.zshrc').is_symlink())
+
+    def test_missing_stow_reports_dry_run_and_blocks_install(self):
+        with patch.object(deployment.shutil, 'which', return_value=None):
+            target = self.home / 'missing'
+            deployment.deploy(target, 'dry')
+            with self.assertRaisesRegex(ValueError, 'stow is required'):
+                deployment.deploy(target, 'install')
+            self.assertFalse(target.exists())
+
+    def test_explicit_home_target_respects_nondefault_codex_home(self):
+        self.env['CODEX_HOME'] = str(self.base / 'custom-codex')
+        result = self.install('--target', str(self.home), ok=False)
+        self.assertIn('nondefault CODEX_HOME', result.stderr)
+        self.assertEqual(list(self.home.iterdir()), [])
+
     def test_mocked_shell_provisioning_repeats_without_update(self):
         target = self.base / 'shell target'; target.mkdir()
         calls = []
@@ -321,6 +406,13 @@ class DeploymentTests(Fixture):
             deployment.shell_sources(target, 'install')
             self.assertEqual(len(calls), count)
         self.assertEqual(count, 6)
+
+    def test_shell_checkout_failure_is_retryable(self):
+        target = self.home
+        with patch.object(deployment.subprocess, 'run', side_effect=subprocess.CalledProcessError(1, 'git')):
+            with self.assertRaises(subprocess.CalledProcessError):
+                deployment.shell_sources(target, 'install')
+        self.assertEqual(list(target.iterdir()), [])
 
     def test_mocked_bootstrap_packages_and_read_only_modes(self):
         # Run the actual Bash bootstrap with OS/package boundaries replaced in
@@ -348,6 +440,11 @@ class DeploymentTests(Fixture):
         self.run_command([str(repo / 'install.sh')])
         self.assertEqual(log.read_text(), 'install --formula fixture\n')
         self.run_command([str(repo / 'install.sh'), '--unknown'], ok=False)
+        self.run_command([str(repo / 'install.sh'), '--target', '--backup'], ok=False)
+        (prefix / 'opt/fixture').rmdir()
+        (repo / 'Brewfile.core').write_text('brew "fixture"\ncask "invalid-core-entry"\n')
+        self.run_command([str(repo / 'install.sh')], ok=False)
+        self.assertEqual(log.read_text(), 'install --formula fixture\n')
 
 
 
@@ -446,6 +543,24 @@ class SkillTests(Fixture):
         self.cli_run('update', 'fixture-skill', '--from-dir', str(self.source), '--origin', 'reviewed fixture', '--license', 'LICENSE', '--reviewed-patches', 'candidate preserves patch')
         (self.source / 'private.key').write_text('fixture only')
         self.add('update', ok=False)
+        (self.source / 'private.key').unlink()
+        (self.source / 'history.SQLITE3').write_text('fixture only')
+        self.add('update', ok=False)
+
+
+class ConfigurationTests(Fixture):
+    def test_secret_path_exclusions_and_toml(self):
+        self.run_command(['/usr/bin/git', 'init', str(self.base)])
+        shutil.copyfile(ROOT / '.gitignore', self.base / '.gitignore')
+        paths = ['.env.local', '.ssh/id_fixture', '.aws/credentials', '.dotfiles-backups/restore.json',
+                 'history.sqlite3', 'agents/.codex/auth.json', 'agents/.agents/skills/framer-project-fixture/SKILL.md']
+        command = ['/usr/bin/git', 'check-ignore', '--no-index', '--']
+        self.assertEqual(self.run_command([*command, *paths]).stdout.splitlines(), paths)
+        self.run_command([*command, 'agents/.codex/AGENTS.md', 'shell-sources.json'], ok=False)
+        for path in ('starship/.config/starship.toml', 'agents/portable/codex-preferences.toml'):
+            tomllib.loads((ROOT / path).read_text())
+        self.run_command(['/usr/bin/git', 'config', '--file', str(ROOT / 'git/.gitconfig'),
+                          '--no-includes', '--list'])
 
 
 

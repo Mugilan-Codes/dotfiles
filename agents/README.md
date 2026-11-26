@@ -10,7 +10,7 @@ deployment. No external skill script runs during import.
 | Repository source | Global destination | Scope/status |
 | --- | --- | --- |
 | `agents/.codex/AGENTS.md` | `$CODEX_HOME/AGENTS.md` (normally `~/.codex/AGENTS.md`) | Existing personal preferences preserved; default-home link already deployed |
-| `agents/.claude/CLAUDE.md` → `../.codex/AGENTS.md` | `~/.claude/CLAUDE.md` | New tracked link; live deployment pending; same shared preferences, no copied text |
+| `agents/.claude/CLAUDE.md` → `../.codex/AGENTS.md` | `~/.claude/CLAUDE.md` | Shared preferences through the Claude Code instruction path |
 | `AGENTS.md` | Repository only | Dotfiles-specific commands/authority |
 | `CLAUDE.md` → `AGENTS.md` | Repository only | Local Claude Code project discovery; no global import cycle |
 | `agents/portable/codex-preferences.toml` | Selectively merge into actual Codex `config.toml` | Not Stow-deployed; preserve host-managed provider/trust/state |
@@ -147,6 +147,7 @@ scripts/agent-skills deploy --backup
 ```
 
 Uses the same Stow/backup logic as `install.sh`, but only the agents package.
+Deployment links only manifest-managed skills and the two instruction files.
 Real runtime parents and directory skill links are mandatory; never `--adopt`
 or `--no-folding`. `install.sh --restore RECORD` restores its deployment record.
 A nondefault CODEX_HOME requires the selective workflow in `docs/RECOVERY.md`.
@@ -181,6 +182,24 @@ Classification (all runtime entries preserved):
 limitations, scope, supported agents and restoration commands. Codex and
 Claude application plugins are separately owned, not duplicate vendored
 inventory. No new unmanaged package was adopted without adequate provenance.
+
+### Prompt library candidates
+
+On 2026-11-26, all six were real directories under
+`~/.agents/skills/<name>/`, each containing `SKILL.md` and
+`agents/openai.yaml`. No same-name Claude or Codex-specific copy and no
+byte-identical tracked `SKILL.md` were found. The package metadata describes
+usage. Authorship, license, upstream source and an update owner are unverified
+for each skill. Keep the runtime copies pending review.
+
+| Skill | Purpose and overlap | Recommended disposition |
+| --- | --- | --- |
+| `investigate-first` | Rank hypotheses before editing. Overlaps tracked `diagnosing-bugs`. | Replace with `diagnosing-bugs`. |
+| `lean-build` | Reuse existing code and constrain feature scope. Overlaps the external Ponytail skill. | Replace with Ponytail plus explicit acceptance criteria in the task prompt. |
+| `migration` | Plan compatibility, reversible transitions and rollback proof. Tracked `tdd` covers testing only. | Retain as a distinct workflow candidate. Review provenance before importing. |
+| `safe-refactor` | Preserve behavior by verifying before and after structural edits. Overlaps `tdd` and `code-review`. | Retain as a focused refactoring workflow candidate. Review provenance before importing. |
+| `surgical-patch` | Fix a bug at its owning layer with narrow regression proof. Overlaps tracked `bug-triage`. | Replace with `bug-triage`. |
+| `verify-and-stop` | Check acceptance criteria without expanding scope. Overlaps the validation portion of `code-review`. | Retain the use case as an original verification-only prompt in the library. |
 
 Future portable preferences, personal instructions, hooks you actually own,
 and reviewed skill changes must be reflected in canonical repository source,

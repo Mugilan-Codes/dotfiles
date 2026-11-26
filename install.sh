@@ -19,7 +19,10 @@ while [[ $# -gt 0 ]]; do
       [[ "$1" == --dry-run ]] && mode=dry || mode=check
       shift ;;
     --target)
-      [[ $# -ge 2 && -n "$2" ]] || { echo '--target requires a directory' >&2; exit 2; }
+      [[ $# -ge 2 && -n "$2" && "$2" != -* && "$isolated" == 0 ]] || {
+        echo '--target requires one directory (prefix dash-leading names with ./)' >&2
+        exit 2
+      }
       isolated=1; shift 2 ;;
     --backup) shift ;;
     --restore)
@@ -57,18 +60,32 @@ if [[ "$isolated" == 0 ]]; then
     echo 'MANUAL: install Homebrew using https://brew.sh, then rerun ./install.sh.'
     [[ "$mode" == dry ]] && exit 0 || exit 2
   fi
+  # Parse the complete core list before handing any argument to Homebrew.
+  formula='^[[:space:]]*brew[[:space:]]+"([[:alnum:]][[:alnum:]@._+-]*)"[[:space:]]*(#.*)?$'
+  packages=()
+  package_count=0
+  while IFS= read -r line || [[ -n "$line" ]]; do
+    if [[ "$line" =~ $formula ]]; then
+      packages+=("${BASH_REMATCH[1]}")
+      package_count=$((package_count + 1))
+    elif [[ ! "$line" =~ ^[[:space:]]*(#.*)?$ ]]; then
+      echo 'FAILED: Brewfile.core supports only unqualified brew formula declarations.' >&2
+      exit 2
+    fi
+  done < "$ROOT/Brewfile.core"
+  [[ "$package_count" -gt 0 ]] || { echo 'FAILED: Brewfile.core is empty.' >&2; exit 2; }
   missing=0
-  while IFS= read -r package; do
-    [[ -n "$package" ]] || continue
+  for package in "${packages[@]}"; do
     if [[ -d "/opt/homebrew/opt/$package" ]]; then
       echo "COMPLETED: $package"
     elif [[ "$mode" == install ]]; then
       /opt/homebrew/bin/brew install --formula "$package" || { echo "FAILED: $package" >&2; exit 1; }
+      [[ -d "/opt/homebrew/opt/$package" ]] || { echo "FAILED: missing opt link for $package" >&2; exit 1; }
     else
       echo "MISSING: $package"
       missing=1
     fi
-  done < <(/usr/bin/sed -n 's/^brew "\([^"]*\)".*/\1/p' "$ROOT/Brewfile.core")
+  done
   [[ "$mode" != check || "$missing" == 0 ]] || exit 1
 fi
 python=/opt/homebrew/bin/python3
